@@ -26,19 +26,15 @@ $taxonomies = $d7_taxonomy->taxonomyList();
 //var_dump($taxonomies);die;
 
 // create the wp_terms for each of the taxonomies
+//$wp_taxonomy->cleanUp();
 $wp_taxonomy->createTerms($taxonomies);
-	
 
-die();	
 
-	
 foreach ($drupal_nodes as $node) {
 
-	// // find the taxonomies for this node
-	// $d7->query("SELECT nid, tid FROM taxonomy_index WHERE nid=" . $node->nid);
-	// $tids = $d7->getRecords();
-
 	$tids = $d7_taxonomy->taxonomyListForNode($node);
+
+var_dump($tids);
 
 	foreach ($tids as $tid) {
 		// $d7->query("SELECT * FROM taxonomy_term_data where tid=" . $tid->tid);
@@ -52,13 +48,13 @@ foreach ($drupal_nodes as $node) {
 	}
 
 	// now create the wp-
-print "\n";
-print $node->title . ' ::: ';
+// print "\n";
+// print $node->title . ' ::: ';
 
-print implode(', ',$taxonomyNames);
-print "\n";
-print implode(',', $taxonmyIds);
-die();	
+// print implode(', ',$taxonomyNames);
+// print "\n";
+// print implode(',', $taxonmyIds);
+// die();	
 
 	// find the WP post that related to this node
 	$sql = "SELECT post_id FROM wp_postmeta WHERE meta_value='".$node->nid."' AND meta_key='_fgd2wp_old_node_id'";
@@ -66,10 +62,21 @@ die();
 	$wp->query($sql);
 	$posts = $wp->getRecords();
 
-die($sql);
+// figure out how to get the wordpress ids to replace the tids
 
 
+	// create noees in wp_term_relationships to associate to $termData ids
+	foreach ($posts as $post) {
+var_dump('post',$post);
+		foreach ($termData as $term) {
+var_dump('d7 term',$term);
 
+		$sql = "INSERT INTO wp_term_relationships (object_id, term_taxonomy_id, term_order) VALUES (" . $post->post_id . ', ' . $term->tid . ", 0)";
+
+print "\n" . $sql;
+		}
+	}
+	die();
 }
 $wp->close();
 $d7->close();

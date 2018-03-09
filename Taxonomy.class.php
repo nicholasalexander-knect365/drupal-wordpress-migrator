@@ -10,11 +10,35 @@ require_once "DB.class.php";
 class Taxonomy {
 	
 	public $db;
+	private $mapped = [
+		'channels' 			=> 'category',
+		'article type' 		=> 'type',
+		'tags' 				=> 'tag',
+		'itunes category' 	=> 'podcast',
+		'weekly brief'		=> 'brief'
+	];
+
+	private $termMeta = [
+		'category' 	=> 'Category',
+		'subject' 	=> 'Subject',
+		'type'		=> 'Type',
+		'region'	=> 'Region',
+		'industry'	=> 'Industry'
+	];
+
 
 	public function __construct($db) {
 		$this->db = $db;
 	}
 	
+
+	private function cleanUp() {
+		$sql = "DELETE FROM wp_terms WHERE term_id>1";
+		$this->db->query($sql);
+		$sql = "DELETE FROM wp_term_taxonomy";
+		$this->db->query($sql);
+	}
+
 	/** 
 	 * checkTerms in Wordpress
 	 */
@@ -67,6 +91,10 @@ class Taxonomy {
 	// 	return $categories;
 	// }
 
+	private function remap($taxonomyType) {
+		return $this->mapped[strtolower($taxonomyType)];
+
+	}
 	public function createTerms($taxonomies) {
 
 		if ($this->termsAlreadyExist()) {
@@ -77,7 +105,8 @@ class Taxonomy {
 //var_dump($taxonomy);die;
 			$category = addslashes(ucfirst($taxonomy->name));
 			$slug = self::slugify($category);
-			$taxonomyType = $taxonomy->vid;
+			$taxonomyType = $this->remap($taxonomy->type);
+
 
 			$sql = "INSERT INTO wp_terms (name, slug) VALUES ('$category', '$slug')";
 			$this->db->query($sql);
