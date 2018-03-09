@@ -34,6 +34,62 @@ class Taxonomy {
 		}	
 	}
 
+	static private function slugify($str) {
+		$text = $str;
+		// replace non letter or digits by -
+		$text = preg_replace('~[^\pL\d]+~u', '-', $text);
+		$text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+		$text = preg_replace('~[^-\w]+~', '', $text);
+		$text = trim($text, '-');
+		$text = preg_replace('~-+~', '-', $text);
+		$text = strtolower($text);
+		if (empty($text)) {
+			return '';
+		}
+		return $text;
+	}
+
+	private function termsAlreadyExist() {
+		$this->db->query('SELECT COUNT(*) as c from wp_terms');
+		$item = $this->db->getRecord();
+		if ($item->c > 1) {
+			return true;
+		}		
+	}
+
+	// private function categories($taxonomies) {
+	// 	$catgories = [];
+	// 	foreach($taxonomies as $taxonomy) {
+	// 		if ((integer)$taxonomy->vid === $catId) {
+	// 			$categories[$taxonomy->tid] = $taxonomy->name;
+	// 		}
+	// 	}
+	// 	return $categories;
+	// }
+
+	public function createTerms($taxonomies) {
+
+		if ($this->termsAlreadyExist()) {
+			return;
+		}
+
+		foreach ($taxonomies as $taxonomy) {
+//var_dump($taxonomy);die;
+			$category = addslashes(ucfirst($taxonomy->name));
+			$slug = self::slugify($category);
+			$taxonomyType = $taxonomy->vid;
+
+			$sql = "INSERT INTO wp_terms (name, slug) VALUES ('$category', '$slug')";
+			$this->db->query($sql);
+			$term_id = $this->db->lastInsertId();
+
+			$sql = "INSERT INTO wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$taxonomyType', 'Migrated from Drupal', 0, 0)";
+
+			$this->db->query($sql);
+		}
+	}
+
+
 	/** 
 	 * get the Drupal taxonomyList
 	 */
@@ -41,7 +97,7 @@ class Taxonomy {
 		$taxonomyNames = [];
 		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name as type  FROM taxonomy_term_data td  LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
 		$this->db->query($sql);
-//die($sql);
+
 		$records = $this->db->getRecords();
 
 		return $records;

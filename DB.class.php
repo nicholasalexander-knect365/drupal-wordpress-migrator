@@ -88,4 +88,8 @@ class DB {
 		}
 
 	}
+
+	public function lastInsertId() {
+		return $this->connection->insert_id;
+	}
 }

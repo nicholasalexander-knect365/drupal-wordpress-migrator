@@ -24,7 +24,14 @@ $taxonomyNames = [];
 $taxonomies = $d7_taxonomy->taxonomyList();
 
 //var_dump($taxonomies);die;
-		
+
+// create the wp_terms for each of the taxonomies
+$wp_taxonomy->createTerms($taxonomies);
+	
+
+die();	
+
+	
 foreach ($drupal_nodes as $node) {
 
 	// // find the taxonomies for this node
@@ -43,6 +50,8 @@ foreach ($drupal_nodes as $node) {
 			$taxonmyIds[] = $term->tid;
 		}
 	}
+
+	// now create the wp-
 print "\n";
 print $node->title . ' ::: ';
 
