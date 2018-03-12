@@ -99,12 +99,12 @@ class Taxonomy {
 	public function createTerms($taxonomies) {
 
 		if ($this->termsAlreadyExist()) {
-			//$this->cleanUp();
-			return;
+			$this->cleanUp();
+			//return;
 		}
 
 		foreach ($taxonomies as $taxonomy) {
-//var_dump($taxonomy);die;
+
 			$category = addslashes(ucfirst($taxonomy->name));
 			$slug = self::slugify($category);
 			$taxonomyType = $this->remap($taxonomy->type);
