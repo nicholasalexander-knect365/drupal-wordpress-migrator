@@ -3,17 +3,17 @@
 class DB {
 	
 	public $wp = [
-		'database' => 'tuwp',
+		'database' => 'tuauto',
 		'username' => 'tuauto',
-    	'password' => 'tuauto',
-    	'host' => 'localhost'
-    ];
+		'password' => 'tuauto',
+		'host' => 'localhost'
+    	];
 
 	public $d7 = [
 		'database' => 'd7telematics',
 		'username' => 'd7telematics',
-    	'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
-    	'host' => 'localhost'
+    		'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
+    		'host' => 'localhost'
 	];
 
 	public $type;
