@@ -76,7 +76,7 @@ foreach ($drupal_nodes as $node) {
 	
 	foreach ($posts as $post) {
 		$post_id = $post->post_id;
-		//print "\nProcessing ".$nid . " termdata ".count($termData) . ' WPpostId ' . $post_id ;
+print "\nProcessing ".$nid . " termdata ".count($termData) . ' WPpostId ' . $post_id ;
 //var_dump('post',$post);
 		foreach ($termData as $term) {
 			$tid = $term->tid;
@@ -86,14 +86,16 @@ foreach ($drupal_nodes as $node) {
 
 			$wp->query($sql);
 			$wp_term = $wp->getRecord();
-			$term_taxonomy_id = $wp_term->term_taxonomy_id;
+			if ($wp_term) {
+				$term_taxonomy_id = $wp_term->term_taxonomy_id;
 //print ' ' . $term_id;
 
-		$sql = "REPLACE INTO wp_term_relationships 
-			(object_id, term_taxonomy_id, term_order) 
-			VALUES ($post_id, $term_taxonomy_id, 0)";
+				$sql = "REPLACE INTO wp_term_relationships 
+					(object_id, term_taxonomy_id, term_order) 
+					VALUES ($post_id, $term_taxonomy_id, 0)";
 
-		$wp->query($sql);
+				$wp->query($sql);
+			}
 //print "\n" . $sql;
 		}
 	}
