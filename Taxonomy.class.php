@@ -10,11 +10,28 @@ require_once "DB.class.php";
 class Taxonomy {
 	
 	public $db;
+	private $mapped = [
+		'channels' 			=> 'category',
+		'article type' 		=> 'type',
+		'tags' 				=> 'tag',
+		'itunes category' 	=> 'podcast',
+		'weekly brief'		=> 'brief'
+	];
+
+	private $termMeta = [
+		'category' 	=> 'Category',
+		'subject' 	=> 'Subject',
+		'type'		=> 'Type',
+		'region'	=> 'Region',
+		'industry'	=> 'Industry'
+	];
+
 
 	public function __construct($db) {
 		$this->db = $db;
 	}
 	
+
 	/** 
 	 * checkTerms in Wordpress
 	 */
@@ -49,6 +66,14 @@ class Taxonomy {
 		return $text;
 	}
 
+	private function cleanUp() {
+		$sql = "DELETE FROM wp_terms WHERE term_id>1";
+		$this->db->query($sql);
+		$sql = "DELETE FROM wp_term_taxonomy";
+		$this->db->query($sql);
+	}
+
+
 	private function termsAlreadyExist() {
 		$this->db->query('SELECT COUNT(*) as c from wp_terms');
 		$item = $this->db->getRecord();
@@ -67,9 +92,14 @@ class Taxonomy {
 	// 	return $categories;
 	// }
 
+	private function remap($taxonomyType) {
+		return $this->mapped[strtolower($taxonomyType)];
+
+	}
 	public function createTerms($taxonomies) {
 
 		if ($this->termsAlreadyExist()) {
+			//$this->cleanUp();
 			return;
 		}
 
@@ -77,13 +107,22 @@ class Taxonomy {
 //var_dump($taxonomy);die;
 			$category = addslashes(ucfirst($taxonomy->name));
 			$slug = self::slugify($category);
-			$taxonomyType = $taxonomy->vid;
+			$taxonomyType = $this->remap($taxonomy->type);
+			$tid = $taxonomy->tid;
+if (!$tid) {
+	var_dump($taxonomy);
+	die('no tid?');
+}
 
-			$sql = "INSERT INTO wp_terms (name, slug) VALUES ('$category', '$slug')";
+			$sql = "INSERT INTO wp_terms (name, slug, term_group) 
+					VALUES ('$category', '$slug', $tid)";
 			$this->db->query($sql);
 			$term_id = $this->db->lastInsertId();
 
-			$sql = "INSERT INTO wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$taxonomyType', 'Migrated from Drupal', 0, 0)";
+			$sql = "INSERT INTO wp_term_taxonomy 
+				(term_id, taxonomy, description, parent, count) 
+				VALUES 
+				($term_id, '$taxonomyType', 'Migrated from Drupal', 0, 0)";
 
 			$this->db->query($sql);
 		}
@@ -93,9 +132,10 @@ class Taxonomy {
 	/** 
 	 * get the Drupal taxonomyList
 	 */
-	public function taxonomyList() {
+	public function fullTaxonomyList() {
 		$taxonomyNames = [];
-		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name as type  FROM taxonomy_term_data td  LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
+		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name as type  FROM taxonomy_term_data td  
+		    LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
 		$this->db->query($sql);
 
 		$records = $this->db->getRecords();
@@ -105,15 +145,19 @@ class Taxonomy {
 
 	public function taxonomyListForNode($node) {
 		// find the taxonomies for this node
-		$this->db->query("SELECT nid, tid FROM taxonomy_index WHERE nid=" . $node->nid);
+		$nid = $node->nid;
+		$this->db->query("SELECT ti.nid, ti.tid, td.name
+			FROM taxonomy_index ti 
+			LEFT JOIN taxonomy_term_data td ON td.tid=ti.tid
+			WHERE nid=$nid");
 		$tids = $this->db->getRecords();		
 		return $tids;
 	}
 
-	public function termData($tid) {
-		$this->db->query("SELECT * FROM taxonomy_term_data where tid=" . $tid);
-		$termData = $this->db->getRecords();
-		return $termData;
-	}
+	// public function termData($tid) {
+	// 	$this->db->query("SELECT * FROM taxonomy_term_data where tid=" . $tid);
+	// 	$termData = $this->db->getRecords();
+	// 	return $termData;
+	// }
 
 }
