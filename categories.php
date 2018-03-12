@@ -30,7 +30,6 @@ foreach ($drupal_nodes as $node) {
 	$termData = $d7_taxonomy->taxonomyListForNode($node);
 	$nid = $node->nid;
 
-	// find the WP post that related to this node
 	$sql = "SELECT pm.post_id, pm.meta_value
 			FROM wp_postmeta pm
 			WHERE pm.meta_value=$nid AND meta_key='_fgd2wp_old_node_id'";
@@ -39,7 +38,9 @@ foreach ($drupal_nodes as $node) {
 	$posts = $wp->getRecords();
 
 	foreach ($posts as $post) {
+
 		$post_id = $post->post_id;
+		#print "\nProcessing ".$nid . " termdata ".count($termData) . ' WPpostId ' . $post_id ;
 
 		foreach ($termData as $term) {
 			$tid = $term->tid;
