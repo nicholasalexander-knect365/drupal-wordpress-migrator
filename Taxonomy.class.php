@@ -99,8 +99,8 @@ class Taxonomy {
 	public function createTerms($taxonomies) {
 
 		if ($this->termsAlreadyExist()) {
-			$this->cleanUp();
-			//return;
+			//$this->cleanUp();
+			return;
 		}
 
 		foreach ($taxonomies as $taxonomy) {
@@ -129,13 +129,13 @@ if (!$tid) {
 	}
 
 
-	/** 
+	 /*
 	 * get the Drupal taxonomyList
 	 */
 	public function fullTaxonomyList() {
 		$taxonomyNames = [];
-		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name as type  FROM taxonomy_term_data td  
-		    LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
+		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name AS type FROM taxonomy_term_data td
+                LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
 		$this->db->query($sql);
 
 		$records = $this->db->getRecords();
@@ -148,16 +148,26 @@ if (!$tid) {
 		$nid = $node->nid;
 		$this->db->query("SELECT ti.nid, ti.tid, td.name
 			FROM taxonomy_index ti 
-			LEFT JOIN taxonomy_term_data td ON td.tid=ti.tid
+			LEFT JOIN taxonomy_term_data td ON td.tid=ti.tid 
 			WHERE nid=$nid");
-		$tids = $this->db->getRecords();		
+		$tids = $this->db->getRecords();	
+
 		return $tids;
 	}
 
-	// public function termData($tid) {
-	// 	$this->db->query("SELECT * FROM taxonomy_term_data where tid=" . $tid);
-	// 	$termData = $this->db->getRecords();
-	// 	return $termData;
-	// }
+	/** 
+	 * taxonomyListWithHierarchy
+	 * purpose: to return taxonomy_term_data with parent node
+	 * NOT TESTTED
+	 */
+	public function taxonomyListWithHierarchy($node) {
+		$nid = $node->nid;
+		$this->db->query("SELECT td.tid, th.parent FROM taxonomy_term_hierarchy th
+							LEFT JOIN taxonomy_term_data td on td.tid=th.tid
+							LEFT JOIN taxonomy_vocabulary v on v.vid=td.vid
+							where td.nid=$nid");
+		$tids = $this->db->getRecords();
+		return $tids;
+	}
 
 }

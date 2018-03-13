@@ -21,6 +21,7 @@ $drupal_nodes = $d7->getRecords();
 
 $taxonomyNames = [];
 
+
 $taxonomies = $d7_taxonomy->fullTaxonomyList();
 
 $wp_taxonomy->createTerms($taxonomies);
@@ -28,6 +29,7 @@ $wp_taxonomy->createTerms($taxonomies);
 foreach ($drupal_nodes as $node) {
 
 	$termData = $d7_taxonomy->taxonomyListForNode($node);
+
 	$nid = $node->nid;
 
 	$sql = "SELECT pm.post_id, pm.meta_value
@@ -43,6 +45,9 @@ foreach ($drupal_nodes as $node) {
 		#print "\nProcessing ".$nid . " termdata ".count($termData) . ' WPpostId ' . $post_id ;
 
 		foreach ($termData as $term) {
+if ($term->parent) {
+	var_dump($term);
+}
 			$tid = $term->tid;
 			// find the wp_term
 			$sql = "SELECT tx.term_taxonomy_id FROM wp_terms 

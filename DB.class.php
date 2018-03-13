@@ -3,7 +3,7 @@
 class DB {
 	
 	public $wp = [
-		'database' => 'tuauto',
+		'database' => 'tuwp',
 		'username' => 'tuauto',
 		'password' => 'tuauto',
 		'host' => 'localhost'
