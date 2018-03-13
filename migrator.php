@@ -45,9 +45,7 @@ foreach ($drupal_nodes as $node) {
 		#print "\nProcessing ".$nid . " termdata ".count($termData) . ' WPpostId ' . $post_id ;
 
 		foreach ($termData as $term) {
-if ($term->parent) {
-	var_dump($term);
-}
+			
 			$tid = $term->tid;
 			// find the wp_term
 			$sql = "SELECT tx.term_taxonomy_id FROM wp_terms 
