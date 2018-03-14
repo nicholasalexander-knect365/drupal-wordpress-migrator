@@ -19,27 +19,32 @@ $d7->query('SELECT * FROM `node`');
 
 $drupal_nodes = $d7->getRecords();
 
-$taxonomyNames = [];
-
-$taxonomies = $d7_taxonomy->fullTaxonomyList();
+$vocabularies = $d7_taxonomy->getVocabulary();
 
 $wp_taxonomy->initialise();
+
+$taxonomyNames = [];
+$taxonomies = $d7_taxonomy->fullTaxonomyList();
+//var_dump($taxonomies);die;
 $wp_taxonomy->createTerms($taxonomies);
+
 
 foreach ($drupal_nodes as $node) {
 
 	$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
 
 	foreach ($taxonomies as $taxonomy) {
-		$wp_taxonomy->makeWPTermData($taxonmy);
-		// $wp_taxonomy->makeTermMeta($taxonomy);
-		// $wp_taxonomy->makeTermRelationship($taxonomy);	
+		$wp_taxonomy->makeWPTermData($taxonomy);
+		//$wp_taxonomy->makeTermRelationship($taxonomy);	
 	}
 
 }
 
-/////////////////// end of programme /////////////////////
+$wp->close();
+$d7->close();
 
+/////////////////// end of programme /////////////////////
+/*
 
 foreach ()
 	$termData = $d7_taxonomy->taxonomyListForNode($node);
@@ -93,5 +98,5 @@ var_dump($node, $nodeVocabulary, $termData);die;
 $sql = "UPDATE wp_terms SET term_group=0";
 $wp->query($sql);
 
-$wp->close();
-$d7->close();
+
+*/
