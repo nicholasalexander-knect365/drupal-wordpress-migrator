@@ -299,12 +299,10 @@ class Taxonomy {
 	}
 
 	private function makeTermTaxonomy($taxonomy) {
-		
-//var_dump($taxonomy);die;		
+			
 		$name = $this->makeWPTermName($taxonomy->name);
 		$slug = $this->slugify($this->makeWPTermName($taxonomy->category));
 		$term_id = $this->terms[$this->slugify($name)];
-//var_dump($name, $slug, $term_id);
 
 		if (strlen($taxonomy->description)) {
 			$description = $taxonomy->name . ' ' . $taxonomy->description;
@@ -318,7 +316,7 @@ class Taxonomy {
 		// does the taxonomy exist, if so increase count
 		$sql = "SELECT term_taxonomy_id from wp_term_taxonomy WHERE term_id = $term_id AND taxonomy = '$slug'";
 		$this->db->query($sql);
-//die($sql);		
+		
 		$record = $this->db->getRecord();
 
 		if (!$record) {
