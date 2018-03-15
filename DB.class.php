@@ -3,7 +3,7 @@
 class DB {
 	
 	public $wp = [
-		'database' => 'tuauto',
+		'database' => 'tuwp',
 		'username' => 'tuauto',
 		'password' => 'tuauto',
 		'host' => 'localhost'
@@ -59,9 +59,13 @@ class DB {
 	}
 
 	public function query($sql) {
-		$result = $this->connection->query($sql);	
-		if ($result === false) {
-			throw new Exception('Query failed! '.$sql);
+		try {
+			$result = $this->connection->query($sql);	
+		} catch (Exception $e) {
+			if ($result === false) {
+				print "\nQuery failed! $sql \n";
+			}
+			die($e->getMessage());
 		}
 		$this->result = $result;
 	}

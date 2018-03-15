@@ -16,42 +16,32 @@ if ($wp_taxonomy->checkTerms()) {
 }
 
 $d7->query('SELECT * FROM `node`');
-
 $drupal_nodes = $d7->getRecords();
 
-$vocabularies = $d7_taxonomy->getVocabulary();
+$taxonomyNames = [];
+
 
 $wp_taxonomy->initialise();
 
-$taxonomyNames = [];
-$taxonomies = $d7_taxonomy->fullTaxonomyList();
-//var_dump($taxonomies);die;
+$taxonomies = $d7_taxonomy->taxonomyVocabulary(); //fullTaxonomyList();
 $wp_taxonomy->createTerms($taxonomies);
 
+$taxonmyTermData = $d7_taxonomy->fullTaxonomyList();
+$wp_taxonomy->createTerms($taxonmyTermData);
+
+die();
+
+print "\nProcessing ". count($drupal_nodes)."nodes...";
 
 foreach ($drupal_nodes as $node) {
 
-	$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
+	$terms = $d7_taxonomy->nodeVocabulary($node);
+var_dump($node->nid, $terms);
 
-	foreach ($taxonomies as $taxonomy) {
-		$wp_taxonomy->makeWPTermData($taxonomy);
-		//$wp_taxonomy->makeTermRelationship($taxonomy);	
-	}
+	// create the term taxonomy ids for these
+	//$wp_taxonomy->makeWPTermTaxonomy($termData->name);
+	$wp_taxonomy->makeWPTermTaxonomy($terms);
 
-}
-
-$wp->close();
-$d7->close();
-
-/////////////////// end of programme /////////////////////
-/*
-
-foreach ()
-	$termData = $d7_taxonomy->taxonomyListForNode($node);
-	
-	$nodeVocabulary = $d7_taxonomy->nodeVocabulary($node);
-
-var_dump($node, $nodeVocabulary, $termData);die;
 	$nid = $node->nid;
 
 	$sql = "SELECT pm.post_id, pm.meta_value
@@ -66,9 +56,10 @@ var_dump($node, $nodeVocabulary, $termData);die;
 		$post_id = $post->post_id;
 		#print "\nProcessing ".$nid . " termdata ".count($termData) . ' WPpostId ' . $post_id ;
 
-		foreach ($termData as $term) {
-			
+		foreach ($terms as $term) {
+
 			$tid = $term->tid;
+
 			// find the wp_term
 			$sql = "SELECT tx.term_taxonomy_id FROM wp_terms 
 					LEFT JOIN wp_term_taxonomy tx ON tx.term_id=wp_terms.term_id 
@@ -89,6 +80,9 @@ var_dump($node, $nodeVocabulary, $termData);die;
 				// add to the count in wp_term_taxonomy
 				$sql = "UPDATE wp_term_taxonomy SET count=1 WHERE term_taxonomy_id=$term_taxonomy_id LIMIT 1";
 				$wp->query($sql);			
+			} else {
+				var_dump($term);
+				die('no wp_term?' . $sql);
 			}
 		}
 	}
@@ -98,5 +92,5 @@ var_dump($node, $nodeVocabulary, $termData);die;
 $sql = "UPDATE wp_terms SET term_group=0";
 $wp->query($sql);
 
-
-*/
+$wp->close();
+$d7->close();
