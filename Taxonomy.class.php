@@ -4,11 +4,13 @@
  * for translating D7 to Wordpress
  * taxonomies: dual purpose class
  * call with DB constructor
+ * v0.6 works with the result of FG plugin PRO
+ * 		imports
  */
 require_once "DB.class.php";
 
 class Taxonomy {
-	
+
 	public $db;
 	private $initialise_regardless = true;
 
@@ -35,7 +37,7 @@ class Taxonomy {
 	public function __construct($db) {
 		$this->db = $db;
 	}
-	
+
 	public function initialise() {
 		if ($this->initialise_regardless && $this->termsAlreadyExist()) {
 			$this->cleanUp();
@@ -47,12 +49,12 @@ class Taxonomy {
 		$sql = "DELETE FROM wp_terms WHERE term_id>1";
 		$this->db->query($sql);
 		$sql = "ALTER TABLE wp_terms AUTO_INCREMENT = 2";
-		$this->db->query($sql);		
+		$this->db->query($sql);
 	}
 
 	private function cleanUp() {
 		$this->removeTerms();
-	
+
 		$sql = "DELETE FROM wp_termmeta";
 		$this->db->query($sql);
 		$sql = "ALTER TABLE wp_term_taxonomy AUTO_INCREMENT = 1";
@@ -74,10 +76,10 @@ class Taxonomy {
 		$item = $this->db->getRecord();
 		if ($item->c > 1) {
 			return true;
-		}		
+		}
 	}
 
-	/** 
+	/**
 	 * checkTerms in Wordpress
 	 */
 	public function checkTerms() {
@@ -93,10 +95,10 @@ class Taxonomy {
 		foreach($taxonomies as $taxonomy) {
 			$sql = "INSERT into wp_term_taxonomy (term_taxonomy_id, term_id, taxonomy, description, parent, count) VALUES (null, 1, '$taxonomy', '', 0, 0)";
 			$this->db->query($sql);
-		}	
+		}
 	}
 
-	
+
 	static private function slugify($str) {
 		$text = $str;
 		// replace non letter or digits by -
@@ -112,16 +114,6 @@ class Taxonomy {
 		return $text;
 	}
 
-
-	// private function categories($taxonomies) {
-	// 	$catgories = [];
-	// 	foreach($taxonomies as $taxonomy) {
-	// 		if ((integer)$taxonomy->vid === $catId) {
-	// 			$categories[$taxonomy->tid] = $taxonomy->name;
-	// 		}
-	// 	}
-	// 	return $categories;
-	// }
 
 	private function remap($taxonomyType) {
 		return $this->mapped[strtolower($taxonomyType)];
@@ -154,9 +146,9 @@ class Taxonomy {
 
 				$name = $this->makeWPTermName($taxonomy->name);
 				$slug = $this->slugify($name);
-				$term_group = 0; 
+				$term_group = 0;
 
-				$sql = "INSERT INTO wp_terms (name, slug, term_group) 
+				$sql = "INSERT INTO wp_terms (name, slug, term_group)
 						VALUES ('$name', '$slug', $term_group)";
 				$this->db->query($sql);
 				$this->terms[$slug] = $this->db->lastInsertId();
@@ -165,48 +157,15 @@ class Taxonomy {
 
 	}
 
-	// public function XcreateTaxonomies($taxonomies) {
-	// 	foreach ($taxonomies as $taxonomy) {
 
-	// 		$category = addslashes(ucfirst($taxonomy->name));
-	// 		$slug = self::slugify($category);
-	// 		$taxonomyType = $this->remap($taxonomy->type);
-	// 		$tid = $taxonomy->tid;
-	// 		// if (!$tid) {
-	// 		// 	var_dump($taxonomy);
-	// 		// 	die('no tid?');
-	// 		// }
-
-	// 		$sql = "SELECT term_id FROM wp_terms WHERE slug='$slug'";
-	// 		$this->db->query($sql);
-	// 		$term = $this->db->getRecord();
-
-	// 		if (isset($term)) {
-
-	// 			$term_id = $term->term_id;
-	// 		} else {
-	// 			var_dump($term);
-	// 			die('term does not exist?');
-	// 		}
-
-	// 		$sql = "INSERT INTO wp_term_taxonomy 
-	// 			(term_id, taxonomy, description, parent, count) 
-	// 			VALUES 
-	// 			($term_id, '$taxonomyType', 'Migrated from Drupal', 0, 0)";
-
-	// 		$this->db->query($sql);
-	// 	}
-	// }
-
-
-	 /*
-	 * get the Drupal taxonomyList
-	 */
+	/*
+	* get the Drupal taxonomyList
+	*/
 	public function fullTaxonomyList() {
 		$taxonomyNames = [];
-		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name AS type 
+		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name AS type
 				FROM taxonomy_term_data td
-                LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
+				LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
 		$this->db->query($sql);
 
 		$records = $this->db->getRecords();
@@ -214,23 +173,23 @@ class Taxonomy {
 		return $records;
 	}
 
-	/** 
+	/**
 	 * full node taxonomy
 	 */
 	public function nodeTaxonomies($node) {
 		$nid = $node->nid;
-		$sql = "SELECT 	ti.nid as nid, 
-						ti.tid as tid, 
-						td.vid as vid, 
-						td.name as name, 
-						td.description as description, 
-						td.weight as weight, 
+		$sql = "SELECT 	ti.nid as nid,
+						ti.tid as tid,
+						td.vid as vid,
+						td.name as name,
+						td.description as description,
+						td.weight as weight,
 						tv.name as category,
 						td.format as format,
 						tv.hierarchy as hierarchy
-				FROM taxonomy_index ti 
-				INNER JOIN taxonomy_term_data td ON td.tid=ti.tid 
-				INNER JOIN taxonomy_vocabulary tv ON tv.vid=td.vid 
+				FROM taxonomy_index ti
+				INNER JOIN taxonomy_term_data td ON td.tid=ti.tid
+				INNER JOIN taxonomy_vocabulary tv ON tv.vid=td.vid
 				WHERE nid=$nid";
 		$this->db->query($sql);
 		$taxonomies = $this->db->getRecords();
@@ -246,7 +205,7 @@ class Taxonomy {
 
 		$wp->query($sql);
 		$post = $wp->getRecord();
-		return $post->post_id;		
+		return $post->post_id;
 	}
 
 
@@ -254,7 +213,7 @@ class Taxonomy {
 	private function getTermData($taxonomy) {
 
 		$termData = [];
-		$tid = $taxonomy->tid;	
+		$tid = $taxonomy->tid;
 
 		$sql = "SELECT * FROM taxonomy_term_data
 				WHERE tid = $tid
@@ -266,40 +225,40 @@ class Taxonomy {
 	}
 
 	private function getTermFromSlug($slug) {
+
 		$sql = "SELECT term_id FROM wp_terms WHERE slug = '$slug' LIMIT 1";
 		$this->db->query($sql);
 		$term = $this->db->getRecord();
 		return $term;
 	}
 
-	// make the wp_termmeta for the tags!!
 	private function makeTermMeta($term_id, $name, $description) {
 
 			$meta_key = addslashes($name);
 			$meta_value = addslashes($description);
 
-			$sql = "INSERT INTO wp_termmeta (term_id, meta_key, meta_value) 
+			$sql = "INSERT INTO wp_termmeta (term_id, meta_key, meta_value)
 					VALUES ($term_id, '$meta_key', '$meta_value')";
 
 			$this->db->query($sql);
 	}
 
 	private function makeTermRelationship($taxonomy, $term_taxonomy_id) {
-		// find the post
+
 		$posts = $this->findPosts($taxonomy->nid);
 
 		foreach ($posts as $post) {
 			$postId = $post->post_id;
 			$term_order = $taxonomy->weight;
 			// create a termRelation
-			$sql = "INSERT INTO wp_term_relationships (object_id, term_taxonomy_id, term_order) 
+			$sql = "INSERT INTO wp_term_relationships (object_id, term_taxonomy_id, term_order)
 					VALUES ($postId, $term_taxonomy_id, $term_order)";
-			$this->db->query($sql);			
+			$this->db->query($sql);
 		}
 	}
 
 	private function makeTermTaxonomy($taxonomy) {
-			
+
 		$name = $this->makeWPTermName($taxonomy->name);
 		$slug = $this->slugify($this->makeWPTermName($taxonomy->category));
 		$term_id = $this->terms[$this->slugify($name)];
@@ -316,7 +275,7 @@ class Taxonomy {
 		// does the taxonomy exist, if so increase count
 		$sql = "SELECT term_taxonomy_id from wp_term_taxonomy WHERE term_id = $term_id AND taxonomy = '$slug'";
 		$this->db->query($sql);
-		
+
 		$record = $this->db->getRecord();
 
 		if (!$record) {
@@ -336,7 +295,7 @@ class Taxonomy {
 
 		$termData = $this->getTermData($taxonomy);
 		$term_id = $taxonomy->tid;
-			
+
 		if (strtolower($taxonomy->category) === 'tags') {
 
 			$name = 'post_tag';
@@ -363,18 +322,4 @@ class Taxonomy {
 		return $posts;
 	}
 
-
-
-	// ?????
-	public function taxonomyListWithHierarchy($node) {
-		$nid = $node->nid;
-		$this->db->query("SELECT td.tid, th.parent FROM taxonomy_term_hierarchy th
-							LEFT JOIN taxonomy_term_data td on td.tid=th.tid
-							LEFT JOIN taxonomy_vocabulary v on v.vid=td.vid
-							where td.nid=$nid");
-		$tids = $this->db->getRecords();
-		return $tids;
-	}
-
 }
-

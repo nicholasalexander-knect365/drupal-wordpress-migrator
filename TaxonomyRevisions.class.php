@@ -292,3 +292,65 @@ var_dump($wpTerms);die;
 	}
 
 }
+
+
+
+/**
+
+	public function fullTaxonomyList() {
+		$taxonomyNames = [];
+		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name AS type FROM taxonomy_term_data td
+                LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
+		$this->db->query($sql);
+
+		$records = $this->db->getRecords();
+
+		return $records;
+	}
+
+	public function nodeVocabulary($node) {
+		$taxonomies = [];
+		$nid = $node->nid;
+		$sql = "SELECT DISTINCT tv.vid, tv.machine_name FROM taxonomy_vocabulary tv 
+				LEFT JOIN taxonomy_term_data td ON tv.vid=td.vid
+				INNER JOIN taxonomy_index ti ON ti.tid=td.tid
+				WHERE ti.nid=$nid";
+
+		$this->db->query($sql);
+		$tids = $this->db->getRecords();
+
+		return $tids;
+	}
+
+
+	public function taxonomyListForNode($node) {
+		// find the taxonomies for this node
+		$nid = $node->nid;
+		$this->db->query("SELECT ti.nid, ti.tid, td.name
+			FROM taxonomy_index ti 
+			LEFT JOIN taxonomy_term_data td ON td.tid=ti.tid 
+			WHERE nid=$nid");
+		$tids = $this->db->getRecords();	
+
+		return $tids;
+	}
+**/
+	/** 
+	 * taxonomyListWithHierarchy
+	 * purpose: to return taxonomy_term_data with parent node
+	 * NOT TESTTED
+	 */
+
+
+	 	public function makeTermTaxonomy($taxonomyRecord) {
+		$post_id = $this->getPostId($taxonomyRecord->nid);
+		$term_id = $taxonomyRecord->term_id;
+		$taxonomy = $taxonomyRecord->category;
+		$description = $taxonomyRecord->name;
+		$parent = 0;
+
+		$sql = "INSERT INTO wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ( $term_id, $taxonomy, $description, $parent, 0)";
+
+		$this->db->query($sql);
+
+	}
