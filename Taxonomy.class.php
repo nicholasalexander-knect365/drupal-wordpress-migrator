@@ -99,8 +99,8 @@ class Taxonomy {
 	public function createTerms($taxonomies) {
 
 		if ($this->termsAlreadyExist()) {
-			$this->cleanUp();
-			//return;
+			//$this->cleanUp();
+			return;
 		}
 
 		foreach ($taxonomies as $taxonomy) {
@@ -134,7 +134,8 @@ if (!$tid) {
 	 */
 	public function fullTaxonomyList() {
 		$taxonomyNames = [];
-		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name as type  FROM taxonomy_term_data td  
+		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name AS type
+			FROM taxonomy_term_data td  
 		    LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
 		$this->db->query($sql);
 
