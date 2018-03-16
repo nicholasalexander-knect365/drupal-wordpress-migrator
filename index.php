@@ -6,6 +6,7 @@
 ?>
 <html>
 <h1>Drupal to Wordpress Migrator</h1>
+<hr>
 <p><strong>Welcome to the Drupal to Wordpress Migrator</strong></p>
 
 <p>Versions add new content elements.  Each version produces a wordpress site that has content.</p>
@@ -16,6 +17,7 @@
 
 <p>Version 0.2</p>
 <li>Run migrator.php on command line to build taxonomies </li>
+<pre>php migrator.php</pre>
 <ol>
 </ol>
 
@@ -25,4 +27,7 @@
 <i>or</i>
 <li>Convert wp_postmeta data into ACF from the FG import</li>
 </ol>
+
 <p>Version 0.4</p>
+<p>Version 0.5</p>
+<p>Version 0.6</p>
