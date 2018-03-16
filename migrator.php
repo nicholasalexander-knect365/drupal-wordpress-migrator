@@ -1,8 +1,14 @@
 <?php
 
 require "DB.class.php";
+require "Events.class.php";
+require "Node.class.php";
 require "Taxonomy.class.php";
 
+$imports = ['initial' => false,
+			'taxonomy' => false,
+			'events'	=> true
+];
 
 $wp = new DB('wp');
 $d7 = new DB('d7');
@@ -10,93 +16,71 @@ $d7 = new DB('d7');
 $wp_taxonomy = new Taxonomy($wp);
 $d7_taxonomy = new Taxonomy($d7);
 
-// build the term_taxonomy if not already present
-if ($wp_taxonomy->checkTerms()) {
-	$wp_taxonomy->buildTerms();
+$d7_events = new Events($d7);
+
+$d7_node = new Node($d7);
+
+if ($imports['initial']) {
+	// build the term_taxonomy if not already present
+	if ($wp_taxonomy->checkTerms()) {
+		$wp_taxonomy->buildTerms();
+	}
+}
+
+if ($imports['taxonomy']) {
+	$wp_taxonomy->initialise();
+	$vocabularies = $d7_taxonomy->getVocabulary();
+	$taxonomyNames = [];
+	$taxonomies = $d7_taxonomy->fullTaxonomyList();
+
+	// wp_terms
+	$wp_taxonomy->createTerms($taxonomies);
 }
 
 $d7->query('SELECT * FROM `node`');
-
 $drupal_nodes = $d7->getRecords();
-
-$vocabularies = $d7_taxonomy->getVocabulary();
-
-$wp_taxonomy->initialise();
-
-$taxonomyNames = [];
-$taxonomies = $d7_taxonomy->fullTaxonomyList();
-//var_dump($taxonomies);die;
-$wp_taxonomy->createTerms($taxonomies);
-
 
 foreach ($drupal_nodes as $node) {
 
-	$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
-
-	foreach ($taxonomies as $taxonomy) {
-		$wp_taxonomy->makeWPTermData($taxonomy);
-		//$wp_taxonomy->makeTermRelationship($taxonomy);	
+	if ($imports['taxonomy']) {
+		$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
+		foreach ($taxonomies as $taxonomy) {
+			$wp_taxonomy->makeWPTermData($taxonomy);
+		}
 	}
 
+	if ($imports['events']) {
+		$events = $d7_events->getEvents($node);
+
+		if ($events && count($events)) {
+
+			assert($events !== NULL && count($events));
+
+			//var_dump($events);
+
+			foreach ($events as $event) {
+				foreach($event as $component) {
+					$event_node_id = $component->entity_id;
+					$event_vid = $component->revision_id;
+
+					$node = $d7_node->getNode($event_node_id);
+					$compare = $d7_node->getNode($event_node_id, $event_vid);
+
+					if ($node != $compare) {
+						print "\n--------------------------------\n";
+						var_dump($node, $compare);
+					}
+
+				}
+			}
+		}
+
+	}
 }
+
+
+
+
 
 $wp->close();
 $d7->close();
-
-/////////////////// end of programme /////////////////////
-/*
-
-foreach ()
-	$termData = $d7_taxonomy->taxonomyListForNode($node);
-	
-	$nodeVocabulary = $d7_taxonomy->nodeVocabulary($node);
-
-var_dump($node, $nodeVocabulary, $termData);die;
-	$nid = $node->nid;
-
-	$sql = "SELECT pm.post_id, pm.meta_value
-			FROM wp_postmeta pm
-			WHERE pm.meta_value=$nid AND meta_key='_fgd2wp_old_node_id'";
-
-	$wp->query($sql);
-	$posts = $wp->getRecords();
-
-	foreach ($posts as $post) {
-
-		$post_id = $post->post_id;
-		#print "\nProcessing ".$nid . " termdata ".count($termData) . ' WPpostId ' . $post_id ;
-
-		foreach ($termData as $term) {
-			
-			$tid = $term->tid;
-			// find the wp_term
-			$sql = "SELECT tx.term_taxonomy_id FROM wp_terms 
-					LEFT JOIN wp_term_taxonomy tx ON tx.term_id=wp_terms.term_id 
-					WHERE term_group=$tid ";
-
-			$wp->query($sql);
-			$wp_term = $wp->getRecord();
-		
-			if ($wp_term) {
-				$term_taxonomy_id = $wp_term->term_taxonomy_id;
-
-				$sql = "REPLACE INTO wp_term_relationships 
-					(object_id, term_taxonomy_id, term_order) 
-					VALUES ($post_id, $term_taxonomy_id, 0)";
-
-				$wp->query($sql);
-
-				// add to the count in wp_term_taxonomy
-				$sql = "UPDATE wp_term_taxonomy SET count=1 WHERE term_taxonomy_id=$term_taxonomy_id LIMIT 1";
-				$wp->query($sql);			
-			}
-		}
-	}
-}
-
-// clear out the term groups from wp_terms
-$sql = "UPDATE wp_terms SET term_group=0";
-$wp->query($sql);
-
-
-*/

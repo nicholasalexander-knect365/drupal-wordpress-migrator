@@ -1,7 +1,7 @@
 <?php
 
 class DB {
-	
+
 	public $wp = [
 		'database' => 'tuwp',
 		'username' => 'tuauto',
@@ -30,18 +30,18 @@ class DB {
 		switch ($this->type) {
 			case 'wp' :
 				$this->db = $this->wp;
-				break;			
+				break;
 			case 'd7' :
 				$this->db = $this->d7;
 				break;
-			default: 
+			default:
 				die('unknown connection type');
 		}
 
 		$this->connection = new mysqli(
-				$this->db['host'], 
-				$this->db['username'], 
-				$this->db['password'], 
+				$this->db['host'],
+				$this->db['username'],
+				$this->db['password'],
 				$this->db['database']);
 
 		// Check connection
@@ -60,7 +60,7 @@ class DB {
 
 	public function query($sql) {
 		try {
-			$result = $this->connection->query($sql);	
+			$result = $this->connection->query($sql);
 		} catch (Exception $e) {
 			if ($result === false) {
 				print "\nQuery failed! $sql \n";
@@ -68,6 +68,9 @@ class DB {
 			die($e->getMessage());
 		}
 		$this->result = $result;
+		$rowCount = $this->connection->affected_rows;
+		assert($rowCount > 0);
+		return $rowCount;
 	}
 
 
@@ -82,7 +85,7 @@ class DB {
 		$row = $this->result->fetch_object();
 		return $row;
 	}
-	
+
 	public function getRecords() {
 		if ($this->result) {
 			$this->getObjects();

@@ -12,7 +12,7 @@ require_once "DB.class.php";
 class Taxonomy {
 
 	public $db;
-	private $initialise_regardless = true;
+	private $initialise_regardless = false;
 
 	private $mapped = [
 		'channels' 			=> 'Channel',
@@ -89,16 +89,6 @@ class Taxonomy {
 		return ($items->c === 1);
 	}
 
-	/** build Wordpress Terms **/
-	public function XbuildTerms() {
-		$taxonomies = ['subject', 'type', 'region', 'industry'];
-		foreach($taxonomies as $taxonomy) {
-			$sql = "INSERT into wp_term_taxonomy (term_taxonomy_id, term_id, taxonomy, description, parent, count) VALUES (null, 1, '$taxonomy', '', 0, 0)";
-			$this->db->query($sql);
-		}
-	}
-
-
 	static private function slugify($str) {
 		$text = $str;
 		// replace non letter or digits by -
@@ -122,8 +112,7 @@ class Taxonomy {
 
 	public function getVocabulary() {
 		$sql = "SELECT vid, name, machine_name, description, hierarchy, module, weight FROM taxonomy_vocabulary ORDER BY weight";
-		$this->db->query($sql);
-		$vocabulary = $this->db->getRecords();
+		$vocabulary = $this->db->records($sql);
 		return $vocabulary;
 	}
 	private function makeWPTermName($name) {
@@ -150,13 +139,13 @@ class Taxonomy {
 
 				$sql = "INSERT INTO wp_terms (name, slug, term_group)
 						VALUES ('$name', '$slug', $term_group)";
+
 				$this->db->query($sql);
 				$this->terms[$slug] = $this->db->lastInsertId();
 			}
 		}
 
 	}
-
 
 	/*
 	* get the Drupal taxonomyList
@@ -166,9 +155,8 @@ class Taxonomy {
 		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name AS type
 				FROM taxonomy_term_data td
 				LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
-		$this->db->query($sql);
 
-		$records = $this->db->getRecords();
+		$records = $this->db->records($sql);
 
 		return $records;
 	}
@@ -191,8 +179,8 @@ class Taxonomy {
 				INNER JOIN taxonomy_term_data td ON td.tid=ti.tid
 				INNER JOIN taxonomy_vocabulary tv ON tv.vid=td.vid
 				WHERE nid=$nid";
-		$this->db->query($sql);
-		$taxonomies = $this->db->getRecords();
+
+		$taxonomies = $this->db->records($sql);
 
 		return $taxonomies;
 	}
@@ -219,8 +207,8 @@ class Taxonomy {
 				WHERE tid = $tid
 				ORDER BY tid";
 
-		$this->db->query($sql);
-		$termData = $this->db->getRecords();
+		$termData = $this->db->records($sql);
+
 		return $termData;
 	}
 
