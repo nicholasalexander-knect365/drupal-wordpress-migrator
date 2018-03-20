@@ -37,48 +37,51 @@ if ($imports['taxonomy']) {
 	$wp_taxonomy->createTerms($taxonomies);
 }
 
-$d7->query('SELECT * FROM `node`');
-$drupal_nodes = $d7->getRecords();
 
-foreach ($drupal_nodes as $node) {
+if ($imports['events']) {
 
-	if ($imports['taxonomy']) {
-		$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
-		foreach ($taxonomies as $taxonomy) {
-			$wp_taxonomy->makeWPTermData($taxonomy);
-		}
-	}
+	$d7->query('SELECT * FROM `node`');
+	$drupal_nodes = $d7->getRecords();
 
-	if ($imports['events']) {
-		$events = $d7_events->getEvents($node);
+	foreach ($drupal_nodes as $node) {
 
-		if ($events && count($events)) {
-
-			assert($events !== NULL && count($events));
-
-			//var_dump($events);
-
-			foreach ($events as $event) {
-				foreach($event as $component) {
-					$event_node_id = $component->entity_id;
-					$event_vid = $component->revision_id;
-
-					$node = $d7_node->getNode($event_node_id);
-					$compare = $d7_node->getNode($event_node_id, $event_vid);
-
-					if ($node != $compare) {
-						print "\n--------------------------------\n";
-						var_dump($node, $compare);
-					}
-
-				}
+		if ($imports['taxonomy']) {
+			$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
+			foreach ($taxonomies as $taxonomy) {
+				$wp_taxonomy->makeWPTermData($taxonomy);
 			}
 		}
 
+		if ($imports['events']) {
+			$events = $d7_events->getEvents($node);
+
+			if ($events && count($events)) {
+
+				assert($events !== NULL && count($events));
+
+var_dump($events);
+
+				foreach ($events as $event) {
+					foreach($event as $component) {
+						$event_node_id = $component->entity_id;
+						$event_vid = $component->revision_id;
+
+						$node = $d7_node->getNode($event_node_id);
+						$compare = $d7_node->getNode($event_node_id, $event_vid);
+
+						if ($node != $compare) {
+							print "\n--------------------------------\n";
+							var_dump($node, $compare);
+						}
+
+					}
+				}
+			}
+
+		}
 	}
+
 }
-
-
 
 
 
