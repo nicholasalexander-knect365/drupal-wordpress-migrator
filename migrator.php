@@ -5,6 +5,12 @@ require "Events.class.php";
 require "Node.class.php";
 require "Taxonomy.class.php";
 
+/*
+ * while adding new features, 
+ * maintain old features: 
+ * but turn them on selectively 
+ * for testing new features
+ */
 $imports = ['initial' => false,
 			'taxonomy' => false,
 			'events'	=> true
