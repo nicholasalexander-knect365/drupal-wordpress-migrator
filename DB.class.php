@@ -59,6 +59,7 @@ class DB {
 	}
 
 	public function query($sql) {
+		$rowCount = 0;
 		try {
 			$result = $this->connection->query($sql);
 		} catch (Exception $e) {
@@ -67,9 +68,11 @@ class DB {
 			}
 			die($e->getMessage());
 		}
-		$this->result = $result;
-		$rowCount = $this->connection->affected_rows;
-		assert($rowCount > 0);
+		if ($result) {
+			$this->result = $result;
+			$rowCount = $this->connection->affected_rows;
+			assert($rowCount > 0);
+		}
 		return $rowCount;
 	}
 
@@ -82,8 +85,12 @@ class DB {
 	}
 
 	public function records($sql) {
-		$this->query($sql);
-		return $this->getRecords();
+		$numRows = $this->query($sql);
+		if ($numRows) {
+			return $this->getRecords();
+		} else {
+			return NULL;
+		}
 	}
 
 

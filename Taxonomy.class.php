@@ -16,7 +16,7 @@ class Taxonomy {
 	private $initialise_regardless;
 
 	private $mapped = [
-		'channels' 			=> 'Channel',
+		'category' 			=> 'Category',
 		'article type' 		=> 'Type',
 		'tags' 				=> 'Tag',
 		'itunes category' 	=> 'Podcast',
@@ -310,7 +310,7 @@ class Taxonomy {
 		$term_id = $taxonomy->tid;
 
 		if ($this->verbose > 1) {
-			print "\nMaking Wordpress Term Data for ".print_r($taxonomy,1);
+			print "\nMaking Wordpress Term Data for $term_id";
 		}
 
 		if (strtolower($taxonomy->category) === 'tags') {

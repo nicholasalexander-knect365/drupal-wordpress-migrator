@@ -1,9 +1,10 @@
 <?php
 
 require "DB.class.php";
-require "Events.class.php";
+
 require "Node.class.php";
 require "Taxonomy.class.php";
+require "Events.class.php";
 
 /*
  * while adding new features,
@@ -54,8 +55,10 @@ if ($imports['taxonomy']) {
 
 		if ($imports['taxonomy']) {
 			$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
-			foreach ($taxonomies as $taxonomy) {
-				$wp_taxonomy->makeWPTermData($taxonomy);
+			if ($taxonomies && count($taxonomies)) {
+				foreach ($taxonomies as $taxonomy) {
+					$wp_taxonomy->makeWPTermData($taxonomy);
+				}
 			}
 		}
 
@@ -66,7 +69,7 @@ if ($imports['taxonomy']) {
 
 				assert($events !== NULL && count($events));
 
-var_dump($events);
+//var_dump($events);
 
 				foreach ($events as $event) {
 					foreach($event as $component) {
