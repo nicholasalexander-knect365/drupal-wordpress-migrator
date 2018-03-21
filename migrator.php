@@ -6,15 +6,16 @@ require "Node.class.php";
 require "Taxonomy.class.php";
 
 /*
- * while adding new features, 
- * maintain old features: 
- * but turn them on selectively 
+ * while adding new features,
+ * maintain old features:
+ * but turn them on selectively
  * for testing new features
  */
-$imports = ['initial' => false,
-			'taxonomy' => false,
-			'events'	=> true
+$imports = ['initial' => true,
+			'taxonomy' => true,
+			'events'	=> false
 ];
+$init = true;
 
 $wp = new DB('wp');
 $d7 = new DB('d7');
@@ -34,20 +35,20 @@ if ($imports['initial']) {
 }
 
 if ($imports['taxonomy']) {
-	$wp_taxonomy->initialise();
+	$wp_taxonomy->initialise($init);
 	$vocabularies = $d7_taxonomy->getVocabulary();
 	$taxonomyNames = [];
 	$taxonomies = $d7_taxonomy->fullTaxonomyList();
 
 	// wp_terms
 	$wp_taxonomy->createTerms($taxonomies);
-}
-
-
-if ($imports['events']) {
 
 	$d7->query('SELECT * FROM `node`');
 	$drupal_nodes = $d7->getRecords();
+
+	if ($wp_taxonomy->isVerbose()) {
+		print "\nProcessing " . count($drupal_nodes) . " Drupal nodes";
+	}
 
 	foreach ($drupal_nodes as $node) {
 
@@ -93,3 +94,5 @@ var_dump($events);
 
 $wp->close();
 $d7->close();
+
+$wp_taxonomy->__destroy();

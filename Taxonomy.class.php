@@ -12,7 +12,8 @@ require_once "DB.class.php";
 class Taxonomy {
 
 	public $db;
-	private $initialise_regardless = false;
+	private $verbose;
+	private $initialise_regardless;
 
 	private $mapped = [
 		'channels' 			=> 'Channel',
@@ -36,15 +37,31 @@ class Taxonomy {
 
 	public function __construct($db) {
 		$this->db = $db;
+		$this->verbose = 5;
+		$this->initialise_regardless = false;
 	}
 
-	public function initialise() {
+	public function __destroy() {
+		if ($this->verbose) {
+			print "\nFinished\n";
+		}
+	}
+
+	public function isVerbose() {
+		return $this->verbose;
+	}
+
+	public function initialise($init = false) {
+
+		$this->initialise_regardless = $init;
+
 		if ($this->initialise_regardless && $this->termsAlreadyExist()) {
 			$this->cleanUp();
 		} else {
 			return;
 		}
 	}
+
 	private function removeTerms() {
 		$sql = "DELETE FROM wp_terms WHERE term_id>1";
 		$this->db->query($sql);
@@ -53,6 +70,9 @@ class Taxonomy {
 	}
 
 	private function cleanUp() {
+		if ($this->verbose) {
+			print "\nCleaning up...";
+		}
 		$this->removeTerms();
 
 		$sql = "DELETE FROM wp_termmeta";
@@ -115,6 +135,7 @@ class Taxonomy {
 		$vocabulary = $this->db->records($sql);
 		return $vocabulary;
 	}
+
 	private function makeWPTermName($name) {
 
 		if (isset($this->mapped[strtolower($name)])) {
@@ -127,6 +148,10 @@ class Taxonomy {
 
 		if ($this->termsAlreadyExist()) {
 			$this->removeTerms();
+		}
+
+		if ($this->verbose) {
+			print "\nCreating " . count($taxonomies) . " taxonomy terms";
 		}
 
 		foreach ($taxonomies as $taxonomy) {
@@ -283,6 +308,10 @@ class Taxonomy {
 
 		$termData = $this->getTermData($taxonomy);
 		$term_id = $taxonomy->tid;
+
+		if ($this->verbose > 1) {
+			print "\nMaking Wordpress Term Data for ".print_r($taxonomy,1);
+		}
 
 		if (strtolower($taxonomy->category) === 'tags') {
 

@@ -13,7 +13,7 @@ class DB {
 		'database' => 'd7telematics',
 		'username' => 'd7telematics',
 		'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
- 		'host' => 'localhost'
+		'host' => 'localhost'
 	];
 
 	public $type;
@@ -80,6 +80,12 @@ class DB {
 			$this->rows[] = $row;
 		}
 	}
+
+	public function records($sql) {
+		$this->query($sql);
+		return $this->getRecords();
+	}
+
 
 	public function getRecord() {
 		$row = $this->result->fetch_object();
