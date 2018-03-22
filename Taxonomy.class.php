@@ -35,9 +35,9 @@ class Taxonomy {
 	public $terms = [];
 
 
-	public function __construct($db) {
+	public function __construct($db, $verbose = true) {
 		$this->db = $db;
-		$this->verbose = 5;
+		$this->verbose = $verbose;
 		$this->initialise_regardless = false;
 	}
 
@@ -47,6 +47,9 @@ class Taxonomy {
 		}
 	}
 
+	public function setVerbose() {
+		$this->verbose = true;
+	}
 	public function isVerbose() {
 		return $this->verbose;
 	}
@@ -150,8 +153,10 @@ class Taxonomy {
 			$this->removeTerms();
 		}
 
-		if ($this->verbose) {
+		if ($this->verbose === true) {
 			print "\nCreating " . count($taxonomies) . " taxonomy terms";
+		} else if (is_string($this->verbose)) {
+			print $this->verbose;
 		}
 
 		foreach ($taxonomies as $taxonomy) {

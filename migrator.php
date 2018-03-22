@@ -16,10 +16,10 @@ require "Events.class.php";
  * v101 import nodes and images 
  *
  */
-$imports = ['initial' => false,
-			'nodes'	=> false,
+$imports = ['initial' => true,
+			'nodes'	=> true,
 			'files' => true,
-			'taxonomy' => false,
+			'taxonomy' => true,
 			'events'	=> false
 ];
 
@@ -31,17 +31,20 @@ if (count($argv) > 1) {
 	$progress = in_array('-p', $argv);
 	$help = in_array('-?', $argv);
 } else {
-	$verbose = $quiet = $help = false;
+	$verbose = $quiet = $help = $progress = false;
 }
 
 if ($help) {
 	die( "\nFormat: php " . $argv[0] . " [-q, -p or -v]\n\n");
 }
+if ($progress) {
+	$verbose = '.';
+}
 
 $wp = new DB('wp');
 $d7 = new DB('d7');
 
-$wp_taxonomy = new Taxonomy($wp);
+$wp_taxonomy = new Taxonomy($wp, $verbose);
 $d7_taxonomy = new Taxonomy($d7);
 
 $files = new Files($d7, 'http://pentontuautodrupalfs.s3.amazonaws.com', ['verbose' => $verbose, 'quiet' => $quiet, 'progress' => $progress]);
@@ -68,6 +71,20 @@ if ($imports['initial']) {
 if (!$drupal_nodes) {
 	$d7->query('SELECT * FROM `node`');
 	$drupal_nodes = $d7->getRecords();
+}
+
+if ($wp_taxonomy->isVerbose()) {
+	print "\nProcessing " . count($drupal_nodes) . " Drupal nodes";
+}
+
+if ($imports['taxonomy']) {
+		$wp_taxonomy->initialise($init);
+		$vocabularies = $d7_taxonomy->getVocabulary();
+		$taxonomyNames = [];
+		$taxonomies = $d7_taxonomy->fullTaxonomyList();
+
+		// wp_terms
+		$wp_taxonomy->createTerms($taxonomies);
 }
 
 foreach($drupal_nodes as $node) {
@@ -97,22 +114,6 @@ foreach($drupal_nodes as $node) {
 	}
 
 	if ($imports['taxonomy']) {
-		$wp_taxonomy->initialise($init);
-		$vocabularies = $d7_taxonomy->getVocabulary();
-		$taxonomyNames = [];
-		$taxonomies = $d7_taxonomy->fullTaxonomyList();
-
-		// wp_terms
-		$wp_taxonomy->createTerms($taxonomies);
-
-	// if (!$drupal_nodes) {
-	// 	$d7->query('SELECT * FROM `node`');
-	// 	$drupal_nodes = $d7->getRecords();
-	// }
-
-		if ($wp_taxonomy->isVerbose()) {
-			print "\nProcessing " . count($drupal_nodes) . " Drupal nodes";
-		}
 
 		$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
 		if ($taxonomies && count($taxonomies)) {
