@@ -84,6 +84,15 @@ class DB {
 		}
 	}
 
+	public function record($sql) {
+		$numRows = $this->query($sql);
+		if ($numRows > 1) {
+			throw new Exception('record query returned more rows than the expected single row: ' . $sql);
+		}
+		$record = $this->getRecord();
+		return $record;
+	}
+
 	public function records($sql) {
 		$numRows = $this->query($sql);
 		if ($numRows) {
@@ -106,10 +115,13 @@ class DB {
 		} else {
 			throw new Exception('send a query before getting Rows!');
 		}
-
 	}
 
 	public function lastInsertId() {
 		return $this->connection->insert_id;
+	}
+
+	static public function strip($sql) {
+		return str_replace(["\n", "\t", "  "],["", " ", " "], $sql);
 	}
 }

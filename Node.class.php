@@ -21,4 +21,17 @@ class Node {
 		return $node;
 	}
 
+	public function getNodeType($node) {
+		$type = $node->type;
+		$sql = "SELECT * FROM node_type WHERE type='$type' LIMIT 1";
+		$nodeType = $this->db->record($sql);
+		return $nodeType;
+	}
+
+	public function getNodeRevisions($nid) {
+		$sql = "SELECT * FROM node_revision WHERE nid=$nid";
+		$revisions = $this->db->records($sql);
+		return $revisions;
+	}
+
 }
