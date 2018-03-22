@@ -1,6 +1,7 @@
 <?php
 
 require "DB.class.php";
+require "Options.class.php";
 
 require "Node.class.php";
 require "Files.class.php";
@@ -13,7 +14,9 @@ require "Events.class.php";
  * but turn them on selectively
  * for testing new features
  *
- * v101 import nodes and images 
+ * v101/2 import images
+ * v102/3 options 
+ * v104 node import
  *
  */
 $imports = ['initial' => true,
@@ -25,21 +28,13 @@ $imports = ['initial' => true,
 
 $init = true;
 
-if (count($argv) > 1) {
-	$verbose = in_array('-v', $argv);
-	$quiet = in_array('-q', $argv);
-	$progress = in_array('-p', $argv);
-	$help = in_array('-?', $argv);
-} else {
-	$verbose = $quiet = $help = $progress = false;
-}
+$option = new Options();
+$option->setAll();
 
-if ($help) {
-	die( "\nFormat: php " . $argv[0] . " [-q, -p or -v]\n\n");
-}
-if ($progress) {
-	$verbose = '.';
-}
+$quiet = $option->get('quiet');
+$progress = $option->get('progress');
+$verbose = $option->get('verbose');
+
 
 $wp = new DB('wp');
 $d7 = new DB('d7');
