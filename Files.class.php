@@ -15,16 +15,24 @@ class Files {
 	public $connection;
 	public $drupalPath;
 	private $verbose = false;
+	public $s3Bucket = 'http://pentontuautodrupalfs.s3.amazonaws.com';
 
-	public function __construct(DB $connection, $args = []) {
+
+	public function __construct(DB $connection, $s3 = '', $args = []) {
 		$this->connection = $connection;
 		$this->nid = null;
+		if (strlen($s3)) {
+			$this->s3Bucket = $s3;
+		}
 		$this->type = 'node';
 		if ($args['verbose']) {
 			$this->verbose = true;
 		}
 		if ($args['quiet']) {
 			$this->verbose = false;
+		}
+		if ($args['progress']) {
+			$this->verbose = '.';
 		}
 	}
 
@@ -37,32 +45,74 @@ class Files {
 	}
 
 	public function getFiles($nid) {
-		$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename as filename, fm.uri as uri, fm.filesize, fm.status, fm.timestamp 
-				FROM file_managed fm
-				JOIN file_usage fu ON fm.fid=fu.fid
-				WHERE fu.id=$nid AND fu.type='node'";
 
-		$files = $this->connection->records($sql);
-		if ($files) {
+		set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
+			// error was suppressed with the @-operator
+			if (0 === error_reporting()) {
+				return false;
+			}
+			// print 'ERROR!!!' . $errno;
+			if ($errno === 2) {
+				return '404';
+			}
+			throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+		});
 
-			foreach ($files as $file) {
-				switch ($this->source($file->uri)) {
-					case 'public' :
-						$path = $this->drupalPath . '/sites/default/files/' . $file->filename;
-						if ($this->verbose) {
-							print "\nCopying path ".$path;
-						}
-						if (file_exists($path)) {	
-							if (!copy($path, 'images/'.$file->filename)) {
-								throw new Exception( 'could not copy '.$path);
+		try {
+	
+			$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename as filename, fm.uri as uri, fm.filesize, fm.status, fm.timestamp 
+					FROM file_managed fm
+					JOIN file_usage fu ON fm.fid=fu.fid
+					WHERE fu.id=$nid AND fu.type='node'";
+
+			$files = $this->connection->records($sql);
+			
+			if ($files) {
+
+				foreach ($files as $file) {
+			
+					switch ($this->source($file->uri)) {
+						case 'public' :
+							$path = $this->drupalPath . '/sites/default/files/' . $file->filename;
+							if ($this->verbose === true) {
+								print "\nCopying image ".$path;
 							}
-						} else {
-							print "\n$path does not exist";
-						}
-
-						break;
+							if (file_exists($path)) {	
+								if (!copy($path, 'images/'.$file->filename)) {
+									throw new Exception( 'could not copy '.$path);
+								}
+							} else {
+								print "\n$path does not exist";
+							}
+							break;
+						case 's3':
+							$path = $this->s3Bucket . '/' . $file->filename;
+							try {
+								$fileData = file_get_contents($path);
+								if (strlen($fileData) > 14) {
+									if (is_string($this->verbose)) {
+										print $this->verbose;
+									} else if ($this->verbose === true) {
+										print "\nImage data size: " . strlen($fileData);
+									}
+									$fd = fopen('images/' . $file->filename, 'w+');
+									fputs($fd, $fileData);
+									fclose($fd);							
+								}
+								if ($this->verbose === true) {
+									print "\nGetting s3 image ".$path;
+								}
+							} catch (Exception $e) {
+								die("could not get file ".$e->getMessage());
+							}
+							break;
+						default: 
+							print "\nDo not know how to get this image " . $path;
+					}
 				}
 			}
+		} catch (ErrorException $e) {
+			print("did not get file ".$e->getMessage());
 		}
 
 		return $files;
@@ -70,8 +120,8 @@ class Files {
 
 	private function source($uri) {
 		if (preg_match('/^s3:\/\//', $uri)) {
-			if ($this->verbose) {
-				print "\n$uri - file has s3: protocol - implementation required.";
+			if ($this->verbose === true) {
+				print "\n$uri - file has s3: protocol - attempting to get file from ";
 			}
 			return 's3';
 		}

@@ -22,13 +22,20 @@ $imports = ['initial' => false,
 			'taxonomy' => false,
 			'events'	=> false
 ];
+
 $init = true;
-$verbose = in_array('-v', $argv);
-$quiet = in_array('-q', $argv);
-$help = in_array('-?', $argv);
+
+if (count($argv) > 1) {
+	$verbose = in_array('-v', $argv);
+	$quiet = in_array('-q', $argv);
+	$progress = in_array('-p', $argv);
+	$help = in_array('-?', $argv);
+} else {
+	$verbose = $quiet = $help = false;
+}
 
 if ($help) {
-	die( "\nFormat: php " . $argv[0] . " [-q or -v]\n\n");
+	die( "\nFormat: php " . $argv[0] . " [-q, -p or -v]\n\n");
 }
 
 $wp = new DB('wp');
@@ -37,7 +44,7 @@ $d7 = new DB('d7');
 $wp_taxonomy = new Taxonomy($wp);
 $d7_taxonomy = new Taxonomy($d7);
 
-$files = new Files($d7, ['verbose' => $verbose, 'quiet' => $quiet]);
+$files = new Files($d7, 'http://pentontuautodrupalfs.s3.amazonaws.com', ['verbose' => $verbose, 'quiet' => $quiet, 'progress' => $progress]);
 
 // TODO: pass files path on CLI ?
 $files->setDrupalPath('../drupal7/tuauto');
@@ -82,8 +89,8 @@ foreach($drupal_nodes as $node) {
 				// get all sizes for this image
 				$best = $files->getBestVersion($image->filename);
 
-				if (!$quiet && ($verbose || $files->isVerbose())) {
-					print "\n" . $best->fid . ' ' . $best->type . ' ' . $best->filename . ' ' . $best->uri;
+				if (!$quiet && !$progress && ($verbose === true || $files->isVerbose())) {
+					print "\n" . $best->fid . ' ' . $best->type . ' ' . $best->filename . ' ' . $best->uri . "\n";
 				}
 			}
 		}
