@@ -4,6 +4,7 @@ require_once "DB.class.php";
 class Node {
 	public $db;
 	public $node;
+	public $limit;
 
 	public function __construct($db) {
 		$this->db = $db;
@@ -40,6 +41,34 @@ class Node {
 		$this->node = $node;
 	}
 
-	
 
+	public function setNodeChunkSize($limit = NULL) {
+		if (!$limit) {
+			$limit = 1000;
+		}
+		$this->limit = $limit;
+	}
+
+	public function getNodeChunkSize() {
+		if (!$this->limit) {
+			$this->setNodeChunk();
+		}
+		$limit = $this->limit;
+	}
+
+	public function getNodeChunk($start) {
+
+		$limit = $this->limit;
+		$sql = "SELECT nid, vid, type, language, title, uid, status, created, changed, comment, promote, sticky, tnid, translate, node_comment_statistics_nid
+				FROM node n
+				INNER JOIN node_type t ON n.type=t.type
+				OUTER JOIN node_revision r ON r.nid=n.nid
+
+				ORDER by nid
+				LIMIT $start, $limit";
+
+		$nodes = $this->db->records($sql);
+var_dump($nodes);
+		return $nodes;
+	}
 }

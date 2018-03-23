@@ -29,6 +29,7 @@ $imports = ['initial' 	=> true,
 
 $init = true;
 
+/* control options */
 $options = new Options();
 $options->setAll();
 $quiet 		= $options->get('quiet');
@@ -36,25 +37,29 @@ $progress 	= $options->get('progress');
 $verbose 	= $options->get('verbose');
 $s3bucket 	= $options->get('s3bucket');
 $drupalPath = $options->get('drupalPath');
+$imageStore = $options->get('imageStore');
 
+
+/* connect databases */
 $wp = new DB('wp');
 $d7 = new DB('d7');
-
 $wp_taxonomy = new Taxonomy($wp, $verbose);
 $d7_taxonomy = new Taxonomy($d7);
+if ($imports['taxonomy']) {
+		$wp_taxonomy->initialise($init);
+		$vocabularies = $d7_taxonomy->getVocabulary();
+		$taxonomyNames = [];
+		$taxonomies = $d7_taxonomy->fullTaxonomyList();
+		$wp_taxonomy->createTerms($taxonomies);
+}
 
-$files = new Files($d7, $s3bucket, ['verbose' => $verbose, 'quiet' => $quiet, 'progress' => $progress]);
-
-// TODO: pass files path on command line ?
-$files->setDrupalPath($drupalPath);
-// TODO: ensure target exists, and is empty (?)
-$files->imageTarget = 'images/';
-
-
+/* content types ... */
 $d7_events = new Events($d7);
 
+/* nodes */
 $d7_node = new Node($d7);
 $drupal_nodes = null;
+
 
 if ($imports['initial']) {
 	// build the term_taxonomy if not already present
@@ -69,26 +74,18 @@ if (!$drupal_nodes) {
 	$drupal_nodes = $d7->getRecords();
 }
 
-if ($wp_taxonomy->isVerbose()) {
+$files = new Files($d7, $s3bucket, ['verbose' => $verbose, 'quiet' => $quiet, 'progress' => $progress]);
+$files->setDrupalPath($drupalPath);
+$files->setImageStore($imageStore);
+
+if ($verbose) {
 	print "\nProcessing " . count($drupal_nodes) . " Drupal nodes\n";
-}
-
-if ($imports['taxonomy']) {
-		$wp_taxonomy->initialise($init);
-		$vocabularies = $d7_taxonomy->getVocabulary();
-		$taxonomyNames = [];
-		$taxonomies = $d7_taxonomy->fullTaxonomyList();
-
-		// wp_terms
-		$wp_taxonomy->createTerms($taxonomies);
 }
 
 foreach($drupal_nodes as $node) {
 
 	if ($imports['nodes']) {
 		$d7_node->setNode($node);
-
-
 	}
 
 	if ($imports['files']) {

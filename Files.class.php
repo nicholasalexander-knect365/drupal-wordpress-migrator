@@ -14,6 +14,7 @@ class Files {
 	public $type;
 	public $connection;
 	public $drupalPath;
+	public $imageStore;
 	private $verbose = false;
 	public $s3Bucket = 'http://pentontuautodrupalfs.s3.amazonaws.com';
 
@@ -37,8 +38,23 @@ class Files {
 		$this->drupalPath = $path;
 	}
 
+	private function dirEmpty($dir) {
+		if (!is_readable($dir)) {
+			die("\nERROR: image store directory $dir does not exist or is not writable\n\n");
+		}
+  		return (count(scandir($dir)) == 2);
+	}
+
 	public function isVerbose() {
 		return $this->verbose;
+	}
+
+	public function setImageStore($path) {
+		if ($this->dirEmpty($path)) {
+			$this->imageStore = $path;
+		} else {
+			die("\nERROR: images directory is not empty, please use --imageStore=EMPTY_DIRECTORY\n\n");
+		}
 	}
 
 	private function fileList($nid) {
@@ -91,8 +107,8 @@ class Files {
 								print "\nCopying image ".$path;
 							}
 							if (file_exists($path)) {	
-								if (!copy($path, 'images/'.$file->filename)) {
-									throw new Exception( 'could not copy '.$path);
+								if (!copy($path, $this->imageStore . '/' . $file->filename)) {
+									throw new Exception('could not copy ' . $path);
 								}
 							} else {
 								print "\n$path does not exist";
@@ -109,7 +125,7 @@ class Files {
 									} else if ($this->verbose === true) {
 										print "\nImage data size: " . strlen($fileData);
 									}
-									$fd = fopen('images/' . $file->filename, 'w+');
+									$fd = fopen($this->imageStore . '/' . $file->filename, 'w+');
 									fputs($fd, $fileData);
 									fclose($fd);							
 								}

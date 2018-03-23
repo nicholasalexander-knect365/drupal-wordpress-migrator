@@ -1,11 +1,13 @@
 <?php 
 
 class Options {
+
 	public $verbose;
 	public $quiet;
 	public $progress;
 	public $s3bucket;
-
+	public $drupalPath;
+	public $imageStore;
 
 	public function __construct() {
 		$this->verbose = false;
@@ -13,6 +15,7 @@ class Options {
 		$this->progress = false;
 		$this->s3bucket = 'http://pentontuautodrupalfs.s3.amazonaws.com';
 		$this->drupalPath = '../drupal7/tuauto';
+		$this->imageStore = 'images/';
 	}
 
 	public function setAll() {
@@ -22,7 +25,7 @@ class Options {
 		if (count($argv) > 1) {
 
 			$shortOpts = 'vqph';
-			$longOpts = ['drupalPath:', 'imagePath:'];
+			$longOpts = ['drupalPath:', 'imageStore:'];
 			$options = getopt($shortOpts, $longOpts);
 
 			foreach ($options as $option => $value) {
@@ -42,8 +45,8 @@ class Options {
 					case 'drupalPath':
 						$this->drupalPath = $value;
 						break;
-					case 'imagePath' :
-						$this->imagePath = $value;
+					case 'imageStore' :
+						$this->imageStore = $value;
 						break; 
 				}
 			}
