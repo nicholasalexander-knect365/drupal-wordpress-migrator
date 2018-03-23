@@ -1,15 +1,14 @@
 <?php
+/* 
+	Files module: reading and writing from the file sysstem
 
-
-/* drupal has three tables for files: 
-   files: not used in Project 1
-   file_usage: relates the fid to the (object, ie node) id
-   file_managed: filename and uri 
+	Support for image files 
 */
 
 require_once "DB.class.php";
 
 class Files {
+
 	public $nid;
 	public $type;
 	public $connection;
@@ -20,6 +19,7 @@ class Files {
 
 
 	public function __construct(DB $connection, $s3 = '', $args = []) {
+
 		$this->connection = $connection;
 		$this->nid = null;
 		if (strlen($s3)) {
@@ -35,10 +35,12 @@ class Files {
 	}
 
 	public function setDrupalPath($path) {
+
 		$this->drupalPath = $path;
 	}
 
 	private function dirEmpty($dir) {
+
 		if (!is_readable($dir)) {
 			die("\nERROR: image store directory $dir does not exist or is not writable\n\n");
 		}
@@ -46,10 +48,12 @@ class Files {
 	}
 
 	public function isVerbose() {
+
 		return $this->verbose;
 	}
 
 	public function setImageStore($path) {
+
 		if ($this->dirEmpty($path)) {
 			$this->imageStore = $path;
 		} else {
@@ -58,12 +62,14 @@ class Files {
 	}
 
 	private function fileList($nid) {
+
 		$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename as filename, fm.uri as uri, fm.filesize, fm.status, fm.timestamp 
 				FROM file_managed fm
 				JOIN file_usage fu ON fm.fid=fu.fid
 				WHERE fu.id=$nid AND fu.type='node'";
 
 		$files = $this->connection->records($sql);
+
 		return $files;
 	} 
 
@@ -156,6 +162,7 @@ class Files {
 	 * DRUPAL_HOME . '/sites/default/files'
 	 */
 	public function getBestVersion($filename) {
+
 		$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename as filename, fm.uri as uri, fm.filesize, fm.status, fm.timestamp 
 				FROM file_managed fm
 				JOIN file_usage fu ON fm.fid=fu.fid
