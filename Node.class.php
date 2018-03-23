@@ -3,6 +3,7 @@ require_once "DB.class.php";
 
 class Node {
 	public $db;
+	public $node;
 
 	public function __construct($db) {
 		$this->db = $db;
@@ -33,5 +34,12 @@ class Node {
 		$revisions = $this->db->records($sql);
 		return $revisions;
 	}
+
+	// node for export
+	public function setNode($node) {
+		$this->node = $node;
+	}
+
+	
 
 }

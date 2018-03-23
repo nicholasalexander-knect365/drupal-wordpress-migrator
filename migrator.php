@@ -2,6 +2,7 @@
 
 require "DB.class.php";
 require "Options.class.php";
+require "WP.class.php";
 
 require "Node.class.php";
 require "Files.class.php";
@@ -19,22 +20,22 @@ require "Events.class.php";
  * v104 node import
  *
  */
-$imports = ['initial' => true,
-			'nodes'	=> true,
-			'files' => true,
-			'taxonomy' => true,
+$imports = ['initial' 	=> true,
+			'nodes'		=> true,
+			'files' 	=> true,
+			'taxonomy' 	=> true,
 			'events'	=> false
 ];
 
 $init = true;
 
-$option = new Options();
-$option->setAll();
-
-$quiet = $option->get('quiet');
-$progress = $option->get('progress');
-$verbose = $option->get('verbose');
-
+$options = new Options();
+$options->setAll();
+$quiet 		= $options->get('quiet');
+$progress 	= $options->get('progress');
+$verbose 	= $options->get('verbose');
+$s3bucket 	= $options->get('s3bucket');
+$drupalPath = $options->get('drupalPath');
 
 $wp = new DB('wp');
 $d7 = new DB('d7');
@@ -42,10 +43,10 @@ $d7 = new DB('d7');
 $wp_taxonomy = new Taxonomy($wp, $verbose);
 $d7_taxonomy = new Taxonomy($d7);
 
-$files = new Files($d7, 'http://pentontuautodrupalfs.s3.amazonaws.com', ['verbose' => $verbose, 'quiet' => $quiet, 'progress' => $progress]);
+$files = new Files($d7, $s3bucket, ['verbose' => $verbose, 'quiet' => $quiet, 'progress' => $progress]);
 
-// TODO: pass files path on CLI ?
-$files->setDrupalPath('../drupal7/tuauto');
+// TODO: pass files path on command line ?
+$files->setDrupalPath($drupalPath);
 // TODO: ensure target exists, and is empty (?)
 $files->imageTarget = 'images/';
 
@@ -69,7 +70,7 @@ if (!$drupal_nodes) {
 }
 
 if ($wp_taxonomy->isVerbose()) {
-	print "\nProcessing " . count($drupal_nodes) . " Drupal nodes";
+	print "\nProcessing " . count($drupal_nodes) . " Drupal nodes\n";
 }
 
 if ($imports['taxonomy']) {
@@ -85,10 +86,8 @@ if ($imports['taxonomy']) {
 foreach($drupal_nodes as $node) {
 
 	if ($imports['nodes']) {
+		$d7_node->setNode($node);
 
-		// get the data
-		// latest revision
-		// all revisions?
 
 	}
 

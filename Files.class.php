@@ -25,12 +25,9 @@ class Files {
 			$this->s3Bucket = $s3;
 		}
 		$this->type = 'node';
-		if ($args['verbose']) {
-			$this->verbose = true;
-		}
-		if ($args['quiet']) {
-			$this->verbose = false;
-		}
+
+		$this->verbose = isset($args['verbose']);
+		$this->verbose = isset($args['quiet']);
 		if ($args['progress']) {
 			$this->verbose = '.';
 		}
@@ -44,6 +41,27 @@ class Files {
 		return $this->verbose;
 	}
 
+	private function fileList($nid) {
+		$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename as filename, fm.uri as uri, fm.filesize, fm.status, fm.timestamp 
+				FROM file_managed fm
+				JOIN file_usage fu ON fm.fid=fu.fid
+				WHERE fu.id=$nid AND fu.type='node'";
+
+		$files = $this->connection->records($sql);
+		return $files;
+	} 
+
+
+	private function source($uri) {
+		
+		if (preg_match('/^([\w]+):\/\//', $uri, $matched)) {
+			return $matched[1];
+		} else {
+			throw new Exception('Unsupported image link: ' . $uri);
+		}
+	}
+
+
 	public function getFiles($nid) {
 
 		set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
@@ -51,7 +69,6 @@ class Files {
 			if (0 === error_reporting()) {
 				return false;
 			}
-			// print 'ERROR!!!' . $errno;
 			if ($errno === 2) {
 				return '404';
 			}
@@ -59,19 +76,15 @@ class Files {
 		});
 
 		try {
-	
-			$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename as filename, fm.uri as uri, fm.filesize, fm.status, fm.timestamp 
-					FROM file_managed fm
-					JOIN file_usage fu ON fm.fid=fu.fid
-					WHERE fu.id=$nid AND fu.type='node'";
-
-			$files = $this->connection->records($sql);
 			
-			if ($files) {
+			if ($files = $this->fileList($nid)) {
 
 				foreach ($files as $file) {
-			
-					switch ($this->source($file->uri)) {
+
+					$fileType = $this->source($file->uri); 
+					
+					switch ($fileType) {
+
 						case 'public' :
 							$path = $this->drupalPath . '/sites/default/files/' . $file->filename;
 							if ($this->verbose === true) {
@@ -85,6 +98,7 @@ class Files {
 								print "\n$path does not exist";
 							}
 							break;
+
 						case 's3':
 							$path = $this->s3Bucket . '/' . $file->filename;
 							try {
@@ -106,8 +120,9 @@ class Files {
 								die("could not get file ".$e->getMessage());
 							}
 							break;
+
 						default: 
-							print "\nDo not know how to get this image " . $path;
+							print "\nDo not know how to get this image " . $path . " type is " . $fileType;
 					}
 				}
 			}
@@ -118,24 +133,8 @@ class Files {
 		return $files;
 	}
 
-	private function source($uri) {
-		if (preg_match('/^s3:\/\//', $uri)) {
-			if ($this->verbose === true) {
-				print "\n$uri - file has s3: protocol - attempting to get file from ";
-			}
-			return 's3';
-		}
-		if (preg_match('/^http:\/\//', $uri)) {
-			die('file has http: protocol - check if implementation required.');
-			return 'http';
-		}
-		if (preg_match('/^public:\/\//', $uri)) {
-			return 'public';
-		}
-	}
-
 	/* 
-	 * best version is the largest version
+	 * TODO: Deprecate this?? - there may be multiple versions but best version appears to be the base path
 	 *
 	 * ... may not be required as all larger images appear to be:
 	 * DRUPAL_HOME . '/sites/default/files'
