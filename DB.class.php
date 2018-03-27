@@ -121,7 +121,11 @@ class DB {
 		return $this->connection->insert_id;
 	}
 
-	static public function strip($sql) {
-		return str_replace(["\n", "\t", "  "],["", " ", " "], $sql);
+	static public function strip($sql, $crlf = false) {
+		$sql = str_replace(["\n", "\t", "  "],["", " ", " "], $sql);
+		if ($crlf) {
+			$sql = "\n" . $sql . "\n";
+		}
+		return $sql;
 	}
 }

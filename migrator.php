@@ -2,7 +2,7 @@
 
 require "DB.class.php";
 require "Options.class.php";
-require "WP.class.php";
+require "Post.class.php";
 
 require "Node.class.php";
 require "Files.class.php";
@@ -27,6 +27,7 @@ $imports = ['initial' 	=> true,
 			'events'	=> false
 ];
 
+$maxChunk = 1000000;
 $init = true;
 
 /* control options */
@@ -53,11 +54,22 @@ if ($imports['taxonomy']) {
 		$wp_taxonomy->createTerms($taxonomies);
 }
 
+if ($imports['files']) {
+	$files = new Files($d7, $s3bucket, [
+		'verbose' 	=> $verbose, 
+		'quiet' 	=> $quiet, 
+		'progress' 	=> $progress
+	]);
+	$files->setDrupalPath($drupalPath);
+	$files->setImageStore($imageStore);
+}
 /* content types ... */
 $d7_events = new Events($d7);
 
 /* nodes */
 $d7_node = new Node($d7);
+$wp_post = new Post($wp);
+
 $drupal_nodes = null;
 
 
@@ -68,79 +80,93 @@ if ($imports['initial']) {
 	}
 }
 
-// look at each node
-if (!$drupal_nodes) {
-	$d7->query('SELECT * FROM `node`');
-	$drupal_nodes = $d7->getRecords();
+// how many nodes to process?
+$nodeCount = $d7_node->nodeCount();
+
+if ($nodeCount > $maxChunk) {
+	$chunk = floor($nodeCount / $maxChunk);
+} else {
+	$chunk = $nodeCount;
 }
 
-$files = new Files($d7, $s3bucket, ['verbose' => $verbose, 'quiet' => $quiet, 'progress' => $progress]);
-$files->setDrupalPath($drupalPath);
-$files->setImageStore($imageStore);
+$d7_node->setNodeChunkSize($nodeCount);
+$chunks = floor($nodeCount / $chunk);
+
+// var_dump($chunk, $chunks);
+// die;
 
 if ($verbose) {
-	print "\nProcessing " . count($drupal_nodes) . " Drupal nodes\n";
+	print "\nConverting $nodeCount Drupal nodes\n";
 }
 
-foreach($drupal_nodes as $node) {
+for ($c = 0; $c < $chunks; $c++) {
 
-	if ($imports['nodes']) {
-		$d7_node->setNode($node);
-	}
+	$drupal_nodes = $d7_node->getNodeChunk();
 
-	if ($imports['files']) {
-		$images = $files->getFiles($node->nid);
-		if ($images) {
-			$largest = null;
+	if ($drupal_nodes && count($drupal_nodes)) {
 
-			foreach ($images as $image) {
-				// get all sizes for this image
-				$best = $files->getBestVersion($image->filename);
+		foreach ($drupal_nodes as $node) {
 
-				if (!$quiet && !$progress && ($verbose === true || $files->isVerbose())) {
-					print "\n" . $best->fid . ' ' . $best->type . ' ' . $best->filename . ' ' . $best->uri . "\n";
-				}
+			if ($imports['nodes']) {
+				$d7_node->setNode($node);
+				$wp_post->makePost($node);
 			}
-		}
-	}
 
-	if ($imports['taxonomy']) {
+			if ($imports['files']) {
+				$images = $files->getFiles($node->nid);
+				if ($images) {
+					$largest = null;
 
-		$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
-		if ($taxonomies && count($taxonomies)) {
-			foreach ($taxonomies as $taxonomy) {
-				$wp_taxonomy->makeWPTermData($taxonomy);
-			}
-		}
-	}
-	if ($imports['events']) {
-		$events = $d7_events->getEvents($node);
+					foreach ($images as $image) {
+						// get all sizes for this image
+						$best = $files->getBestVersion($image->filename);
 
-		if ($events && count($events)) {
-
-			assert($events !== NULL && count($events));
-
-//var_dump($events);
-
-			foreach ($events as $event) {
-				foreach($event as $component) {
-					$event_node_id = $component->entity_id;
-					$event_vid = $component->revision_id;
-
-					$node = $d7_node->getNode($event_node_id);
-					$compare = $d7_node->getNode($event_node_id, $event_vid);
-
-					if ($node != $compare) {
-						print "\n--------------------------------\n";
-						var_dump($node, $compare);
+						if (!$quiet && !$progress && ($verbose === true || $files->isVerbose())) {
+							print "\n" . $best->fid . ' ' . $best->type . ' ' . $best->filename . ' ' . $best->uri . "\n";
+						}
 					}
-
 				}
 			}
+
+			if ($imports['taxonomy']) {
+
+				$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
+				if ($taxonomies && count($taxonomies)) {
+					foreach ($taxonomies as $taxonomy) {
+						$wp_taxonomy->makeWPTermData($taxonomy);
+					}
+				}
+			}
+			if ($imports['events']) {
+				$events = $d7_events->getEvents($node);
+
+				if ($events && count($events)) {
+
+					assert($events !== NULL && count($events));
+
+		//var_dump($events);
+
+					foreach ($events as $event) {
+						foreach($event as $component) {
+							$event_node_id = $component->entity_id;
+							$event_vid = $component->revision_id;
+
+							$node = $d7_node->getNode($event_node_id);
+							$compare = $d7_node->getNode($event_node_id, $event_vid);
+
+							if ($node != $compare) {
+								print "\n--------------------------------\n";
+								var_dump($node, $compare);
+							}
+
+						}
+					}
+				}
+
+			}
+
 		}
-
 	}
-
 }
 
 

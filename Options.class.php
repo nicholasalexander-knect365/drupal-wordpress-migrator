@@ -59,7 +59,9 @@ class Options {
 			}
 		}
 	}
+
 	public function get($name) {
 		return $this->$name;
 	}
+
 }

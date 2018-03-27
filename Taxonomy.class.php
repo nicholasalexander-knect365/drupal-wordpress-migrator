@@ -112,7 +112,7 @@ class Taxonomy {
 		return ($items->c === 1);
 	}
 
-	static private function slugify($str) {
+	static public function slugify($str) {
 		$text = $str;
 		// replace non letter or digits by -
 		$text = preg_replace('~[^\pL\d]+~u', '-', $text);
