@@ -76,27 +76,6 @@ class Post {
 		$sql = "DELETE FROM wp_posts";
 		$this->db->query($sql);
 	}
-	// public function setPost($data) {
-	// 	$post_author = $data['uid'];
-		
-	// 	$post_date = date('Y-m-d h:i:s', $data['created']);
-	// 	$post_date_gmt = date('Y-m-d h:i:s', $data['created'] + $this->timezone_add * 3600);
-
-
-	// }
-
-	// public function convert($node) {
-	// 	// format conversions
-	// 	// $node->created = date('Y-m-d h:i:s', $node->created);
-	// 	// $node->changed = date('Y-m-d h:i:s', $node->changed);
-
-	// 	$post['post_date_gmt'] = $post['post_date'];
-	// 	$post['post_modified_gmt'] = $post['post_modified'];
-	// 	$post['comment_status'] === 1 ? 'open' : 'closed';
-
-
-	// 	return $post;
-	// }
 
 	private function findMakes($item) {
 		return strpos('make_', $item);
@@ -116,13 +95,16 @@ class Post {
 			// they are post_meta and are created AFTER post is created
 			if (preg_match('/^make_/', $wpKey)) {
 				$metas[$key] = $value;
+
 			} else if (preg_match('/^ignore_/', $wpKey) && isset($value)) {
+
 				if (preg_match('/^ignore_trans/', static::$translation_warning === 0)) {
 					print "\nWarning: translation data exists in drupal!";
 					static::$translation_warning = 1;
 				}
+
 			} else {
-				//$$key = $value;
+
 				if ($key === 'created' || $key === 'changed') {
 					$value = date('Y-m-d h:i:s', $value);
 					$values[$wpKey] = $value;
@@ -150,7 +132,6 @@ class Post {
 						}
 						break;
 					case 'title' :
-//e(var_dump($key, $values));
 						$values[$wpKey] = $value;
 						$values['post_name'] = Taxonomy::slugify($value);
 						if (strlen($values['post_name']) === 0) {
@@ -175,15 +156,12 @@ class Post {
 
 		$sql = "INSERT into wp_posts (" . implode(', ', array_keys($values)) . ") VALUES ('" . implode("', '", $values) ."')";
 
-//var_dump($sql);
-
 		$this->db->query($sql); 
 		$post_id = $this->db->lastInsertId();
 
 
 		// meta processing: 
 		// create values in postmeta 
-
 		foreach ($metas as $key => $value) {
 			// $action = static::$mapped[$drupalKey];
 			if (preg_match('/^make_/', $value)) {
