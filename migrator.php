@@ -20,9 +20,9 @@ require "Events.class.php";
  * v104 node import
  *
  */
-$imports = ['initial' 	=> true,
-			'nodes'		=> true,
-			'files' 	=> true,
+$imports = ['initial' 	=> false,
+			'nodes'		=> false,
+			'files' 	=> false,
 			'taxonomy' 	=> true,
 			'events'	=> false
 ];
@@ -135,6 +135,10 @@ for ($c = 0; $c < $chunks; $c++) {
 					foreach ($taxonomies as $taxonomy) {
 						$wp_taxonomy->makeWPTermData($taxonomy);
 					}
+				
+					if (!$quiet && !$progress && ($verbose === true) ) {
+						print "\nImported " . count($taxonomies) . "taxonomies.\n";
+					}				
 				}
 			}
 			if ($imports['events']) {

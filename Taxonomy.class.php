@@ -17,6 +17,7 @@ class Taxonomy {
 
 	private $mapped = [
 		'category' 			=> 'Category',
+		'channel'			=> 'Category',
 		'article type' 		=> 'Type',
 		'tags' 				=> 'Tag',
 		'itunes category' 	=> 'Podcast',

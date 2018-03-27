@@ -80,8 +80,8 @@ class Node {
 				LIMIT $start, $limit";
 
 		$nodes = $this->db->records($sql);
-
-print DB::strip($sql, 1);
+		
+// print DB::strip($sql, 1);
 //var_dump($nodes);
 		$this->start = $start + $limit;
 
