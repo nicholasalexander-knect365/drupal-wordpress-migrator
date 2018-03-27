@@ -39,7 +39,7 @@ class Files {
 		$this->drupalPath = $path;
 	}
 
-	private function dirEmpty($dir) {
+	public function dirEmpty($dir) {
 
 		if (!is_readable($dir)) {
 			die("\nERROR: image store directory $dir does not exist or is not writable\n\n");

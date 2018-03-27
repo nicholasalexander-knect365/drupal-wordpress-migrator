@@ -20,12 +20,12 @@ require "Events.class.php";
  * v104 node import
  *
  */
-$imports = ['initial' 	=> false,
-			'nodes'		=> false,
-			'files' 	=> false,
-			'taxonomy' 	=> true,
-			'events'	=> false
-];
+// $imports = ['initialise' 	=> false,
+// 			'nodes'		=> false,
+// 			'files' 	=> false,
+// 			'taxonomy' 	=> true,
+// 			'events'	=> false
+// ];
 
 $maxChunk = 1000000;
 $init = true;
@@ -33,20 +33,38 @@ $init = true;
 /* control options */
 $options = new Options();
 $options->setAll();
-$quiet 		= $options->get('quiet');
-$progress 	= $options->get('progress');
-$verbose 	= $options->get('verbose');
+
+// $quiet 		= $options->get('quiet');
+// $progress 	= $options->get('progress');
+
 $s3bucket 	= $options->get('s3bucket');
 $drupalPath = $options->get('drupalPath');
 $imageStore = $options->get('imageStore');
+$verbose    = $options->get('verbose');
 
+$option = [];
+$optionSet = ['defaults', 'help', 'quiet', 'progress', 'initialise' ,'files', 'nodes', 'taxonomy', 'events'];
+foreach ($optionSet as $opt) {
+	$option[$opt] = $options->get($opt);
+	if ($verbose) {
+		$options->show($opt);
+	}
+}
+
+if ($options->get('defaults')) {
+	$options->setDefaults();
+}
+
+if ($options->get('help')) {
+	die("HELP Mode\n");
+}
 
 /* connect databases */
 $wp = new DB('wp');
 $d7 = new DB('d7');
 $wp_taxonomy = new Taxonomy($wp, $verbose);
 $d7_taxonomy = new Taxonomy($d7);
-if ($imports['taxonomy']) {
+if ($option['taxonomy']) {
 		$wp_taxonomy->initialise($init);
 		$vocabularies = $d7_taxonomy->getVocabulary();
 		$taxonomyNames = [];
@@ -54,11 +72,11 @@ if ($imports['taxonomy']) {
 		$wp_taxonomy->createTerms($taxonomies);
 }
 
-if ($imports['files']) {
+if ($option['files']) {
 	$files = new Files($d7, $s3bucket, [
 		'verbose' 	=> $verbose, 
-		'quiet' 	=> $quiet, 
-		'progress' 	=> $progress
+		'quiet' 	=> $option['quiet'], 
+		'progress' 	=> $option['progress']
 	]);
 	$files->setDrupalPath($drupalPath);
 	$files->setImageStore($imageStore);
@@ -73,11 +91,13 @@ $wp_post = new Post($wp);
 $drupal_nodes = null;
 
 
-if ($imports['initial']) {
+if ($option['initialise']) {
 	// build the term_taxonomy if not already present
 	if ($wp_taxonomy->checkTerms()) {
 		$wp_taxonomy->buildTerms();
 	}
+	$wp_post->purge();
+
 }
 
 // how many nodes to process?
@@ -95,7 +115,7 @@ $chunks = floor($nodeCount / $chunk);
 // var_dump($chunk, $chunks);
 // die;
 
-if ($verbose) {
+if ($option['files'] && $verbose) {
 	print "\nConverting $nodeCount Drupal nodes\n";
 }
 
@@ -107,12 +127,12 @@ for ($c = 0; $c < $chunks; $c++) {
 
 		foreach ($drupal_nodes as $node) {
 
-			if ($imports['nodes']) {
+			if ($option['nodes']) {
 				$d7_node->setNode($node);
 				$wp_post->makePost($node);
 			}
 
-			if ($imports['files']) {
+			if ($option['files']) {
 				$images = $files->getFiles($node->nid);
 				if ($images) {
 					$largest = null;
@@ -121,14 +141,14 @@ for ($c = 0; $c < $chunks; $c++) {
 						// get all sizes for this image
 						$best = $files->getBestVersion($image->filename);
 
-						if (!$quiet && !$progress && ($verbose === true || $files->isVerbose())) {
+						if (!$option['quiet'] && !$option['progress'] && ($verbose === true || $files->isVerbose())) {
 							print "\n" . $best->fid . ' ' . $best->type . ' ' . $best->filename . ' ' . $best->uri . "\n";
 						}
 					}
 				}
 			}
 
-			if ($imports['taxonomy']) {
+			if ($option['taxonomy']) {
 
 				$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
 				if ($taxonomies && count($taxonomies)) {
@@ -136,12 +156,12 @@ for ($c = 0; $c < $chunks; $c++) {
 						$wp_taxonomy->makeWPTermData($taxonomy);
 					}
 				
-					if (!$quiet && !$progress && ($verbose === true) ) {
+					if (!$option['quiet'] && !$option['progress'] && ($verbose === true) ) {
 						print "\nImported " . count($taxonomies) . "taxonomies.\n";
 					}				
 				}
 			}
-			if ($imports['events']) {
+			if ($option['events']) {
 				$events = $d7_events->getEvents($node);
 
 				if ($events && count($events)) {
@@ -172,8 +192,6 @@ for ($c = 0; $c < $chunks; $c++) {
 		}
 	}
 }
-
-
 
 $wp->close();
 $d7->close();

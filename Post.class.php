@@ -69,7 +69,6 @@ class Post {
 		$this->db = $db;
 		$this->timezone_add = 0;
 		static::$translation_warning = 0;
-		$this->purge();
 	}
 
 	public function purge() {
