@@ -19,7 +19,7 @@ class Node {
 		if ($vid) {
 			$sql .= " AND vid=$vid";
 		}
-		$this->db->query($sql);
+		$this->db->runQuery($sql);
 
 		$node = $this->db->getRecord();
 		return $node;

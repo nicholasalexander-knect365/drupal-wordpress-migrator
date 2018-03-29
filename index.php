@@ -6,19 +6,7 @@
 ?>
 <html>
 <head>
-	<style>
-		.block {
-			display: block;
-			background: #cccccc;
-			border: 1px inset #dedede;
-			padding: 1rem;
-			margin: 1rem;
-			max-width: 32rem;
-		}
-		.small {
-			font-size: small;
-		}
-	</style>
+	<link href="styles.css" type="text/css" rel="stylesheet"></link>
 </head>
 <body>
 <h1>Drupal to Wordpress Migrator</h1>
@@ -37,6 +25,7 @@
 		<li>Wordpress Multisite <a href="http://telecoms.local" target="vagrant">Multisite (Telecoms)</a></li>
 		<li>Wordpress Multisite <a href="http://tuauto.vagrant" target="vagrant">TUAuto Wordpress (on Vagrant)</a></li>
 		<li>Drupal <a href="http://tudrupal.local" target="local2">Drupal 7 (TUAuto)</a></li>	
+		<li>Analysis <a href="analysis.php">TU Auto</a></li>
 	</ul>	
 </div>
 

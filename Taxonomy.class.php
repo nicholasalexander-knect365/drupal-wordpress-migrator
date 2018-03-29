@@ -12,6 +12,7 @@ require_once "DB.class.php";
 class Taxonomy {
 
 	public $db;
+	public $drupalDB;
 	private $verbose;
 	private $initialise_regardless;
 
@@ -40,6 +41,10 @@ class Taxonomy {
 		$this->db = $db;
 		$this->verbose = $verbose;
 		$this->initialise_regardless = false;
+	}
+
+	public function setDrupalDb($db) {
+		$this->drupalDB = $db;
 	}
 
 	public function __destroy() {
@@ -238,7 +243,11 @@ class Taxonomy {
 				WHERE tid = $tid
 				ORDER BY tid";
 
-		$termData = $this->db->records($sql);
+		if (!$this->drupalDB) {
+			$termData = $this->db->records($sql);
+		} else {
+			$termData = $this->drupalDB->records($sql);
+		}
 
 		return $termData;
 	}
@@ -311,6 +320,8 @@ class Taxonomy {
 	}
 
 	public function makeWPTermData($taxonomy) {
+
+// die(var_dump($this->db));
 
 		$termData = $this->getTermData($taxonomy);
 		$term_id = $taxonomy->tid;

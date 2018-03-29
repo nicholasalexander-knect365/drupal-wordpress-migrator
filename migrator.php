@@ -8,6 +8,7 @@ require "Node.class.php";
 require "Files.class.php";
 require "Taxonomy.class.php";
 require "Events.class.php";
+require "FieldSet.class.php";
 
 /*
  * v100 while adding new features,
@@ -62,8 +63,12 @@ if ($options->get('help')) {
 /* connect databases */
 $wp = new DB('wp');
 $d7 = new DB('d7');
+
 $wp_taxonomy = new Taxonomy($wp, $verbose);
 $d7_taxonomy = new Taxonomy($d7);
+// If the wordpress instance of Taxonomy needs to get drupal data: 
+$wp_taxonomy->setDrupalDb($d7);
+
 if ($option['taxonomy']) {
 		$wp_taxonomy->initialise($init);
 		$vocabularies = $d7_taxonomy->getVocabulary();
@@ -161,33 +166,6 @@ for ($c = 0; $c < $chunks; $c++) {
 					}				
 				}
 			}
-			if ($option['events']) {
-				$events = $d7_events->getEvents($node);
-
-				if ($events && count($events)) {
-
-					assert($events !== NULL && count($events));
-
-		//var_dump($events);
-
-					foreach ($events as $event) {
-						foreach($event as $component) {
-							$event_node_id = $component->entity_id;
-							$event_vid = $component->revision_id;
-
-							$node = $d7_node->getNode($event_node_id);
-							$compare = $d7_node->getNode($event_node_id, $event_vid);
-
-							if ($node != $compare) {
-								print "\n--------------------------------\n";
-								var_dump($node, $compare);
-							}
-
-						}
-					}
-				}
-
-			}
 
 		}
 	}
@@ -197,3 +175,5 @@ $wp->close();
 $d7->close();
 
 $wp_taxonomy->__destroy();
+
+die('finished');

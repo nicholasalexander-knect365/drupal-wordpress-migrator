@@ -59,23 +59,60 @@ class DB {
 	}
 
 	public function query($sql) {
+
 		$rowCount = 0;
+		
 		try {
+		
 			$result = $this->connection->query($sql);
+		
 		} catch (Exception $e) {
+		
 			if ($result === false) {
 				print "\nQuery failed! $sql \n";
 			}
+		
 			die($e->getMessage());
+		
 		}
+
 		if ($result) {
+
 			$this->result = $result;
+
 			$rowCount = $this->connection->affected_rows;
+
 			assert($rowCount > 0);
+
+		} else {
+			return false;
+			die($sql . "\n ... query returned nothing??");
+
 		}
+
 		return $rowCount;
 	}
 
+	/* for low level calls such as show tables, 
+	   do not populate $this->rows 
+	   and each row returned is an array element
+	*/
+	public function rows($sql) {
+
+		$numRows = $this->query($sql);
+		$rows = [];
+		if ($numRows) {
+			for ($c = 0; $c< $numRows; $c++) {
+				$rowSet = $this->result->fetch_row();
+				while ($row = array_pop($rowSet)) {
+					$rows[] = $row;
+				}
+			}
+			return $rows;
+		} else {
+			return NULL;
+		}
+	}
 
 	private function getObjects() {
 		$this->rows = [];
@@ -94,7 +131,7 @@ class DB {
 	}
 
 	public function records($sql) {
-		$numRows = $this->query($sql);
+		$numRows = $this->query($sql);		
 		if ($numRows) {
 			return $this->getRecords();
 		} else {

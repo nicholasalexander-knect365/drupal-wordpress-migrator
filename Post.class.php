@@ -80,6 +80,14 @@ class Post {
 		return strpos('make_', $item);
 	}
 
+	private function prepare($str) {
+        $str = html_entity_decode($str);
+        $str = str_replace(array("\r\n", "\r", "\n"), '', $str);
+        $str = preg_replace('/\'/', '&apos;', $str);
+        ///$str = preg_replace('/\"/', '&quot;', $str);
+        return $str;
+	}
+
 	public function makePost($drupal_data) {
 
 		$values = [];
@@ -103,6 +111,8 @@ class Post {
 				}
 
 			} else {
+
+				$value =$this->prepare($value);
 
 				if ($key === 'created' || $key === 'changed') {
 					$value = date('Y-m-d h:i:s', $value);
