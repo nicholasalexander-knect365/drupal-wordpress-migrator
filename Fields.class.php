@@ -29,6 +29,9 @@ class Fields {
 		$nid = $this->nid;
 		$sql = "SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, body_value, body_summary, body_format FROM field_data_body WHERE entity_id=$nid";
 		$records = $this->db->records($sql);
+		if ($records && count($records) === 1) {
+			return $records[0];
+		}
 		return $records;
 	}
 
@@ -40,6 +43,9 @@ class Fields {
 			INNER JOIN taxonomy_term_data td ON td.tid=fd.field_tags_tid 
 			WHERE entity_id=$nid";
 		$records = $this->db->records($sql);
+		if ($records && count($records) === 1) {
+			return $records[0];
+		}
 		return $records;
 	}
 
@@ -47,6 +53,9 @@ class Fields {
 		$nid = $this->nid;
 		$sql = "SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, field_image_fid, field_image_alt, field_image_title FROM field_data_field_image WHERE entity_id=$nid";
 		$records = $this->db->records($sql);
+		if ($records && count($records) === 1) {
+			return $records[0];
+		}
 		return $records;
 	}	
 
@@ -54,6 +63,9 @@ class Fields {
 		$nid = $this->nid;
 		$sql = "SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, comment_body_value, comment_body_format FROM field_data_comment_body WHERE entity_id=$nid";
 		$records = $this->db->records($sql);
+		if ($records && count($records) === 1) {
+			return $records[0];
+		}
 		return $records;
 	}	
 }

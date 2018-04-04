@@ -7,6 +7,7 @@ abstract class FieldSetDiscovery {
 
 	protected $bundle;
 	protected $entity;
+	protected $table;
 	protected $db;
 
 	protected function discovery($db) {
@@ -19,6 +20,10 @@ abstract class FieldSetDiscovery {
 
 	public function setBundle($bundle) {
 		$this->bundle = $bundle;
+	}
+
+	public function setTable($table) {
+		$this->table = $table;
 	}
 
 	protected function findFieldTypesContent() {
@@ -41,6 +46,19 @@ abstract class FieldSetDiscovery {
 		}
 
 		return [$fieldTypes, $pairs];
+	}
+
+	public function getFieldNames() {
+		$table = $this->table;
+		$sql = "SHOW COLUMNS FROM field_data_field_$table";
+		$records = $this->db->records($sql);
+		$fields = [];
+		foreach($records as $value) {
+			if (strpos($value->Field, $table)) {
+				$fields[] = $value->Field;
+			}
+		}
+		return $fields;
 	}
 
 	public function fieldSetTable($type, $item) {

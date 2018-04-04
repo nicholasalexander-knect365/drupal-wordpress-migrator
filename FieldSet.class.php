@@ -1,6 +1,6 @@
 <?php
 
-require "FieldSetDiscovery.class.php";
+require_once "FieldSetDiscovery.class.php";
 
 class FieldSet extends FieldSetDiscovery {
 

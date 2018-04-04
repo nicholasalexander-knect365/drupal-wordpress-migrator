@@ -7,7 +7,12 @@ require "Post.class.php";
 require "Node.class.php";
 require "Files.class.php";
 require "Taxonomy.class.php";
+
 require "Fields.class.php";
+require "FieldSet.class.php";
+require "Gather.class.php";
+
+require "common.php";
 
 /*
  * v100 while adding new features,
@@ -87,6 +92,7 @@ $wp_post = new Post($wp);
 
 /* content types ... */
 $d7_fields = new Fields($d7);
+$fieldSet = new FieldSet($d7);
 
 $drupal_nodes = null;
 
@@ -97,6 +103,17 @@ if ($option['initialise']) {
 	}
 	$wp_post->purge();
 
+}
+
+if ($option['fields']) {
+	$records = $fieldSet->getFieldData();
+	$fieldTables = [];
+	foreach($records as $key => $numberFound) {
+		$fields = $fieldSet->getFieldData($key);
+		foreach ($fields as $field) {
+			$fieldTables[] = $key . '_' . $field;
+		}
+	}
 }
 
 // how many nodes to process?
@@ -164,14 +181,75 @@ for ($c = 0; $c < $chunks; $c++) {
 			/* each node has a bunch of "fields" attached which can be additional content
 			   for the content type and can be text fields, images. comments, tags
 			*/
-			if ($option['fields']) {
-				$d7_fields->setNodeId($node->nid);
-				$fields = $d7_fields->getFieldDataBody();
-				$images = $d7_fields->getFieldImages();
-				$tags   = $d7_fields->getFieldTags();
-				$comments = $d7_fields->getFieldComments();
+			if (false && $option['fields']) {
+				// $d7_fields->setNodeId($node->nid);
 
-				var_dump($fields);
+				// $fields = $d7_fields->getFieldDataBody();
+				// $images = $d7_fields->getFieldImages();
+				// $tags   = $d7_fields->getFieldTags();
+				// $comments = $d7_fields->getFieldComments();
+
+				// // normal data types for FieldDataBody and Images, Tags, etc 
+				// // should be already dealt with as content
+				// if ($fields) {
+				// 	switch($fields->bundle) {
+				// 		case 'article':
+				// 		break;
+				// 		case 'blog':
+				// 		break;
+				// 		case 'podcast':
+				// 		break;
+				// 		case 'page':
+				// 		break;
+				// 		default: 
+				// 			print "\n" . $fields->bundle;
+				// 	}
+				// }
+
+				// check each field table for content types and make WP POSTMETA
+				if ($fieldTables && count($fieldTables)) {
+
+					foreach($fieldTables as $fieldDataSource) {
+
+						$gather = new Gather($d7, $fieldDataSource);
+						$gather->setNid($node->nid);
+
+						$tableName = 'field_data_field_' . $fieldDataSource;
+						$func = 'get_' . $fieldDataSource;
+	
+						$data = $gather->$func($node->nid);
+						if ($data) {
+							/* example of format for $data
+							array(2) {
+							  [0]=>   {TABLE}
+							  string(15) "field_event_url"
+							  [1]=>	  FIELDS {TABLE}_FIELDNAME => value
+							  object(stdClass)#3929 (3) {
+							    ["field_event_url_url"]=>
+							    string(41) "http://www.telematicsupdate.com/cvtusa06/"
+							    ["field_event_url_title"]=>
+							    NULL
+							    ["field_event_url_attributes"]=>
+							    string(6) "a:0:{}"
+							  }
+							}
+							*/
+							// create Wordpress ACF data
+							var_dump($data);
+						}
+					}
+
+				}
+				// if ($images) {
+				// 	var_dump($images);
+				// }
+				// if ($tags) {
+				// 	var_dump($tags);
+				// }
+				// if ($comments) {
+				// 	var_dump($comments);
+				// }
+
 
 			}
 

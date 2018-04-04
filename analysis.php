@@ -45,11 +45,12 @@ if ($fieldSelected === 'labels') {
 	if ($data) {
 
 		foreach($data as $objects) {
-			$input = '';
+			$input = '<div class="block">';
 
 			foreach ($objects as $key => $value) {
-				$input .= $key . '=>' . $value;
+				$input .= '<br>' . $key . '=>' . $value;
 			}
+			$input .= '</div>';
 			$inputs[] = $input;
 		}
 	} else {

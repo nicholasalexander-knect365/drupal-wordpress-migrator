@@ -123,9 +123,7 @@ class Options {
 				}
 			}
 
-
-
-			if (isset($this->help)) {
+			if ($this->help) {
 				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -c]\n";
 				print "\nSettings:  --drupalPath=setDrupalPath --imageStore=[set images directory]";
 				print "\nControls:  --initialise=[clear data]  --noFiles=[no files]\n";
@@ -138,9 +136,8 @@ class Options {
 				print "\n-t Taxonomy";
 				print "\n-c Field Content";
 				print "\n";
-
-
 			}
+
 			if ($this->progress) {
 				$this->verbose = '.';
 			}
