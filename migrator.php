@@ -7,8 +7,7 @@ require "Post.class.php";
 require "Node.class.php";
 require "Files.class.php";
 require "Taxonomy.class.php";
-require "Events.class.php";
-require "FieldSet.class.php";
+require "Fields.class.php";
 
 /*
  * v100 while adding new features,
@@ -19,14 +18,9 @@ require "FieldSet.class.php";
  * v101/2 import images
  * v102/3 options 
  * v104 node import
- *
+ * v105 fields import (includes tags, images and content_types)
  */
-// $imports = ['initialise' 	=> false,
-// 			'nodes'		=> false,
-// 			'files' 	=> false,
-// 			'taxonomy' 	=> true,
-// 			'events'	=> false
-// ];
+
 
 $maxChunk = 1000000;
 $init = true;
@@ -44,20 +38,20 @@ $imageStore = $options->get('imageStore');
 $verbose    = $options->get('verbose');
 
 $option = [];
-$optionSet = ['defaults', 'help', 'quiet', 'progress', 'initialise' ,'files', 'nodes', 'taxonomy', 'events'];
+$optionSet = ['defaults', 'help', 'quiet', 'progress', 'initialise' ,'files', 'nodes', 'taxonomy', 'fields'];
 foreach ($optionSet as $opt) {
 	$option[$opt] = $options->get($opt);
 	if ($verbose) {
 		$options->show($opt);
 	}
 }
-
+//var_dump($option);die;
 if ($options->get('defaults')) {
 	$options->setDefaults();
 }
 
 if ($options->get('help')) {
-	die("HELP Mode\n");
+	die("\nHELP Mode\n\n");
 }
 
 /* connect databases */
@@ -86,15 +80,15 @@ if ($option['files']) {
 	$files->setDrupalPath($drupalPath);
 	$files->setImageStore($imageStore);
 }
-/* content types ... */
-$d7_events = new Events($d7);
 
 /* nodes */
 $d7_node = new Node($d7);
 $wp_post = new Post($wp);
 
-$drupal_nodes = null;
+/* content types ... */
+$d7_fields = new Fields($d7);
 
+$drupal_nodes = null;
 
 if ($option['initialise']) {
 	// build the term_taxonomy if not already present
@@ -165,6 +159,20 @@ for ($c = 0; $c < $chunks; $c++) {
 						print "\nImported " . count($taxonomies) . "taxonomies.\n";
 					}				
 				}
+			}
+
+			/* each node has a bunch of "fields" attached which can be additional content
+			   for the content type and can be text fields, images. comments, tags
+			*/
+			if ($option['fields']) {
+				$d7_fields->setNodeId($node->nid);
+				$fields = $d7_fields->getFieldDataBody();
+				$images = $d7_fields->getFieldImages();
+				$tags   = $d7_fields->getFieldTags();
+				$comments = $d7_fields->getFieldComments();
+
+				var_dump($fields);
+
 			}
 
 		}

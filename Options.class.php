@@ -12,7 +12,7 @@ class Options {
 	public $nodes;
 	public $taxonomy;
 	public $files;
-	public $events;
+	public $fields;
 
 	public $s3bucket;
 	public $drupalPath;
@@ -30,7 +30,7 @@ class Options {
 		$this->nodes 		= false;
 		$this->taxonomy 	= false;
 		$this->files 		= false;
-		$this->events 		= false;
+		$this->fields 		= false;
 
 		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
 		$this->drupalPath 	= '../drupal7/tuauto';
@@ -54,7 +54,7 @@ class Options {
 		$this->files    = true;
 		$this->nodes    = true;
 		$this->taxonomy = true;
-		$this->events 	= true;
+		$this->fields 	= true;
 		$this->initialise = true;
 	}
 
@@ -64,7 +64,7 @@ class Options {
 
 		if (count($argv) > 1) {
 
-			$shortOpts = 'dvqpfnteh';
+			$shortOpts = 'dvqpfntch';
 			$longOpts = ['drupalPath:', 'imageStore:', 'initialise'];
 			$options = getopt($shortOpts, $longOpts);
 
@@ -98,8 +98,8 @@ class Options {
 						$this->taxonomy = true;
 						break;
 
-					case 'e' : 
-						$this->events = true;
+					case 'c' : 
+						$this->fields = true;
 						break;
 
 					case 'initialise':
@@ -126,9 +126,20 @@ class Options {
 
 
 			if (isset($this->help)) {
-				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -e]\n";
+				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -c]\n";
 				print "\nSettings:  --drupalPath=setDrupalPath --imageStore=[set images directory]";
 				print "\nControls:  --initialise=[clear data]  --noFiles=[no files]\n";
+				print "\n-v Verbose";
+				print "\n-d Defaults";
+				print "\n-q Quiet";
+				print "\n-p Progress indicators";
+				print "\n-f Files (Images)";
+				print "\n-n Nodes";
+				print "\n-t Taxonomy";
+				print "\n-c Field Content";
+				print "\n";
+
+
 			}
 			if ($this->progress) {
 				$this->verbose = '.';

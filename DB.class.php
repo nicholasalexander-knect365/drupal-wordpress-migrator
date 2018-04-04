@@ -61,19 +61,19 @@ class DB {
 	public function query($sql) {
 
 		$rowCount = 0;
-		
+
 		try {
-		
+
 			$result = $this->connection->query($sql);
-		
+
 		} catch (Exception $e) {
-		
+
 			if ($result === false) {
 				print "\nQuery failed! $sql \n";
 			}
 		
 			die($e->getMessage());
-		
+
 		}
 
 		if ($result) {
@@ -128,10 +128,10 @@ class DB {
 		}
 		$record = $this->getRecord();
 		return $record;
-	}
+	} 
 
 	public function records($sql) {
-		$numRows = $this->query($sql);		
+		$numRows = $this->query($sql);
 		if ($numRows) {
 			return $this->getRecords();
 		} else {

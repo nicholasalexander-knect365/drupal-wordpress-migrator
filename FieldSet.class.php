@@ -3,7 +3,7 @@
 require "FieldSetDiscovery.class.php";
 
 class FieldSet extends FieldSetDiscovery {
-	
+
 	protected $tables;
 	protected $bundle;
 	protected $bundles;
@@ -21,7 +21,7 @@ class FieldSet extends FieldSetDiscovery {
 		// either list the field labels - i.e. content types
 		if ($label === 'labels') {
 			return $fieldsUsed;
-		} else {
+ 		} else {
 			// or list the fields related to the field
 			$combined = [];
 			foreach ($fieldTypesContent as $pair) {
@@ -39,6 +39,4 @@ class FieldSet extends FieldSetDiscovery {
 		$this->setBundle('events');							
 		$this->findTables();
 	}
-
-
 }

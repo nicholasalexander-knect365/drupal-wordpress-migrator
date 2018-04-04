@@ -36,7 +36,7 @@ if ($fieldSelected === 'labels') {
 	$heading = "List of $fieldSelected type elements";
 	foreach ($types as $key => $value) {
 		$input  = '<input type="checkbox" name="' . $key . '">';
-		$input .= '<a href="analysis.php?field=' .$fieldSelected. '&item=' .$value.'&data=1">' . $value . '</a>'; 
+		$input .= '<a href="analysis.php?field=' .$fieldSelected. '&item=' .$value.'&data=1">' . $value . '</a>';
 		$inputs[] = $input;	
 	}
 } else {
@@ -44,8 +44,8 @@ if ($fieldSelected === 'labels') {
 
 	if ($data) {
 
-		foreach($data as $objects) {	
-			$input = '';			
+		foreach($data as $objects) {
+			$input = '';
 
 			foreach ($objects as $key => $value) {
 				$input .= $key . '=>' . $value;
@@ -64,7 +64,7 @@ if ($fieldSelected === 'labels') {
 	<link href="styles.css" type="text/css" rel="stylesheet"></link>
 </head>
 <body>
-	<div class="menu block"><a href="index.php">Home</a><a href="analysis.php">Analysis</a></div>
+	<div class="menu block"><a href="index.php">Home</a> <a href="analysis.php">Analysis</a></div>
 	<div class="block">
 		<form>
 			<h2>Summary</h2>
