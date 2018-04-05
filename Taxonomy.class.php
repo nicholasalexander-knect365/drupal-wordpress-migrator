@@ -101,7 +101,13 @@ class Taxonomy {
 	}
 
 	private function termsAlreadyExist() {
-		$this->db->query('SELECT COUNT(*) as c from wp_terms');
+
+		$wp_terms = DB::wptable('terms');
+
+		$sql = "SELECT COUNT(*) as c from $wp_terms";
+
+		$this->db->query($sql);
+
 		$item = $this->db->getRecord();
 		if ($item->c > 1) {
 			return true;

@@ -2,12 +2,13 @@
 
 class DB {
 
+	public static $wp_prefix = 'wp_38_';
+
 	public $wp = [
 		'database' => 'newprod_local',
 		'username' => 'root',
 		'password' => 'root',
-		'host' => 'localhost',
-		'prefix' => 'wp_37_'
+		'host' => 'localhost'
     	];
 
 	public $d7 = [
@@ -83,6 +84,9 @@ class DB {
 
 			$rowCount = $this->connection->affected_rows;
 
+			if ($rowCount < 1 ) {
+				die($sql);
+			}
 			assert($rowCount > 0);
 
 		} else {
@@ -142,8 +146,12 @@ class DB {
 
 
 	public function getRecord() {
-		$row = $this->result->fetch_object();
-		return $row;
+		if ($this->result) {
+			$row = $this->result->fetch_object();
+			return $row;
+		} else {
+			throw new Exception('DB::getRecord() but no result variable?');
+		}
 	}
 
 	public function getRecords() {
