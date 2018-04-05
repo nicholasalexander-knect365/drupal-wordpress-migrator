@@ -14,7 +14,7 @@ class FieldSet extends FieldSetDiscovery {
 		$this->discovery($db);
 	}
 
-	public function getFieldData(String $label = 'labels') {
+	public function getFieldData($label = 'labels') {
 
 		list($fieldsUsed, $fieldTypesContent) = $this->findFieldTypesContent();
 
