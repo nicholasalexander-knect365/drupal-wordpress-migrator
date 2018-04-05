@@ -17,13 +17,25 @@ class Taxonomy {
 	private $initialise_regardless;
 
 	private $mapped = [
-		'category' 			=> 'Category',
-		'channel'			=> 'Category',
-		'article type' 		=> 'Type',
-		'tags' 				=> 'Tag',
-		'itunes category' 	=> 'Podcast',
-		'weekly brief'		=> 'Brief',
-		'upload type'		=> 'Upload'
+		'category' 					=> 'Category',
+		'channel'					=> 'Category',
+		'channels'					=> 'Category',
+		'article type' 				=> 'Type',
+		'tags' 						=> 'Tag',
+		'itunes category' 			=> 'Podcast',
+		'weekly brief'				=> 'Brief',
+		'upload type'				=> 'Upload',
+		'auto mobility'				=> 'Mobility',
+		'autonomous car'			=> 'Autonomous',
+		'fleet and asset management' => 'Fleet',
+		'user experience & hmi' 	=> 'User Experience',
+		'insurance & legal'			=> 'Insurance',
+		'insurance telematics' 		=> 'Insurance',
+		'safety, adas & autonomous'	=> 'ADAS',
+		'telematics for evs'		=> 'Electric Vehicles',
+		'navigation and lbs'		=> 'Uncategorised'
+
+
 	];
 
 	private $termMeta = [
@@ -72,9 +84,12 @@ class Taxonomy {
 	}
 
 	private function removeTerms() {
-		$sql = "DELETE FROM wp_terms WHERE term_id>1";
+
+		$wp_terms = DB::wptable('terms');
+
+		$sql = "DELETE FROM $wp_terms WHERE term_id>1";
 		$this->db->query($sql);
-		$sql = "ALTER TABLE wp_terms AUTO_INCREMENT = 2";
+		$sql = "ALTER TABLE $wp_terms AUTO_INCREMENT = 2";
 		$this->db->query($sql);
 	}
 
@@ -84,24 +99,31 @@ class Taxonomy {
 		}
 		$this->removeTerms();
 
-		$sql = "DELETE FROM wp_termmeta";
+		$wp_termmeta = DB::wptable('termmeta');
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
+		$wp_term_relationships = DB::wptable('term_relationships');
+
+		$sql = "DELETE FROM $wp_termmeta";
 		$this->db->query($sql);
-		$sql = "ALTER TABLE wp_term_taxonomy AUTO_INCREMENT = 1";
+		$sql = "ALTER TABLE $wp_term_taxonomy AUTO_INCREMENT = 1";
 		$this->db->query($sql);
 
-		$sql = "DELETE FROM wp_term_taxonomy";
+		$sql = "DELETE FROM $wp_term_taxonomy";
 		$this->db->query($sql);
-		$sql = "ALTER TABLE wp_term_taxonomy AUTO_INCREMENT = 1";
+		$sql = "ALTER TABLE $wp_term_taxonomy AUTO_INCREMENT = 1";
 		$this->db->query($sql);
 
-		$sql = "DELETE FROM wp_term_relationships";
+		$sql = "DELETE FROM $wp_term_relationships";
 		$this->db->query($sql);
-		$sql = "ALTER TABLE wp_term_relationships AUTO_INCREMENT = 1";
+		$sql = "ALTER TABLE $wp_term_relationships AUTO_INCREMENT = 1";
 		$this->db->query($sql);
 	}
 
 	private function termsAlreadyExist() {
-		$this->db->query('SELECT COUNT(*) as c from wp_terms');
+
+		$wp_terms = DB::wptable('terms');
+
+		$this->db->query("SELECT COUNT(*) as c from $wp_terms");
 		$item = $this->db->getRecord();
 		if ($item->c > 1) {
 			return true;
@@ -112,7 +134,10 @@ class Taxonomy {
 	 * checkTerms in Wordpress
 	 */
 	public function checkTerms() {
-		$sql = "SELECT COUNT(*) AS c FROM wp_term_taxonomy";
+
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
+
+		$sql = "SELECT COUNT(*) AS c FROM $wp_term_taxonomy";
 		$this->db->query($sql);
 		$items = $this->db->getRecord();
 		return ($items->c === 1);
@@ -139,25 +164,33 @@ class Taxonomy {
 
 	}
 
+	// D7 only
 	public function getVocabulary() {
-		$sql = "SELECT vid, name, machine_name, description, hierarchy, module, weight FROM taxonomy_vocabulary ORDER BY weight";
+		$sql = "SELECT vid, name, machine_name, description, hierarchy, module, weight
+				FROM taxonomy_vocabulary
+				ORDER BY weight";
 		$vocabulary = $this->db->records($sql);
 		return $vocabulary;
 	}
 
 	private function makeWPTermName($name) {
-
+		$old = $name;
 		if (isset($this->mapped[strtolower($name)])) {
 			$name = $this->mapped[strtolower($name)];
 		}
+		//debug($old . ' => ' . $name);
 		return $name;
 	}
 
 	public function createTerms($taxonomies) {
 
+		$wp_terms = DB::wptable('terms');
+
 		if ($this->termsAlreadyExist()) {
 			$this->removeTerms();
 		}
+
+		//debug('creating terms');
 
 		if ($this->verbose === true) {
 			print "\nCreating " . count($taxonomies) . " taxonomy terms";
@@ -173,7 +206,7 @@ class Taxonomy {
 				$slug = $this->slugify($name);
 				$term_group = 0;
 
-				$sql = "INSERT INTO wp_terms (name, slug, term_group)
+				$sql = "INSERT INTO $wp_terms (name, slug, term_group)
 						VALUES ('$name', '$slug', $term_group)";
 
 				$this->db->query($sql);
@@ -184,9 +217,10 @@ class Taxonomy {
 	}
 
 	/*
-	* get the Drupal taxonomyList
+	* D7 only ... get the Drupal taxonomyList
 	*/
 	public function fullTaxonomyList() {
+
 		$taxonomyNames = [];
 		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name AS type
 				FROM taxonomy_term_data td
@@ -198,7 +232,7 @@ class Taxonomy {
 	}
 
 	/**
-	 * full node taxonomy
+	 * D7 only ... full node taxonomy
 	 */
 	public function nodeTaxonomies($node) {
 		$nid = $node->nid;
@@ -221,19 +255,18 @@ class Taxonomy {
 		return $taxonomies;
 	}
 
+	// private function getPostId($nid) {
+	// 	$sql = "SELECT pm.post_id
+	// 			FROM wp_postmeta pm
+	// 			WHERE pm.meta_value=$nid AND meta_key='_fgd2wp_old_node_id'";
 
-	private function getPostId($nid) {
-		$sql = "SELECT pm.post_id
-				FROM wp_postmeta pm
-				WHERE pm.meta_value=$nid AND meta_key='_fgd2wp_old_node_id'";
-
-		$wp->query($sql);
-		$post = $wp->getRecord();
-		return $post->post_id;
-	}
+	// 	$wp->query($sql);
+	// 	$post = $wp->getRecord();
+	// 	return $post->post_id;
+	// }
 
 
-	// build the taxonomy term_data from drupal
+	// D7 only ... build the taxonomy term_data from drupal
 	private function getTermData($taxonomy) {
 
 		$termData = [];
@@ -252,26 +285,33 @@ class Taxonomy {
 		return $termData;
 	}
 
+	// wp only
 	private function getTermFromSlug($slug) {
 
-		$sql = "SELECT term_id FROM wp_terms WHERE slug = '$slug' LIMIT 1";
+		$wp_terms = DB::wptable('terms');
+
+		$sql = "SELECT term_id FROM $wp_terms WHERE slug = '$slug' LIMIT 1";
 		$this->db->query($sql);
 		$term = $this->db->getRecord();
 		return $term;
 	}
 
+	// wp only
 	private function makeTermMeta($term_id, $name, $description) {
-
+			$wp_termmeta = DB::wptable('termmeta');
 			$meta_key = addslashes($name);
 			$meta_value = addslashes($description);
 
-			$sql = "INSERT INTO wp_termmeta (term_id, meta_key, meta_value)
+			$sql = "INSERT INTO $wp_termmeta (term_id, meta_key, meta_value)
 					VALUES ($term_id, '$meta_key', '$meta_value')";
 
 			$this->db->query($sql);
 	}
 
+	// wp only
 	private function makeTermRelationship($taxonomy, $term_taxonomy_id) {
+
+		$wp_term_relationships = DB::wptable('term_relationships');
 
 		$posts = $this->findPosts($taxonomy->nid);
 
@@ -279,13 +319,15 @@ class Taxonomy {
 			$postId = $post->post_id;
 			$term_order = $taxonomy->weight;
 			// create a termRelation
-			$sql = "INSERT INTO wp_term_relationships (object_id, term_taxonomy_id, term_order)
+			$sql = "INSERT INTO $wp_term_relationships (object_id, term_taxonomy_id, term_order)
 					VALUES ($postId, $term_taxonomy_id, $term_order)";
 			$this->db->query($sql);
 		}
 	}
 
 	private function makeTermTaxonomy($taxonomy) {
+
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
 
 		$name = $this->makeWPTermName($taxonomy->name);
 		$slug = $this->slugify($this->makeWPTermName($taxonomy->category));
@@ -301,27 +343,33 @@ class Taxonomy {
 		$parent = $taxonomy->hierarchy;
 
 		// does the taxonomy exist, if so increase count
-		$sql = "SELECT term_taxonomy_id from wp_term_taxonomy WHERE term_id = $term_id AND taxonomy = '$slug'";
+		$sql = "SELECT term_taxonomy_id 
+				FROM   $wp_term_taxonomy 
+				WHERE  term_id = $term_id 
+				  AND taxonomy = '$slug'";
 		$this->db->query($sql);
 
 		$record = $this->db->getRecord();
-
+// debug($taxonomy);
+// debug($slug);
 		if (!$record) {
-			$sql = "INSERT INTO wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$slug', '$description', $parent, 0)";
+			$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$slug', '$description', $parent, 0)";
 			$this->db->query($sql);
 			$term_taxonomy_id = $this->db->lastInsertId();
 
 		} else {
+
 			$term_taxonomy_id = $record->term_taxonomy_id;
-			$sql = "UPDATE wp_term_taxonomy SET count=count+1 WHERE term_taxonomy_id=$term_taxonomy_id";
+			$sql = "UPDATE $wp_term_taxonomy 
+					SET count=count+1 
+					WHERE term_taxonomy_id=$term_taxonomy_id";
 			$this->db->query($sql);
 		}
 		return $term_taxonomy_id;
 	}
 
+	// wp only
 	public function makeWPTermData($taxonomy) {
-
-// die(var_dump($this->db));
 
 		$termData = $this->getTermData($taxonomy);
 		$term_id = $taxonomy->tid;
@@ -347,8 +395,10 @@ class Taxonomy {
 
 	private function findPosts($nid) {
 
+		$wp_postmeta = DB::wptable('postmeta');
+
 		$sql = "SELECT pm.post_id, pm.meta_value
-				FROM wp_postmeta pm
+				FROM $wp_postmeta pm
 				WHERE pm.meta_value=$nid AND meta_key='_fgd2wp_old_node_id'";
 
 		$this->db->query($sql);

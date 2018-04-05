@@ -72,7 +72,10 @@ class Post {
 	}
 
 	public function purge() {
-		$sql = "DELETE FROM wp_posts";
+
+		$wp_posts = DB::wptable('posts');
+
+		$sql = "DELETE FROM $wp_posts";
 		$this->db->query($sql);
 	}
 
@@ -89,6 +92,8 @@ class Post {
 	}
 
 	public function makePost($drupal_data) {
+
+		$wp_posts = DB::wptable('posts');
 
 		$values = [];
 		$metas = [];
@@ -163,7 +168,7 @@ class Post {
 			$values[$field] = $value;
 		}
 
-		$sql = "INSERT into wp_posts (" . implode(', ', array_keys($values)) . ") VALUES ('" . implode("', '", $values) ."')";
+		$sql = "INSERT into $wp_posts (" . implode(', ', array_keys($values)) . ") VALUES ('" . implode("', '", $values) ."')";
 
 		$this->db->query($sql); 
 		$post_id = $this->db->lastInsertId();

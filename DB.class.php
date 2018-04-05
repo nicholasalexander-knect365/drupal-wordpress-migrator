@@ -2,6 +2,8 @@
 
 class DB {
 
+	public static $wp_prefix = 'wp_';
+
 	public $wp = [
 		'database' => 'tuwp',
 		'username' => 'tuauto',
@@ -47,6 +49,20 @@ class DB {
 		// Check connection
 		if ($this->connection->connect_error) {
 		    throw new Exception("Connection failed: " . $this->type . ' ' . $this->connection->connect_error);
+		}
+	}
+
+	public static function wptable($type) {
+		switch($type) {
+			case 'postmeta':
+			case 'posts':
+			case 'termmeta':
+			case 'terms':
+			case 'term_relationships':
+			case 'term_taxonomy':
+				return static::$wp_prefix . $type;
+			default:
+				die('unknown table type for wordpress : '.$type);
 		}
 	}
 
@@ -139,10 +155,13 @@ class DB {
 		}
 	}
 
-
 	public function getRecord() {
-		$row = $this->result->fetch_object();
-		return $row;
+		if ($this->result) {
+			$row = $this->result->fetch_object();
+			return $row;
+		} else {
+			die('DB::getRecord() - no result??');
+		}
 	}
 
 	public function getRecords() {

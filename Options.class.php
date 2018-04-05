@@ -33,7 +33,7 @@ class Options {
 		$this->fields 		= false;
 
 		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
-		$this->drupalPath 	= '../drupal7/tuauto';
+		$this->drupalPath 	= '../drupal7/tu-auto';
 		$this->imageStore 	= 'images/';
 	}
 
@@ -49,7 +49,7 @@ class Options {
 	public function setDefaults() {
 		$this->progress = true;
 		$this->quiet    = true;
-		$this->verbose  = true;
+		$this->verbose  = false;
 		$this->help     = false;
 		$this->files    = true;
 		$this->nodes    = true;
