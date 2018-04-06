@@ -5,16 +5,16 @@ class DB {
 	public static $wp_prefix = 'wp_38_';
 
 	public $wp = [
-		'database' => 'newprod_local',
-		'username' => 'root',
-		'password' => 'root',
-		'host' => 'localhost'
+		'database' => 'tuwp',
+		'username' => 'tuauto',
+		'password' => 'tuauto',
+		'host' => 'localhost',
     	];
 
 	public $d7 = [
 		'database' => 'd7telematics',
-		'username' => 'root',
-		'password' => 'root',
+		'username' => 'd7telematics',
+		'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
 		'host' => 'localhost'
 	];
 
