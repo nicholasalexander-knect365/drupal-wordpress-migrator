@@ -2,10 +2,8 @@
 /**
  * Taxonomy class
  * for translating D7 to Wordpress
- * taxonomies: dual purpose class
- * call with DB constructor
- * v0.6 works with the result of FG plugin PRO
- * 		imports
+ * taxonomies: dual purpose class 
+ * i.e. addresses both Drupal (input) and Wordpress (output) functionality
  */
 require_once "DB.class.php";
 
@@ -248,8 +246,6 @@ class Taxonomy {
 			$this->removeTerms();
 		}
 
-		//debug('creating terms');
-
 		if ($this->verbose === true) {
 			print "\nCreating " . count($taxonomies) . " taxonomy terms";
 		} else if (is_string($this->verbose)) {
@@ -258,22 +254,19 @@ class Taxonomy {
 
 		foreach ($taxonomies as $taxonomy) {
 
-//			
+			$name = $this->makeWPTermName($taxonomy->name);
+			if (strtolower($taxonomy->type) !== 'tags') {
+				$slug = $this->slugify($name);
+			} else {
+				$slug = 'post_tag';
+			}
+			$term_group = 0;
 
-				$name = $this->makeWPTermName($taxonomy->name);
-				if (strtolower($taxonomy->type) !== 'tags') {
-					$slug = $this->slugify($name);
-				} else {
-					$slug = 'post_tag';
-				}
-				$term_group = 0;
+			$sql = "INSERT INTO $wp_terms (name, slug, term_group)
+					VALUES ('$name', '$slug', $term_group)";
 
-				$sql = "INSERT INTO $wp_terms (name, slug, term_group)
-						VALUES ('$name', '$slug', $term_group)";
-
-				$this->db->query($sql);
-				$this->terms[$slug] = $this->db->lastInsertId();
-//			}
+			$this->db->query($sql);
+			$this->terms[$slug] = $this->db->lastInsertId();
 		}
 
 	}
@@ -409,8 +402,7 @@ class Taxonomy {
 
 			$record = $this->db->getRecord();
 		}
-// debug($taxonomy);
-// debug($slug);
+
 		if (!$record) {
 			$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$slug', '$description', $parent, 0)";
 			$this->db->query($sql);
@@ -424,7 +416,7 @@ class Taxonomy {
 					WHERE term_taxonomy_id=$term_taxonomy_id";
 			$this->db->query($sql);
 		}
-//debug($sql);		
+
 		return $term_taxonomy_id;
 	}
 
@@ -432,7 +424,6 @@ class Taxonomy {
 	public function makeWPTermData($taxonomy, $postId) {
 
 		$termData = $this->getTermData($taxonomy);
-//debug($termData);
 		$term_id = $taxonomy->tid;
 
 		if ($this->verbose > 1) {
@@ -443,38 +434,9 @@ class Taxonomy {
 
 			$taxonomy->slug = 'post_tag';
 		}
-// debug($taxonomy);
 
 		$term_taxonomy_id = $this->makeTermTaxonomy($taxonomy);
 		$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId);
 
 	}
-
-
-	// OLD method using importer that 
-	//   created postmeta elements to record drupal nids
-	//
-	// private function getPostId($nid) {
-	// 	$sql = "SELECT pm.post_id
-	// 			FROM wp_postmeta pm
-	// 			WHERE pm.meta_value=$nid AND meta_key='_fgd2wp_old_node_id'";
-
-	// 	$wp->query($sql);
-	// 	$post = $wp->getRecord();
-	// 	return $post->post_id;
-	// }
-
-	// private function findPosts($nid) {
-
-	// 	$wp_postmeta = DB::wptable('postmeta');
-
-	// 	$sql = "SELECT pm.post_id, pm.meta_value
-	// 			FROM $wp_postmeta pm
-	// 			WHERE pm.meta_value=$nid AND meta_key='_fgd2wp_old_node_id'";
-	// dd(DB::strip($sql));
-	// 	$this->db->query($sql);
-	// 	$posts = $this->db->getRecords();
-	// 	return $posts;
-	// }
-
 }
