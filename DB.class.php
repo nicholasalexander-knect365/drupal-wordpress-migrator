@@ -2,7 +2,7 @@
 
 class DB {
 
-	public static $wp_prefix = 'wp_38_';
+	public static $wp_prefix = 'wp_';
 
 	public $wp = [
 		'database' => 'tuwp',
@@ -101,7 +101,7 @@ class DB {
 			// if the rowCount < 1 
 			// and it is a DELETE of an empty table
 			// the assert will be a problem...
-			if (!strncmp('DELETE FROM', $sql)) {
+			if (!strncmp('DELETE FROM', $sql, 11)) {
 				assert($rowCount > 0);
 			}
 

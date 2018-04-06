@@ -326,23 +326,58 @@ class Taxonomy {
 		}
 	}
 
+	private function remapNameCategory($name, $slug) {
+		switch($name) {
+			case 'Auto Mobility':
+				$name = 'Mobility';
+				$slug = 'channel';
+				break;
+			case 'Autonomous Car':
+				$name = 'Autonomous';
+				$slug = 'channel';
+				break;
+			case 'Fleet and Asset Management':
+				$name = 'Fleet';
+				$slug = 'category';
+				break;
+			case 'Insurance & Legal':
+			case 'Insurance and Legal':
+			case 'Insurance Telematics':
+				$name = 'Insurance';
+				$slug = 'channel';
+				break;
+			case 'Safety, ADAS & Autonomous':
+				$name = 'ADAS';
+				$slug = 'category';
+				break;
+			case 'Telematics for EVs':
+				$name = 'Electric Vehicles';
+				$slug = 'category';
+				break;
+		}	
+		return [$name, $slug];		
+	}
 	private function makeTermTaxonomy($taxonomy) {
 
 		$wp_term_taxonomy = DB::wptable('term_taxonomy');
 
 		$name = $this->makeWPTermName($taxonomy->name);
 		$slug = $this->slugify($this->makeWPTermName($taxonomy->category));
-		$term_id = $this->terms[$this->slugify($name)];
+		list($name, $slug) = $this->remapNameCategory($name, $slug);		
 
 		if (strlen($taxonomy->description)) {
 			$description = $taxonomy->name . ' ' . $taxonomy->description;
 		} else {
 			$description = $taxonomy->name;
 		}
+
+		$term_id = $this->terms[$this->slugify($name)];
+
 		$format = $taxonomy->format;
 		$weight = $taxonomy->weight;
 		$parent = $taxonomy->hierarchy;
-
+		//debug($name . '   =>   '. $slug);
+		
 		// does the taxonomy exist, if so increase count
 		$sql = "SELECT term_taxonomy_id 
 				FROM   $wp_term_taxonomy 
@@ -366,13 +401,14 @@ class Taxonomy {
 					WHERE term_taxonomy_id=$term_taxonomy_id";
 			$this->db->query($sql);
 		}
+//debug($sql);		
 		return $term_taxonomy_id;
 	}
 
 	// wp only
 	public function makeWPTermData($taxonomy) {
 
-		$termData = $this->getTermData($taxonomy);
+		$termData = $this->getTermData($taxonomy);	
 		$term_id = $taxonomy->tid;
 
 		if ($this->verbose > 1) {
