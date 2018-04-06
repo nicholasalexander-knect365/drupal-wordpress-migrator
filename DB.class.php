@@ -2,6 +2,7 @@
 
 class DB {
 
+/*
 	public static $wp_prefix = 'wp_';
 
 	public $wp = [
@@ -17,6 +18,25 @@ class DB {
 		'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
 		'host' => 'localhost'
 	];
+
+*/
+        public static $wp_prefix = 'wp_38_';
+ 
+        public $wp = [
+               'database' => 'newprod_local',
+               'username' => 'root',
+               'password' => 'root',
+               'host' => 'localhost'
+        ];
+ 
+        public $d7 = [
+               'database' => 'd7telematics',
+               'username' => 'root',
+               'password' => 'root',
+               'host' => 'localhost'
+        ];
+
+
 
 	public $type;
 	public $db;
