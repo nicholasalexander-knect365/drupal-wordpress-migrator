@@ -328,31 +328,38 @@ class Taxonomy {
 
 	private function remapNameCategory($name, $slug) {
 		switch($name) {
+			case 'Mobility':
 			case 'Auto Mobility':
 				$name = 'Mobility';
-				$slug = 'channel';
+				$slug = 'channels';
 				break;
+			case 'Autonomous':
 			case 'Autonomous Car':
 				$name = 'Autonomous';
-				$slug = 'channel';
+				$slug = 'channels';
 				break;
 			case 'Fleet and Asset Management':
 				$name = 'Fleet';
-				$slug = 'category';
+				$slug = 'categories';
 				break;
+			case 'Insurance':
 			case 'Insurance & Legal':
 			case 'Insurance and Legal':
 			case 'Insurance Telematics':
 				$name = 'Insurance';
-				$slug = 'channel';
+				$slug = 'channels';
 				break;
 			case 'Safety, ADAS & Autonomous':
 				$name = 'ADAS';
-				$slug = 'category';
+				$slug = 'categories';
 				break;
 			case 'Telematics for EVs':
 				$name = 'Electric Vehicles';
-				$slug = 'category';
+				$slug = 'categories';
+				break;
+			case 'Security':
+			case 'Connected Car':
+				$slug = 'channels';
 				break;
 		}	
 		return [$name, $slug];		
@@ -377,7 +384,7 @@ class Taxonomy {
 		$weight = $taxonomy->weight;
 		$parent = $taxonomy->hierarchy;
 		//debug($name . '   =>   '. $slug);
-		
+
 		// does the taxonomy exist, if so increase count
 		$sql = "SELECT term_taxonomy_id 
 				FROM   $wp_term_taxonomy 
