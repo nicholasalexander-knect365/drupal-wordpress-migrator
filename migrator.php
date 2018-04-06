@@ -11,6 +11,7 @@ require "Taxonomy.class.php";
 require "Fields.class.php";
 require "FieldSet.class.php";
 require "Gather.class.php";
+require "ACF.class.php";
 
 require "common.php";
 
@@ -40,16 +41,20 @@ $options->setAll();
 $s3bucket 	= $options->get('s3bucket');
 $drupalPath = $options->get('drupalPath');
 $imageStore = $options->get('imageStore');
+
+
 $verbose    = $options->get('verbose');
 
 $option = [];
-$optionSet = ['defaults', 'help', 'quiet', 'progress', 'initialise' ,'files', 'nodes', 'taxonomy', 'fields'];
+$optionSet = ['defaults', 'help', 'quiet', 'verbose', 'progress', 'initialise' ,'files', 'nodes', 'taxonomy', 'fields'];
 foreach ($optionSet as $opt) {
 	$option[$opt] = $options->get($opt);
 	if ($verbose) {
 		$options->show($opt);
 	}
 }
+$verbose = $option['verbose'];
+
 //var_dump($option);die;
 if ($options->get('defaults')) {
 	$options->setDefaults();
@@ -142,10 +147,12 @@ for ($c = 0; $c < $chunks; $c++) {
 	if ($drupal_nodes && count($drupal_nodes)) {
 
 		foreach ($drupal_nodes as $node) {
+			
+			$wpPostId = null;
 
 			if ($option['nodes']) {
 				$d7_node->setNode($node);
-				$wp_post->makePost($node);
+				$wpPostId = $wp_post->makePost($node);
 			}
 
 			if ($option['files']) {
@@ -170,10 +177,14 @@ for ($c = 0; $c < $chunks; $c++) {
 				if ($taxonomies && count($taxonomies)) {
 					foreach ($taxonomies as $taxonomy) {
 						$wp_taxonomy->makeWPTermData($taxonomy);
+						if ($verbose) {
+							print "\n" . $taxonomy->category . ' : ' . $taxonomy->name;
+						}
 					}
-				
+// debug($taxonomies);
 					if (!$option['quiet'] && !$option['progress'] && ($verbose === true) ) {
-						print "\nImported " . count($taxonomies) . "taxonomies.\n";
+						print "\nImported " . count($taxonomies) . " taxonomies.\n";
+
 					}				
 				}
 			}
@@ -181,7 +192,11 @@ for ($c = 0; $c < $chunks; $c++) {
 			/* each node has a bunch of "fields" attached which can be additional content
 			   for the content type and can be text fields, images. comments, tags
 			*/
-			if (false && $option['fields']) {
+			if ($wpPostId && $option['fields']) {
+
+				$acf = new ACF($wp);
+				$acf->setPostId($wpPostId);
+
 				// $d7_fields->setNodeId($node->nid);
 
 				// $fields = $d7_fields->getFieldDataBody();
@@ -235,7 +250,8 @@ for ($c = 0; $c < $chunks; $c++) {
 							}
 							*/
 							// create Wordpress ACF data
-							var_dump($data);
+							//var_dump($data);
+
 						}
 					}
 
@@ -262,4 +278,4 @@ $d7->close();
 
 $wp_taxonomy->__destroy();
 
-die('finished');
+die("\n\nMigrator programme ends.\n\n");

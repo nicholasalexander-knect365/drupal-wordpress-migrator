@@ -52,6 +52,20 @@ class DB {
 		}
 	}
 
+	public static function wptable($type) {
+		switch($type) {
+			case 'postmeta':
+			case 'posts':
+			case 'termmeta':
+			case 'terms':
+			case 'term_relationships':
+			case 'term_taxonomy':
+				return static::$wp_prefix . $type;
+			default:
+				die('unknown table type for wordpress : '.$type);
+		}
+	}
+
 	public function close() {
 		$this->connection->close();
 	}
@@ -144,13 +158,14 @@ class DB {
 		}
 	}
 
-
 	public function getRecord() {
 		if ($this->result) {
 			$row = $this->result->fetch_object();
 			return $row;
 		} else {
+
 			throw new Exception('DB::getRecord() but no result variable?');
+
 		}
 	}
 
