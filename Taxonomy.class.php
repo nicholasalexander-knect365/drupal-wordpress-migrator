@@ -223,7 +223,7 @@ class Taxonomy {
 	public function fullTaxonomyList() {
 
 		$taxonomyNames = [];
-		$sql = 'SELECT distinct td.tid, td.vid, td.name, v.name AS type
+		$sql = 'SELECT DISTINCT td.tid, td.vid, td.name, v.name AS type
 				FROM taxonomy_term_data td
 				LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
 

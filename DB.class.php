@@ -98,15 +98,16 @@ class DB {
 
 			$rowCount = $this->connection->affected_rows;
 
-			if ($rowCount < 1 ) {
-				die($sql);
+			// if the rowCount < 1 
+			// and it is a DELETE of an empty table
+			// the assert will be a problem...
+			if (!strncmp('DELETE FROM', $sql)) {
+				assert($rowCount > 0);
 			}
-			assert($rowCount > 0);
 
 		} else {
-			return false;
-			die($sql . "\n ... query returned nothing??");
 
+			return false;
 		}
 
 		return $rowCount;
