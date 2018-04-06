@@ -21,7 +21,7 @@ class Taxonomy {
 		'channel'					=> 'Category',
 		'channels'					=> 'Category',
 		'article type' 				=> 'Type',
-		'tags' 						=> 'Tag',
+		'tags' 						=> 'post_tag',
 		'itunes category' 			=> 'Podcast',
 		'weekly brief'				=> 'Brief',
 		'upload type'				=> 'Upload',
@@ -72,6 +72,56 @@ class Taxonomy {
 		return $this->verbose;
 	}
 
+
+	// maps taxonomy slug and name
+	// TODO: these should be a little softer!
+	private function remapNameCategory($name, $slug) {
+		switch($name) {
+			case 'Mobility':
+			case 'Auto Mobility':
+				$name = 'Mobility';
+				$slug = 'channels';
+				break;
+			case 'Autonomous':
+			case 'Autonomous Car':
+				$name = 'Autonomous';
+				$slug = 'channels';
+				break;
+			case 'Fleet and Asset Management':
+				$name = 'Fleet';
+				$slug = 'categories';
+				break;
+			case 'Insurance':
+			case 'Insurance & Legal':
+			case 'Insurance and Legal':
+			case 'Insurance Telematics':
+				$name = 'Insurance';
+				$slug = 'channels';
+				break;
+			case 'Safety, ADAS & Autonomous':
+				$name = 'ADAS';
+				$slug = 'categories';
+				break;
+			case 'Telematics for EVs':
+				$name = 'Electric Vehicles';
+				$slug = 'categories';
+				break;
+			case 'Security':
+			case 'Connected Car':
+				$slug = 'channels';
+				break;
+		}	
+		return [$name, $slug];		
+	}
+
+	// more generic ... maps taxonmy types
+	private function remap($taxonomyType) {
+		return $this->mapped[strtolower($taxonomyType)];
+
+	}
+
+
+	// initialisation functions
 	public function initialise($init = false) {
 
 		$this->initialise_regardless = $init;
@@ -99,9 +149,15 @@ class Taxonomy {
 		}
 		$this->removeTerms();
 
+		$wp_posts = DB::wptable('posts');
 		$wp_termmeta = DB::wptable('termmeta');
 		$wp_term_taxonomy = DB::wptable('term_taxonomy');
 		$wp_term_relationships = DB::wptable('term_relationships');
+
+		$sql = "DELETE FROM $wp_posts";
+		$this->db->query($sql);
+		$sql = "ALTER TABLE $wp_posts AUTO_INCREMENT = 1";
+		$this->db->query($sql);
 
 		$sql = "DELETE FROM $wp_termmeta";
 		$this->db->query($sql);
@@ -119,6 +175,8 @@ class Taxonomy {
 		$this->db->query($sql);
 	}
 
+
+	// TERMS 
 	private function termsAlreadyExist() {
 
 		$wp_terms = DB::wptable('terms');
@@ -126,9 +184,11 @@ class Taxonomy {
 		$this->db->query("SELECT COUNT(*) as c from $wp_terms");
 
 		$item = $this->db->getRecord();
-		if ($item->c > 1) {
+
+		if ((integer) $item->c > 1) {
 			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -145,6 +205,9 @@ class Taxonomy {
 	}
 
 	static public function slugify($str) {
+		if ($str === 'post_tag') {
+			return $str;
+		}
 		$text = $str;
 		// replace non letter or digits by -
 		$text = preg_replace('~[^\pL\d]+~u', '-', $text);
@@ -157,12 +220,6 @@ class Taxonomy {
 			return '';
 		}
 		return $text;
-	}
-
-
-	private function remap($taxonomyType) {
-		return $this->mapped[strtolower($taxonomyType)];
-
 	}
 
 	// D7 only
@@ -179,7 +236,7 @@ class Taxonomy {
 		if (isset($this->mapped[strtolower($name)])) {
 			$name = $this->mapped[strtolower($name)];
 		}
-		//debug($old . ' => ' . $name);
+		//debug($old . ' => ' . $name);c
 		return $name;
 	}
 
@@ -201,10 +258,14 @@ class Taxonomy {
 
 		foreach ($taxonomies as $taxonomy) {
 
-			if (strtolower($taxonomy->type) !== 'tags') {
+//			
 
 				$name = $this->makeWPTermName($taxonomy->name);
-				$slug = $this->slugify($name);
+				if (strtolower($taxonomy->type) !== 'tags') {
+					$slug = $this->slugify($name);
+				} else {
+					$slug = 'post_tag';
+				}
 				$term_group = 0;
 
 				$sql = "INSERT INTO $wp_terms (name, slug, term_group)
@@ -212,7 +273,7 @@ class Taxonomy {
 
 				$this->db->query($sql);
 				$this->terms[$slug] = $this->db->lastInsertId();
-			}
+//			}
 		}
 
 	}
@@ -256,16 +317,6 @@ class Taxonomy {
 		return $taxonomies;
 	}
 
-	// private function getPostId($nid) {
-	// 	$sql = "SELECT pm.post_id
-	// 			FROM wp_postmeta pm
-	// 			WHERE pm.meta_value=$nid AND meta_key='_fgd2wp_old_node_id'";
-
-	// 	$wp->query($sql);
-	// 	$post = $wp->getRecord();
-	// 	return $post->post_id;
-	// }
-
 
 	// D7 only ... build the taxonomy term_data from drupal
 	private function getTermData($taxonomy) {
@@ -298,7 +349,7 @@ class Taxonomy {
 	}
 
 	// wp only
-	private function makeTermMeta($term_id, $name, $description) {
+	private function makeTermMeta($term_id, $name, $description, $postId) {
 			$wp_termmeta = DB::wptable('termmeta');
 			$meta_key = addslashes($name);
 			$meta_value = addslashes($description);
@@ -310,60 +361,17 @@ class Taxonomy {
 	}
 
 	// wp only
-	private function makeTermRelationship($taxonomy, $term_taxonomy_id) {
+	private function makeTermRelationship($taxonomy, $term_taxonomy_id, $postId) {
 
 		$wp_term_relationships = DB::wptable('term_relationships');
 
-		$posts = $this->findPosts($taxonomy->nid);
-
-		foreach ($posts as $post) {
-			$postId = $post->post_id;
-			$term_order = $taxonomy->weight;
-			// create a termRelation
-			$sql = "INSERT INTO $wp_term_relationships (object_id, term_taxonomy_id, term_order)
-					VALUES ($postId, $term_taxonomy_id, $term_order)";
-			$this->db->query($sql);
-		}
+		$term_order = $taxonomy->weight;
+		// create a termRelation
+		$sql = "INSERT INTO $wp_term_relationships (object_id, term_taxonomy_id, term_order)
+				VALUES ($postId, $term_taxonomy_id, $term_order)";
+		$this->db->query($sql);
 	}
 
-	private function remapNameCategory($name, $slug) {
-		switch($name) {
-			case 'Mobility':
-			case 'Auto Mobility':
-				$name = 'Mobility';
-				$slug = 'channels';
-				break;
-			case 'Autonomous':
-			case 'Autonomous Car':
-				$name = 'Autonomous';
-				$slug = 'channels';
-				break;
-			case 'Fleet and Asset Management':
-				$name = 'Fleet';
-				$slug = 'categories';
-				break;
-			case 'Insurance':
-			case 'Insurance & Legal':
-			case 'Insurance and Legal':
-			case 'Insurance Telematics':
-				$name = 'Insurance';
-				$slug = 'channels';
-				break;
-			case 'Safety, ADAS & Autonomous':
-				$name = 'ADAS';
-				$slug = 'categories';
-				break;
-			case 'Telematics for EVs':
-				$name = 'Electric Vehicles';
-				$slug = 'categories';
-				break;
-			case 'Security':
-			case 'Connected Car':
-				$slug = 'channels';
-				break;
-		}	
-		return [$name, $slug];		
-	}
 	private function makeTermTaxonomy($taxonomy) {
 
 		$wp_term_taxonomy = DB::wptable('term_taxonomy');
@@ -378,21 +386,29 @@ class Taxonomy {
 			$description = $taxonomy->name;
 		}
 
-		$term_id = $this->terms[$this->slugify($name)];
+		if (isset($this->terms[$this->slugify($name)])) {
+			$term_id = $this->terms[$this->slugify($name)];
+		} else {
+			$term_id = null;
+		}
 
 		$format = $taxonomy->format;
 		$weight = $taxonomy->weight;
 		$parent = $taxonomy->hierarchy;
 		//debug($name . '   =>   '. $slug);
 
-		// does the taxonomy exist, if so increase count
-		$sql = "SELECT term_taxonomy_id 
-				FROM   $wp_term_taxonomy 
-				WHERE  term_id = $term_id 
-				  AND taxonomy = '$slug'";
-		$this->db->query($sql);
+		$record = null;
+		if ($term_id) {
 
-		$record = $this->db->getRecord();
+			// does the taxonomy exist, if so increase count
+			$sql = "SELECT term_taxonomy_id 
+					FROM   $wp_term_taxonomy 
+					WHERE  term_id = $term_id 
+					  AND taxonomy = '$slug'";
+			$this->db->query($sql);
+
+			$record = $this->db->getRecord();
+		}
 // debug($taxonomy);
 // debug($slug);
 		if (!$record) {
@@ -413,9 +429,10 @@ class Taxonomy {
 	}
 
 	// wp only
-	public function makeWPTermData($taxonomy) {
+	public function makeWPTermData($taxonomy, $postId) {
 
-		$termData = $this->getTermData($taxonomy);	
+		$termData = $this->getTermData($taxonomy);
+//debug($termData);
 		$term_id = $taxonomy->tid;
 
 		if ($this->verbose > 1) {
@@ -424,30 +441,40 @@ class Taxonomy {
 
 		if (strtolower($taxonomy->category) === 'tags') {
 
-			$name = 'post_tag';
-			$description = $taxonomy->name;
-			$this->makeTermMeta($term_id, $name, $description);
-
-		} else {
-
-			$term_taxonomy_id = $this->makeTermTaxonomy($taxonomy);
-			$this->makeTermRelationship($taxonomy, $term_taxonomy_id);
-
+			$taxonomy->slug = 'post_tag';
 		}
+// debug($taxonomy);
+
+		$term_taxonomy_id = $this->makeTermTaxonomy($taxonomy);
+		$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId);
 
 	}
 
-	private function findPosts($nid) {
 
-		$wp_postmeta = DB::wptable('postmeta');
+	// OLD method using importer that 
+	//   created postmeta elements to record drupal nids
+	//
+	// private function getPostId($nid) {
+	// 	$sql = "SELECT pm.post_id
+	// 			FROM wp_postmeta pm
+	// 			WHERE pm.meta_value=$nid AND meta_key='_fgd2wp_old_node_id'";
 
-		$sql = "SELECT pm.post_id, pm.meta_value
-				FROM $wp_postmeta pm
-				WHERE pm.meta_value=$nid AND meta_key='_fgd2wp_old_node_id'";
+	// 	$wp->query($sql);
+	// 	$post = $wp->getRecord();
+	// 	return $post->post_id;
+	// }
 
-		$this->db->query($sql);
-		$posts = $this->db->getRecords();
-		return $posts;
-	}
+	// private function findPosts($nid) {
+
+	// 	$wp_postmeta = DB::wptable('postmeta');
+
+	// 	$sql = "SELECT pm.post_id, pm.meta_value
+	// 			FROM $wp_postmeta pm
+	// 			WHERE pm.meta_value=$nid AND meta_key='_fgd2wp_old_node_id'";
+	// dd(DB::strip($sql));
+	// 	$this->db->query($sql);
+	// 	$posts = $this->db->getRecords();
+	// 	return $posts;
+	// }
 
 }
