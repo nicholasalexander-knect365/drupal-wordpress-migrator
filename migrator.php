@@ -41,7 +41,7 @@ $options->setAll();
 $s3bucket 	= $options->get('s3bucket');
 $drupalPath = $options->get('drupalPath');
 $imageStore = $options->get('imageStore');
-
+$server 	= $options->get('server');
 
 $verbose    = $options->get('verbose');
 
@@ -65,8 +65,12 @@ if ($options->get('help')) {
 }
 
 /* connect databases */
-$wp = new DB('local', 'wp');
-$d7 = new DB('local', 'd7');
+try {
+	$wp = new DB($server, 'wp');
+	$d7 = new DB($server, 'd7');
+} catch (Exception $e) {
+	die( 'DB ' . $e->getMessage());
+}
 
 $wp_taxonomy = new Taxonomy($wp, $verbose);
 $d7_taxonomy = new Taxonomy($d7);

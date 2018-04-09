@@ -17,7 +17,8 @@ class DB {
 	public function __construct($server = 'local', $type) {
 
 		$connection = [];
-		debug(ucfirst($server) . ' : ' . $type . ' connected.');
+
+		debug(ucfirst($server) . ' : ' . $type . ' connect request...');
 
 		switch ($server) {
 			case 'vm':
@@ -59,6 +60,7 @@ class DB {
 				static::$wp_prefix = 'wp_';;
 			break;
 		}
+		
 		$this->db = $this->connector($type);
 	}
 
@@ -78,15 +80,17 @@ class DB {
 				die('Programming error: connection type ' . $type . ' has not been defined.');
 		}
 
+
 		$this->connection = new mysqli(
-				$credentials['host'],
-				$credentials['username'],
-				$credentials['password'],
-				$credentials['database']);
+			$credentials['host'],
+			$credentials['username'],
+			$credentials['password'],
+			$credentials['database']);
 
 		if ($this->connection->connect_error) {
-		    throw new Exception("Connection failed: " . $this->type . ' ' . $this->connection->connect_error);
-		}	
+		    throw new Exception("\nConnection failed: " . $this->type . ' ' . $this->connection->connect_error . "\n");
+		}
+	
 		return $this->connection;
 	}
 

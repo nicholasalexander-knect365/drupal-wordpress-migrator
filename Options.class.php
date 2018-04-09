@@ -8,6 +8,7 @@ class Options {
 	public $progress;
 	
 	public $initialise;
+	public $server;
 
 	public $nodes;
 	public $taxonomy;
@@ -27,6 +28,7 @@ class Options {
 		
 		$this->initialise 	= false;
 		
+		$this->server 		= 'local';
 		$this->nodes 		= false;
 		$this->taxonomy 	= false;
 		$this->files 		= false;
@@ -56,6 +58,7 @@ class Options {
 		$this->taxonomy = true;
 		$this->fields 	= true;
 		$this->initialise = true;
+		$this->server 	= 'local';
 	}
 
 	public function setAll() {
@@ -65,7 +68,7 @@ class Options {
 		if (count($argv) > 1) {
 
 			$shortOpts = 'dvqpfntch';
-			$longOpts = ['drupalPath:', 'imageStore:', 'initialise'];
+			$longOpts  = ['server:', 'drupalPath:', 'imageStore:', 'initialise'];
 			$options = getopt($shortOpts, $longOpts);
 
 			foreach ($options as $option => $value) {
@@ -102,6 +105,10 @@ class Options {
 						$this->fields = true;
 						break;
 
+					case 'server' :
+						$this->server = $value;
+						break; 
+
 					case 'initialise':
 						$this->initialise = true;
 						break;
@@ -120,11 +127,15 @@ class Options {
 						return;
 						break;
 
+					default: 
+						throw new Exception('invaid option? ' . $option);
+						break;
 				}
 			}
 
 			if ($this->help) {
 				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -c]\n";
+				print "\nServer:    --server=[local,vm,staging,live]";
 				print "\nSettings:  --drupalPath=setDrupalPath --imageStore=[set images directory]";
 				print "\nControls:  --initialise=[clear data]  --noFiles=[no files]\n";
 				print "\n-v Verbose";
@@ -141,6 +152,7 @@ class Options {
 			if ($this->progress) {
 				$this->verbose = '.';
 			}
+
 		} else {
 			$this->setDefaults();
 		}
