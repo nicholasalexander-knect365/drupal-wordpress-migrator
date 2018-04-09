@@ -181,7 +181,7 @@ for ($c = 0; $c < $chunks; $c++) {
 							print "\n" . $taxonomy->category . ' : ' . $taxonomy->name;
 						}
 					}
-// debug($taxonomies);
+
 					if (!$option['quiet'] && !$option['progress'] && ($verbose === true) ) {
 						print "\nImported " . count($taxonomies) . " taxonomies.\n";
 

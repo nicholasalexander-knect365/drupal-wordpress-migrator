@@ -173,7 +173,6 @@ class Taxonomy {
 		$this->db->query($sql);
 	}
 
-
 	// TERMS 
 	private function termsAlreadyExist() {
 
