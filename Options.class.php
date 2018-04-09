@@ -58,7 +58,6 @@ class Options {
 		$this->taxonomy = true;
 		$this->fields 	= true;
 		$this->initialise = true;
-		$this->server 	= 'local';
 	}
 
 	public function setAll() {
