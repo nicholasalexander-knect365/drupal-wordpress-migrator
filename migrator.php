@@ -176,12 +176,12 @@ for ($c = 0; $c < $chunks; $c++) {
 				$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
 				if ($taxonomies && count($taxonomies)) {
 					foreach ($taxonomies as $taxonomy) {
-						$wp_taxonomy->makeWPTermData($taxonomy);
+						$wp_taxonomy->makeWPTermData($taxonomy, $wpPostId);
 						if ($verbose) {
 							print "\n" . $taxonomy->category . ' : ' . $taxonomy->name;
 						}
 					}
-// debug($taxonomies);
+
 					if (!$option['quiet'] && !$option['progress'] && ($verbose === true) ) {
 						print "\nImported " . count($taxonomies) . " taxonomies.\n";
 
