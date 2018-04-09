@@ -2,74 +2,92 @@
 
 class DB {
 
-/*
-	public static $wp_prefix = 'wp_';
+	public static $wp_prefix;
 
-	public $wp = [
-		'database' => 'tuwp',
-		'username' => 'tuauto',
-		'password' => 'tuauto',
-		'host' => 'localhost',
-    	];
-
-	public $d7 = [
-		'database' => 'd7telematics',
-		'username' => 'd7telematics',
-		'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
-		'host' => 'localhost'
-	];
-
-*/
-        public static $wp_prefix = 'wp_38_';
- 
-        public $wp = [
-               'database' => 'newprod_local',
-               'username' => 'root',
-               'password' => 'root',
-               'host' => 'localhost'
-        ];
- 
-        public $d7 = [
-               'database' => 'd7telematics',
-               'username' => 'root',
-               'password' => 'root',
-               'host' => 'localhost'
-        ];
-
-
-
-	public $type;
 	public $db;
-	public $connection;
-	public $result;
-	public $rows;
+	public $wp;
+	public $d7;
 
-	public function __construct($type = '') {
+	private $type;
+	private $credentials;
+	private $connection;
+	private $result;
+	private $rows;
+
+	public function __construct($server = 'local', $type) {
+
+		$connection = [];
+		debug(ucfirst($server) . ' : ' . $type . ' connected.');
+
+		switch ($server) {
+			case 'vm':
+			    $this->credentials['wp'] = [
+			           'database' => 'newprod_local',
+			           'username' => 'root',
+			           'password' => 'root',
+			           'host' => 'localhost'
+			    ];
+
+			    $this->credentials['d7'] = [
+			           'database' => 'd7telematics',
+			           'username' => 'root',
+			           'password' => 'root',
+			           'host' => 'localhost'
+			    ];
+			    static::$wp_prefix = 'wp_38_';
+				break;
+			case 'staging':
+				die('Staging server test: no database defined!');
+				break;
+			case 'live':
+				die('LIVE server: no database defined!');
+				break;
+			default:
+				$this->credentials['wp'] = [
+					'database' => 'tuwp',
+					'username' => 'tuauto',
+					'password' => 'tuauto',
+					'host' => 'localhost',
+			    	];
+
+				$this->credentials['d7'] = [
+					'database' => 'd7telematics',
+					'username' => 'd7telematics',
+					'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
+					'host' => 'localhost'
+				];
+				static::$wp_prefix = 'wp_';;
+			break;
+		}
+		$this->db = $this->connector($type);
+	}
+
+	private function connector($type = '') {
 		if (!$type) {
-			throw new Exception('to instantiate a DB, use a type!');
+			throw new Exception('Programming error: to connect to a Database, please use a type (wp or d7).');
 		}
 		$this->type = $type;
 		switch ($this->type) {
 			case 'wp' :
-				$this->db = $this->wp;
+				$credentials = $this->credentials['wp'];
 				break;
 			case 'd7' :
-				$this->db = $this->d7;
+				$credentials = $this->credentials['d7'];
 				break;
 			default:
-				die('unknown connection type');
+				die('Programming error: connection type ' . $type . ' has not been defined.');
 		}
 
 		$this->connection = new mysqli(
-				$this->db['host'],
-				$this->db['username'],
-				$this->db['password'],
-				$this->db['database']);
+				$credentials['host'],
+				$credentials['username'],
+				$credentials['password'],
+				$credentials['database']);
 
-		// Check connection
 		if ($this->connection->connect_error) {
 		    throw new Exception("Connection failed: " . $this->type . ' ' . $this->connection->connect_error);
-		}
+		}	
+		return $this->connection;
 	}
 
 	public static function wptable($type) {
@@ -99,23 +117,17 @@ class DB {
 		$rowCount = 0;
 
 		try {
-
 			$result = $this->connection->query($sql);
-
 		} catch (Exception $e) {
-
 			if ($result === false) {
 				print "\nQuery failed! $sql \n";
 			}
-		
 			die($e->getMessage());
-
 		}
 
 		if ($result) {
 
 			$this->result = $result;
-
 			$rowCount = $this->connection->affected_rows;
 
 			// if the rowCount < 1 
@@ -180,6 +192,7 @@ class DB {
 	}
 
 	public function getRecord() {
+	
 		if ($this->result) {
 			$row = $this->result->fetch_object();
 			return $row;

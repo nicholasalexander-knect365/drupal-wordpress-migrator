@@ -42,7 +42,7 @@ class Files {
 	public function dirEmpty($dir) {
 
 		if (!is_readable($dir)) {
-			die("\nERROR: image store directory $dir does not exist or is not writable\n\n");
+			die("\n\nERROR: image store directory $dir does not exist or is not writable\n\n");
 		}
   		return (count(scandir($dir)) == 2);
 	}

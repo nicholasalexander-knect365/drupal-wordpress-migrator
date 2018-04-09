@@ -126,6 +126,7 @@ class Taxonomy {
 		$this->db->query("SELECT COUNT(*) as c from $wp_terms");
 
 		$item = $this->db->getRecord();
+
 		if ($item->c > 1) {
 			return true;
 		}

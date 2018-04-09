@@ -65,8 +65,8 @@ if ($options->get('help')) {
 }
 
 /* connect databases */
-$wp = new DB('wp');
-$d7 = new DB('d7');
+$wp = new DB('local', 'wp');
+$d7 = new DB('local', 'd7');
 
 $wp_taxonomy = new Taxonomy($wp, $verbose);
 $d7_taxonomy = new Taxonomy($d7);
