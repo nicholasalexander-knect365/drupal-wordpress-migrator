@@ -88,6 +88,7 @@ class Options {
 			// default option
 			if (in_array('d', array_keys($options))) {
 				$this->defaults = true;
+				$this->server = $options['server'] || 'local';
 				$this->setDefaults();
 				return;
 			}
