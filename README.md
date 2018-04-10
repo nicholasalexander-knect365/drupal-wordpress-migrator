@@ -15,5 +15,3 @@ Following an import using FG import (which imports nodes and builds wp_termmeta 
 * v105 additional phpunit, better options
 * MASTER & TAG prerelease02
 * v106 ACF import from ACF data
-
- 

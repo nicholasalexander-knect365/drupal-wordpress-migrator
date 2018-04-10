@@ -121,6 +121,7 @@ $wp_post = new Post($wp);
 /* content types ... */
 $d7_fields = new Fields($d7);
 $fieldSet = new FieldSet($d7);
+$wp_fields = new Fields($wp);
 
 $drupal_nodes = null;
 
@@ -217,32 +218,10 @@ for ($c = 0; $c < $chunks; $c++) {
 				$acf = new ACF($wp);
 				$acf->setPostId($wpPostId);
 
-				// $d7_fields->setNodeId($node->nid);
-
-				// $fields = $d7_fields->getFieldDataBody();
-				// $images = $d7_fields->getFieldImages();
-				// $tags   = $d7_fields->getFieldTags();
-				// $comments = $d7_fields->getFieldComments();
-
-				// // normal data types for FieldDataBody and Images, Tags, etc 
-				// // should be already dealt with as content
-				// if ($fields) {
-				// 	switch($fields->bundle) {
-				// 		case 'article':
-				// 		break;
-				// 		case 'blog':
-				// 		break;
-				// 		case 'podcast':
-				// 		break;
-				// 		case 'page':
-				// 		break;
-				// 		default: 
-				// 			print "\n" . $fields->bundle;
-				// 	}
-				// }
-
 				// check each field table for content types and make WP POSTMETA
 				if ($fieldTables && count($fieldTables)) {
+
+					$events = [];
 
 					foreach($fieldTables as $fieldDataSource) {
 
@@ -253,42 +232,54 @@ for ($c = 0; $c < $chunks; $c++) {
 						$func = 'get_' . $fieldDataSource;
 	
 						$data = $gather->$func($node->nid);
-						if ($data) {
-							/* example of format for $data
-							array(2) {
-							  [0]=>   {TABLE}
-							  string(15) "field_event_url"
-							  [1]=>	  FIELDS {TABLE}_FIELDNAME => value
-							  object(stdClass)#3929 (3) {
-							    ["field_event_url_url"]=>
-							    string(41) "http://www.telematicsupdate.com/cvtusa06/"
-							    ["field_event_url_title"]=>
-							    NULL
-							    ["field_event_url_attributes"]=>
-							    string(6) "a:0:{}"
-							  }
-							}
-							*/
-							// create Wordpress ACF data
-							//var_dump($data);
 
+						if ($data) {						
+							switch ($data[0]) {
+								case 'field_primary_event':
+									$event = new stdClass();
+									$event->nid = $data[1]->field_primary_event_nid;
+									break;								
+								case 'field_event_date':
+									$event->start_date = $data[1]->field_event_date_value;
+									$event->end_date   = $data[1]->field_event_date_value2;
+									break;
+								case 'field_event_location':
+									$event->venue = $data[1]->field_event_location_value;
+									break;
+								case 'field_event_url':
+									$event->url = $data[1]->field_event_url_url;
+									break;									
+								case 'field_event_organiser':
+									$event->organiser = $data[1]->field_event_organiser_value;
+									break;
+								case 'field_event_organiser_email':
+									$event->organiser_email = $data[1]->field_event_organiser_email_email;
+									break;
+								case 'field_event_attendees':
+									$event->attendees = $data[1]->field_event_attendees_value;
+									break;
+							}
 						}
 					}
-
-				}
-				// if ($images) {
-				// 	var_dump($images);
-				// }
-				// if ($tags) {
-				// 	var_dump($tags);
-				// }
-				// if ($comments) {
-				// 	var_dump($comments);
-				// }
-
-
+					if ($event) {
+						$events[$wpPostId] = $event;
+					}
+				}		
 			}
-
+		}
+		if ($option['fields'] && isset($events) && count($events)) {
+			// write out the events, etc
+			foreach($events as $postId => $event) {
+				$wp_fields->createEventFields($postId, [ 
+					'start_date' 	=> $event->start_date, 
+					'end_date' 		=> $event->end_date, 
+					'venue'			=> $event->venue, 
+					'url'			=> $event->url, 
+					'organiser' 	=> $event->organiser, 
+					'organiser_email' => $event->organiser_email, 
+					'attendees' 	=> $event->attendees
+				]);
+			}
 		}
 	}
 }
