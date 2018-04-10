@@ -18,6 +18,11 @@ class Options {
 	public $s3bucket;
 	public $drupalPath;
 	public $imageStore;
+	public $clean;
+	public $images;
+
+	public $all = ['defaults', 'help', 'quiet', 'verbose', 'progress', 'initialise' ,'files', 'nodes', 'taxonomy', 'fields', 'clean', 'images'];
+
 
 	public function __construct() {
 		// these are the defaults, use options to override
@@ -29,19 +34,27 @@ class Options {
 		$this->initialise 	= false;
 		
 		$this->server 		= 'local';
-		$this->nodes 		= false;
-		$this->taxonomy 	= false;
+		$this->nodes 		= true;
+		$this->taxonomy 	= true;
 		$this->files 		= false;
 		$this->fields 		= false;
 
 		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
 		$this->drupalPath 	= '../drupal7/tu-auto';
 		$this->imageStore 	= 'images/';
+		$this->clean  		= false;
+		$this->images 		= false;
 	}
 
 	public function show($opt) {
 		print "\nOption " . $opt . " is ";
 		print $this->$opt ? 'set' : 'not set';
+	}
+
+	public function showAll() {
+		foreach ($this->all as $opt) {
+			$this->show($opt);
+		}
 	}
 
 	public function get($name) {
@@ -58,6 +71,8 @@ class Options {
 		$this->taxonomy = true;
 		$this->fields 	= true;
 		$this->initialise = true;
+		$this->clean 	= false;
+		$this->images 	= false;
 	}
 
 	public function setAll() {
@@ -67,18 +82,26 @@ class Options {
 		if (count($argv) > 1) {
 
 			$shortOpts = 'dvqpfntch';
-			$longOpts  = ['server:', 'drupalPath:', 'imageStore:', 'initialise'];
+			$longOpts  = ['server:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'images'];
 			$options = getopt($shortOpts, $longOpts);
 
+			// default option
+			if (in_array('d', array_keys($options))) {
+				$this->defaults = true;
+				$this->setDefaults();
+				return;
+			}
+
 			foreach ($options as $option => $value) {
+
 				switch ($option) {
-					case 'p' : 
+					case 'p' :
 						$this->progress = true;
 						break;
 
 					case 'q' :
 						$this->quiet = true;
-						break; 
+						break;
 
 					case 'v' :
 						$this->verbose = true;
@@ -112,6 +135,10 @@ class Options {
 						$this->initialise = true;
 						break;
 
+					case 'clean':
+						$this->clean = true;
+						break;
+
 					case 'drupalPath':
 						$this->drupalPath = $value;
 						break;
@@ -120,10 +147,8 @@ class Options {
 						$this->imageStore = $value;
 						break; 
 
-					case 'd' :
-						$this->defaults = true;
-						$this->setDefaults();
-						return;
+					case 'images' : 
+						$this->images = true;
 						break;
 
 					default: 
@@ -134,9 +159,16 @@ class Options {
 
 			if ($this->help) {
 				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -c]\n";
-				print "\nServer:    --server=[local,vm,staging,live]";
-				print "\nSettings:  --drupalPath=setDrupalPath --imageStore=[set images directory]";
-				print "\nControls:  --initialise=[clear data]  --noFiles=[no files]\n";
+				print "\nServer:";
+				print "\n --server=[local,vm,staging,live]";
+				print "\nSettings:";
+				print "\n --drupalPath=set Drupal path";
+				print "\n --imageStore=set images directory";
+				print "\nControls:";
+				print "\n --initialise ... clears ALL data";
+				print "\n --clean  ... strips html content";
+				print "\n --images ... clears default images directory";
+				print "\n --noFiles=[no files]\n";
 				print "\n-v Verbose";
 				print "\n-d Defaults";
 				print "\n-q Quiet";
@@ -156,5 +188,4 @@ class Options {
 			$this->setDefaults();
 		}
 	}
-
 }

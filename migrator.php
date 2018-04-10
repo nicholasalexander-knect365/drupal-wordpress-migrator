@@ -27,16 +27,12 @@ require "common.php";
  * v105 fields import (includes tags, images and content_types)
  */
 
-
 $maxChunk = 1000000;
 $init = true;
 
 /* control options */
 $options = new Options();
 $options->setAll();
-
-// $quiet 		= $options->get('quiet');
-// $progress 	= $options->get('progress');
 
 $s3bucket 	= $options->get('s3bucket');
 $drupalPath = $options->get('drupalPath');
@@ -46,8 +42,8 @@ $server 	= $options->get('server');
 $verbose    = $options->get('verbose');
 
 $option = [];
-$optionSet = ['defaults', 'help', 'quiet', 'verbose', 'progress', 'initialise' ,'files', 'nodes', 'taxonomy', 'fields'];
-foreach ($optionSet as $opt) {
+
+foreach ($options->all as $opt) {
 	$option[$opt] = $options->get($opt);
 	if ($verbose) {
 		$options->show($opt);
@@ -58,6 +54,7 @@ $verbose = $option['verbose'];
 //var_dump($option);die;
 if ($options->get('defaults')) {
 	$options->setDefaults();
+	$options->showAll();
 }
 
 if ($options->get('help')) {
@@ -72,8 +69,40 @@ try {
 	die( 'DB ' . $e->getMessage());
 }
 
+if ($option['files']) {
+	if ($option['images']) {
+		if (is_dir($imageStore)) {
+			$files = glob($imageStore . '/*');
+			foreach ($files as $file) {
+				if (is_file($file)) {
+					unlink($file);
+				}
+			}
+			print "\n" . $imageStore . ' cleared of files.';
+		} else {
+			dd("ERROR: $imageStore is not a directory");
+		}
+	}
+	$files = new Files($d7, $s3bucket, [
+		'verbose' 	=> $verbose,
+		'quiet' 	=> $option['quiet'],
+		'progress' 	=> $option['progress']
+	]);
+
+	$files->setDrupalPath($drupalPath);
+	$files->setImageStore($imageStore);
+	if ($verbose) {
+		print "\nimages will be imported to $imageStore";
+	}
+} else {
+	if ($option['images']) {
+		print "\nimages option -f not selected, images will not be cleared\n";
+	}
+}
+
 $wp_taxonomy = new Taxonomy($wp, $verbose);
 $d7_taxonomy = new Taxonomy($d7);
+
 // If the wordpress instance of Taxonomy needs to get drupal data: 
 $wp_taxonomy->setDrupalDb($d7);
 
@@ -83,16 +112,6 @@ if ($option['taxonomy']) {
 		$taxonomyNames = [];
 		$taxonomies = $d7_taxonomy->fullTaxonomyList();
 		$wp_taxonomy->createTerms($taxonomies);
-}
-
-if ($option['files']) {
-	$files = new Files($d7, $s3bucket, [
-		'verbose' 	=> $verbose, 
-		'quiet' 	=> $option['quiet'], 
-		'progress' 	=> $option['progress']
-	]);
-	$files->setDrupalPath($drupalPath);
-	$files->setImageStore($imageStore);
 }
 
 /* nodes */
@@ -111,7 +130,6 @@ if ($option['initialise']) {
 		$wp_taxonomy->buildTerms();
 	}
 	$wp_post->purge();
-
 }
 
 if ($option['fields']) {
@@ -137,18 +155,16 @@ if ($nodeCount > $maxChunk) {
 $d7_node->setNodeChunkSize($nodeCount);
 $chunks = floor($nodeCount / $chunk);
 
-// var_dump($chunk, $chunks);
-// die;
-
 if ($option['files'] && $verbose) {
 	print "\nConverting $nodeCount Drupal nodes\n";
 }
+
 
 for ($c = 0; $c < $chunks; $c++) {
 
 	$drupal_nodes = $d7_node->getNodeChunk();
 
-	if ($drupal_nodes && count($drupal_nodes)) {
+	if (isset($drupal_nodes) && count($drupal_nodes)) {
 
 		foreach ($drupal_nodes as $node) {
 			
@@ -156,7 +172,7 @@ for ($c = 0; $c < $chunks; $c++) {
 
 			if ($option['nodes']) {
 				$d7_node->setNode($node);
-				$wpPostId = $wp_post->makePost($node);
+				$wpPostId = $wp_post->makePost($node, $options);
 			}
 
 			if ($option['files']) {

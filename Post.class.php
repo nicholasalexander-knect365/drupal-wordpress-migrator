@@ -129,13 +129,7 @@ class Post {
 
 	private function prepare($str) {
 
-
         $str = str_replace(array("\r\n", "\r", "\n"), '', $str);
-
-
-//         return $str;
-
-// $old = $str;
         $str = preg_replace('/&rdquo;/', '&quot;', $str);
         $str = preg_replace('/&rsquo;/', '&apos;', $str);
         $str = preg_replace('/&ldquo;/', '&quot;', $str);
@@ -143,25 +137,14 @@ class Post {
         $str = preg_replace('/&ndash;/', '-', $str);
         $str = preg_replace('/&mdash;/', '--', $str);
 
-// $old1 = $str;        
-//         $str = $this->convert_smart_quotes($str);
+		// $str = $this->convert_smart_quotes($str);
         $str = $this->decode_entities_full($str);
-        // $str = preg_replace('/&#39;/', '&apos;', $str);
-        // $str = preg_replace('/\'/', '&apos;', $str);
-        // $str = preg_replace('/&rsquo/', '\'', $str);
-        ///$str = preg_replace('/\"/', '&quot;', $str);
+        // $str = html_entity_decode($str);
 
-// if ($old !== $str) {
-// 	debug($str);
-// }
-// if ($old1 !== $str) {
-// 	debug($str);
-// }
-        //$str = html_entity_decode($str);
         return $str;
 	}
 
-	public function makePost($drupal_data) {
+	public function makePost($drupal_data, $options = NULL) {
 
 		$wp_posts = DB::wptable('posts');
 
@@ -196,8 +179,13 @@ class Post {
 					// - the TZ difference would is needed 
 					//   to calculate GMT for this post
 					$values[$wpKey . '_gmt'] = $value;
-				} 
+				}
 				switch ($key) {
+					case 'content':
+						if ($options && $options->clean) {
+							$values[$wpKey] = strip_tags($value);
+						}
+						break;
 					case 'status':
 						if ($value === '1' || $value === 1) {
 							$values[$wpKey] = 'publish';

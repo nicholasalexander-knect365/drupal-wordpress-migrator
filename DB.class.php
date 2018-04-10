@@ -18,7 +18,7 @@ class DB {
 
 		$connection = [];
 
-		debug(ucfirst($server) . ' : ' . $type . ' connect request...');
+		print "\n" . ucfirst($server) . ' : ' . $type . ' connect request...';
 
 		switch ($server) {
 			case 'vm':
@@ -37,12 +37,15 @@ class DB {
 			    ];
 			    static::$wp_prefix = 'wp_38_';
 				break;
+
 			case 'staging':
 				die('Staging server test: no database defined!');
 				break;
+
 			case 'live':
 				die('LIVE server: no database defined!');
 				break;
+
 			default:
 				$this->credentials['wp'] = [
 					'database' => 'tuwp',
@@ -60,8 +63,11 @@ class DB {
 				static::$wp_prefix = 'wp_';;
 			break;
 		}
-		
+
 		$this->db = $this->connector($type);
+		if ($this->db) {
+			print "connected.";
+		}
 	}
 
 	private function connector($type = '') {

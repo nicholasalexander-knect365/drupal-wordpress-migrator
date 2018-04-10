@@ -371,7 +371,7 @@ class Taxonomy {
 
 		$name = $this->makeWPTermName($taxonomy->name);
 		$slug = $this->slugify($this->makeWPTermName($taxonomy->category));
-		list($name, $slug) = $this->remapNameCategory($name, $slug);		
+		list($name, $slug) = $this->remapNameCategory($name, $slug);
 
 		if (strlen($taxonomy->description)) {
 			$description = $taxonomy->name . ' ' . $taxonomy->description;
@@ -388,7 +388,6 @@ class Taxonomy {
 		$format = $taxonomy->format;
 		$weight = $taxonomy->weight;
 		$parent = $taxonomy->hierarchy;
-		//debug($name . '   =>   '. $slug);
 
 		$record = null;
 		if ($term_id) {

@@ -57,7 +57,7 @@ class Files {
 		if ($this->dirEmpty($path)) {
 			$this->imageStore = $path;
 		} else {
-			die("\nERROR: images directory is not empty, please use --imageStore=EMPTY_DIRECTORY\n\n");
+			die("\nERROR: images directory is not empty\n --images with -f to clear them\n --imageStore=Set to empty directory\n\n");
 		}
 	}
 
