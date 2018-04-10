@@ -181,11 +181,14 @@ class Post {
 					$values[$wpKey . '_gmt'] = $value;
 				}
 				switch ($key) {
+
 					case 'content':
 						if ($options && $options->clean) {
-							$values[$wpKey] = strip_tags($value);
+							$value = strip_tags($value);
 						}
+						$values[$wpKey] = $value;	
 						break;
+
 					case 'status':
 						if ($value === '1' || $value === 1) {
 							$values[$wpKey] = 'publish';
