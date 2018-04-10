@@ -72,7 +72,7 @@ class Options {
 		$this->fields 	= true;
 		$this->initialise = true;
 		$this->clean 	= false;
-		$this->images 	= false;
+		$this->images 	= true;
 	}
 
 	public function setAll() {
