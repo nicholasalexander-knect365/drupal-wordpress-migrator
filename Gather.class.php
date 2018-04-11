@@ -2,7 +2,7 @@
 
 require_once "FieldSetDiscovery.class.php";
 
-// gather additional content type data for a node
+// gather additional content type data for a node from Drupal
 
 class Gather extends FieldSetDiscovery {
 	

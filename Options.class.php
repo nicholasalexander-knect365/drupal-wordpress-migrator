@@ -21,7 +21,20 @@ class Options {
 	public $clean;
 	public $images;
 
-	public $all = ['defaults', 'help', 'quiet', 'verbose', 'progress', 'initialise' ,'files', 'nodes', 'taxonomy', 'fields', 'clean', 'images'];
+	public $all = [
+		'd' => 'defaults', 
+		'h' => 'help', 
+		'q' => 'quiet', 
+		'v' => 'verbose', 
+		'p' => 'progress', 
+		'f' => 'files', 
+		'n' => 'nodes', 
+		't' => 'taxonomy', 
+		'c' => 'fields', 
+		'init' => 'initialise', 
+		'clean' => 'clean', 
+		'images' => 'images'
+	];
 
 
 	public function __construct() {
@@ -34,8 +47,8 @@ class Options {
 		$this->initialise 	= false;
 		
 		$this->server 		= 'local';
-		$this->nodes 		= true;
-		$this->taxonomy 	= true;
+		$this->nodes 		= false;
+		$this->taxonomy 	= false;
 		$this->files 		= false;
 		$this->fields 		= false;
 
@@ -47,13 +60,23 @@ class Options {
 	}
 
 	public function show($opt) {
-		print "\nOption " . $opt . " is ";
-		print $this->$opt ? 'set' : 'not set';
+		dd('show is deprecated');
+		if ($this->verbose) {
+
+		} else {
+
+		}
 	}
 
 	public function showAll() {
-		foreach ($this->all as $opt) {
-			$this->show($opt);
+		foreach ($this->all as $key => $opt) {
+			if ($this->verbose) {
+				print "\nOption " . $opt . " is ";
+				print $this->$opt ? 'set' : 'NOT set';
+			} else {
+				print " " . $key;
+				print $this->$opt ? '+' : '-';
+			}
 		}
 	}
 
@@ -70,7 +93,7 @@ class Options {
 		$this->nodes    = true;
 		$this->taxonomy = true;
 		$this->fields 	= true;
-		$this->initialise = true;
+		$this->init 	= true;
 		$this->clean 	= false;
 		$this->images 	= true;
 	}
@@ -82,13 +105,17 @@ class Options {
 		if (count($argv) > 1) {
 
 			$shortOpts = 'dvqpfntch';
-			$longOpts  = ['server:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'images'];
+			$longOpts  = ['server:', 'drupalPath:', 'imageStore:', 'init', 'clean', 'images'];
 			$options = getopt($shortOpts, $longOpts);
+
+			if (empty($options)) {
+				dd('nothing set');
+			}
 
 			// default option
 			if (in_array('d', array_keys($options))) {
 				$this->defaults = true;
-				$this->server = $options['server'] || 'local';
+				$this->server = isset($options['server']) ? $options['server'] : 'local';
 				$this->setDefaults();
 				return;
 			}
@@ -132,7 +159,7 @@ class Options {
 						$this->server = $value;
 						break; 
 
-					case 'initialise':
+					case 'init':
 						$this->initialise = true;
 						break;
 
@@ -166,7 +193,7 @@ class Options {
 				print "\n --drupalPath=set Drupal path";
 				print "\n --imageStore=set images directory";
 				print "\nControls:";
-				print "\n --initialise ... clears ALL data";
+				print "\n --init   ... clears ALL data";
 				print "\n --clean  ... strips html content";
 				print "\n --images ... clears default images directory";
 				print "\n --noFiles=[no files]\n";

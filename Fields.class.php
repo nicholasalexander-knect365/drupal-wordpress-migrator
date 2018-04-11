@@ -69,13 +69,4 @@ class Fields {
 		return $records;
 	}	
 
-	public function createEventFields($wpPostId, $data) {
-		foreach($data as $key => $value) {
-			$sql = "INSERT INTO wp_38_postmeta (post_id, meta_key, meta_value) VALUES ($wpPostId, $key, '$value'";
-			$this->db->query($sql);
-
-			$id = $this->db->lastInsertId();
-			assert($id > 0);
-		}
-	}
 }

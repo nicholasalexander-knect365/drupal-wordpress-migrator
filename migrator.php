@@ -3,6 +3,7 @@
 require "DB.class.php";
 require "Options.class.php";
 require "Post.class.php";
+require "PostMeta.class.php";
 
 require "Node.class.php";
 require "Files.class.php";
@@ -11,7 +12,7 @@ require "Taxonomy.class.php";
 require "Fields.class.php";
 require "FieldSet.class.php";
 require "Gather.class.php";
-require "ACF.class.php";
+//require "ACF.class.php";
 
 require "common.php";
 
@@ -43,13 +44,14 @@ $verbose    = $options->get('verbose');
 
 $option = [];
 
-foreach ($options->all as $opt) {
-	$option[$opt] = $options->get($opt);
-	if ($verbose) {
-		$options->show($opt);
+	foreach ($options->all as $opt) {
+		$option[$opt] = $options->get($opt);
+		//if ($verbose) {
+			// $options->show($opt);
+		//}
 	}
-}
 $verbose = $option['verbose'];
+$options->showAll();
 
 //var_dump($option);die;
 if ($options->get('defaults')) {
@@ -156,10 +158,12 @@ if ($nodeCount > $maxChunk) {
 $d7_node->setNodeChunkSize($nodeCount);
 $chunks = floor($nodeCount / $chunk);
 
-if ($option['files'] && $verbose) {
+if ($option['fields']) {
+	$postmeta = new PostMeta($wp, DB::wptable('postmeta'));
+}
+if ($verbose) {
 	print "\nConverting $nodeCount Drupal nodes\n";
 }
-
 
 for ($c = 0; $c < $chunks; $c++) {
 
@@ -174,6 +178,9 @@ for ($c = 0; $c < $chunks; $c++) {
 			if ($option['nodes']) {
 				$d7_node->setNode($node);
 				$wpPostId = $wp_post->makePost($node, $options);
+			} else {
+				// find the wpPostId for this node??
+				dd($node);
 			}
 
 			if ($option['files']) {
@@ -215,13 +222,14 @@ for ($c = 0; $c < $chunks; $c++) {
 			*/
 			if ($wpPostId && $option['fields']) {
 
-				$acf = new ACF($wp);
-				$acf->setPostId($wpPostId);
+				// $acf = new ACF($wp);
+				//$acf->setPostId($wpPostId);
 
 				// check each field table for content types and make WP POSTMETA
 				if ($fieldTables && count($fieldTables)) {
 
 					$events = [];
+					$event = new stdClass();
 
 					foreach($fieldTables as $fieldDataSource) {
 
@@ -233,15 +241,15 @@ for ($c = 0; $c < $chunks; $c++) {
 	
 						$data = $gather->$func($node->nid);
 
-						if ($data) {						
+						if (isset($data) && count($data)) {
+
 							switch ($data[0]) {
-								case 'field_primary_event':
-									$event = new stdClass();
+								case 'fie2008-03-11T00:00:00ld_primary_event':
 									$event->nid = $data[1]->field_primary_event_nid;
 									break;								
 								case 'field_event_date':
-									$event->start_date = $data[1]->field_event_date_value;
-									$event->end_date   = $data[1]->field_event_date_value2;
+									$event->start_date = date_format(date_create($data[1]->field_event_date_value), 'Y-m-d h:i:s');
+									$event->end_date   = date_format(date_create($data[1]->field_event_date_value2), 'Y-m-d h:i:s');
 									break;
 								case 'field_event_location':
 									$event->venue = $data[1]->field_event_location_value;
@@ -259,26 +267,22 @@ for ($c = 0; $c < $chunks; $c++) {
 									$event->attendees = $data[1]->field_event_attendees_value;
 									break;
 							}
+	
 						}
 					}
-					if ($event) {
-						$events[$wpPostId] = $event;
+					if (isset($event->start_date)) {
+
+						$postmeta->createEventFields($wpPostId, [ 
+							'start_date' 	=> isset($event->start_date) ? $event->start_date : '', 
+							'end_date' 		=> isset($event->end_date) ? $event->end_date : '', 
+							'venue'			=> isset($event->venue) ? $event->venue : '', 
+							'url'			=> isset($event->url) ? $event->url : '', 
+							'organiser' 	=> isset($event->organiser) ? $event->organiser : '', 
+							'organiser_email' => isset($event->organiser_email) ? $event->organiser_email : '', 
+							'attendees' 	=> isset($event->attendees) ? $event->attendees : ''
+						]);
 					}
-				}		
-			}
-		}
-		if ($option['fields'] && isset($events) && count($events)) {
-			// write out the events, etc
-			foreach($events as $postId => $event) {
-				$wp_fields->createEventFields($postId, [ 
-					'start_date' 	=> $event->start_date, 
-					'end_date' 		=> $event->end_date, 
-					'venue'			=> $event->venue, 
-					'url'			=> $event->url, 
-					'organiser' 	=> $event->organiser, 
-					'organiser_email' => $event->organiser_email, 
-					'attendees' 	=> $event->attendees
-				]);
+				}
 			}
 		}
 	}
