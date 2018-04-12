@@ -1,9 +1,11 @@
 <?php
 
 require "DB.class.php";
+require "Initialise.class.php";
 require "Options.class.php";
 require "Post.class.php";
 require "PostMeta.class.php";
+require "WPTermMeta.class.php";
 
 require "Node.class.php";
 require "Files.class.php";
@@ -15,6 +17,8 @@ require "Gather.class.php";
 //require "ACF.class.php";
 
 require "common.php";
+
+define('DRUPAL_WP', 'DRUPAL_WP');
 
 /*
  * v100 while adding new features,
@@ -44,20 +48,17 @@ $verbose    = $options->get('verbose');
 
 $option = [];
 
-	foreach ($options->all as $opt) {
-		$option[$opt] = $options->get($opt);
-		//if ($verbose) {
-			// $options->show($opt);
-		//}
-	}
-$verbose = $option['verbose'];
+foreach ($options->all as $opt) {
+	$option[$opt] = $options->get($opt);
+}
 $options->showAll();
 
 //var_dump($option);die;
-if ($options->get('defaults')) {
-	$options->setDefaults();
-	$options->showAll();
-}
+
+// if ($options->get('defaults')) {
+// 	$options->setDefaults();
+// 	$options->showAll();
+// }
 
 if ($options->get('help')) {
 	die("\nHELP Mode\n\n");
@@ -125,6 +126,10 @@ $d7_fields = new Fields($d7);
 $fieldSet = new FieldSet($d7);
 $wp_fields = new Fields($wp);
 
+// use termmeta to record nodeIds converted to wordpress IDs
+$wp_termmeta = new WPTermMeta($wp);
+$wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
+
 $drupal_nodes = null;
 
 if ($option['initialise']) {
@@ -132,7 +137,7 @@ if ($option['initialise']) {
 	if ($wp_taxonomy->checkTerms()) {
 		$wp_taxonomy->buildTerms();
 	}
-	$wp_post->purge();
+	Initialise::purge($wp);
 }
 
 if ($option['fields']) {
@@ -165,6 +170,8 @@ if ($verbose) {
 	print "\nConverting $nodeCount Drupal nodes\n";
 }
 
+$unassigned = [];
+
 for ($c = 0; $c < $chunks; $c++) {
 
 	$drupal_nodes = $d7_node->getNodeChunk();
@@ -178,9 +185,15 @@ for ($c = 0; $c < $chunks; $c++) {
 			if ($option['nodes']) {
 				$d7_node->setNode($node);
 				$wpPostId = $wp_post->makePost($node, $options);
+				if ($wpPostId) {
+					$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
+				} else {
+					debug('makePost returned no value for this node??');
+					dd($node);
+				}
 			} else {
 				// find the wpPostId for this node??
-				dd($node);
+				$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
 			}
 
 			if ($option['files']) {
@@ -222,9 +235,6 @@ for ($c = 0; $c < $chunks; $c++) {
 			*/
 			if ($wpPostId && $option['fields']) {
 
-				// $acf = new ACF($wp);
-				//$acf->setPostId($wpPostId);
-
 				// check each field table for content types and make WP POSTMETA
 				if ($fieldTables && count($fieldTables)) {
 
@@ -244,7 +254,7 @@ for ($c = 0; $c < $chunks; $c++) {
 						if (isset($data) && count($data)) {
 
 							switch ($data[0]) {
-								case 'fie2008-03-11T00:00:00ld_primary_event':
+								case 'field_primary_event':
 									$event->nid = $data[1]->field_primary_event_nid;
 									break;								
 								case 'field_event_date':
@@ -266,27 +276,38 @@ for ($c = 0; $c < $chunks; $c++) {
 								case 'field_event_attendees':
 									$event->attendees = $data[1]->field_event_attendees_value;
 									break;
+								default:
+									if (empty($unassigned[$data[0]])) {
+										$unassigned[$data[0]] = 1;
+									} else {
+										$unassigned[$data[0]]++;
+									}
+									break;
 							}
 	
 						}
 					}
+
 					if (isset($event->start_date)) {
 
 						$postmeta->createEventFields($wpPostId, [ 
-							'start_date' 	=> isset($event->start_date) ? $event->start_date : '', 
-							'end_date' 		=> isset($event->end_date) ? $event->end_date : '', 
-							'venue'			=> isset($event->venue) ? $event->venue : '', 
-							'url'			=> isset($event->url) ? $event->url : '', 
-							'organiser' 	=> isset($event->organiser) ? $event->organiser : '', 
-							'organiser_email' => isset($event->organiser_email) ? $event->organiser_email : '', 
+							'start_date' 	=> isset($event->start_date) ? $event->start_date : '',
+							'end_date' 		=> isset($event->end_date) ? $event->end_date : '',
+							'venue'			=> isset($event->venue) ? $event->venue : '',
+							'url'			=> isset($event->url) ? $event->url : '',
+							'organiser' 	=> isset($event->organiser) ? $event->organiser : '',
+							'organiser_email' => isset($event->organiser_email) ? $event->organiser_email : '',
 							'attendees' 	=> isset($event->attendees) ? $event->attendees : ''
 						]);
 					}
+
 				}
 			}
 		}
 	}
 }
+
+debug($unassigned);
 
 $wp->close();
 $d7->close();

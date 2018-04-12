@@ -71,13 +71,7 @@ class Post {
 		static::$translation_warning = 0;
 	}
 
-	public function purge() {
 
-		$wp_posts = DB::wptable('posts');
-
-		$sql = "DELETE FROM $wp_posts";
-		$this->db->query($sql);
-	}
 
 	private function findMakes($item) {
 		return strpos('make_', $item);
@@ -136,7 +130,9 @@ class Post {
         $str = preg_replace('/&lsquo;/', '&apos;', $str);
         $str = preg_replace('/&ndash;/', '-', $str);
         $str = preg_replace('/&mdash;/', '--', $str);
-
+        $str = preg_replace('/\'/', '&apos;', $str);
+        $str = preg_replace('/\"/', '&quot;', $str);
+        
 		// $str = $this->convert_smart_quotes($str);
         $str = $this->decode_entities_full($str);
         // $str = html_entity_decode($str);
@@ -175,12 +171,16 @@ class Post {
 				if ($key === 'created' || $key === 'changed') {
 					$value = date('Y-m-d h:i:s', $value);
 					$values[$wpKey] = $value;
-					// assume the blog is GMT based: if it isn't 
+					// TODO: assume the blog is GMT based: if it isn't 
 					// - the TZ difference would is needed 
 					//   to calculate GMT for this post
 					$values[$wpKey . '_gmt'] = $value;
 				}
 				switch ($key) {
+
+					case 'title': 
+						$values[$wpKey] = substr($value, 0, 200);
+						break;
 
 					case 'content':
 						if ($options && $options->clean) {
@@ -206,13 +206,6 @@ class Post {
 							$values[$wpKey] = 'closed';
 						}
 						break;
-					// case 'content':
-					// case 'body_value':
-				 //        if (preg_match('/Russia/', $value)) {
-				 //        	var_dump($key, $value);
-				 //        }
-
-					// 	break;
 					case 'title' :
 						$values[$wpKey] = $value;
 						$values['post_name'] = Taxonomy::slugify($value);
@@ -241,7 +234,6 @@ class Post {
 		$this->db->query($sql); 
 		$post_id = $this->db->lastInsertId();
 
-
 		// meta processing: 
 		// create values in postmeta 
 		foreach ($metas as $key => $value) {
@@ -253,6 +245,9 @@ class Post {
 						var_dump($key, $value);
 				}
 			}
+		}
+		if (!$post_id) {
+			debug($sql);
 		}
 		return $post_id;
 	}

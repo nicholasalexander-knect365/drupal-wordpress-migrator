@@ -93,7 +93,7 @@ class Options {
 		$this->nodes    = true;
 		$this->taxonomy = true;
 		$this->fields 	= true;
-		$this->init 	= true;
+		$this->initialise = true;
 		$this->clean 	= false;
 		$this->images 	= true;
 	}

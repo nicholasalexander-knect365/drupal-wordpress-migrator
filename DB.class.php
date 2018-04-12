@@ -22,20 +22,20 @@ class DB {
 
 		switch ($server) {
 			case 'vm':
-			    $this->credentials['wp'] = [
-			           'database' => 'newprod_local',
-			           'username' => 'root',
-			           'password' => 'root',
-			           'host' => 'localhost'
-			    ];
+				$this->credentials['wp'] = [
+					'database' => 'newprod_local',
+					'username' => 'root',
+					'password' => 'root',
+					'host' => 'localhost'
+				];
 
-			    $this->credentials['d7'] = [
-			           'database' => 'd7telematics',
-			           'username' => 'root',
-			           'password' => 'root',
-			           'host' => 'localhost'
-			    ];
-			    static::$wp_prefix = 'wp_38_';
+				$this->credentials['d7'] = [
+					'database' => 'd7telematics',
+					'username' => 'root',
+					'password' => 'root',
+					'host' => 'localhost'
+				];
+				static::$wp_prefix = 'wp_38_';
 				break;
 
 			case 'staging':
@@ -48,11 +48,11 @@ class DB {
 
 			default:
 				$this->credentials['wp'] = [
-					'database' => 'tuwp',
+					'database' => 'tuautowp',
 					'username' => 'tuauto',
 					'password' => 'tuauto',
 					'host' => 'localhost',
-			    	];
+				];
 
 				$this->credentials['d7'] = [
 					'database' => 'd7telematics',
@@ -60,7 +60,7 @@ class DB {
 					'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
 					'host' => 'localhost'
 				];
-				static::$wp_prefix = 'wp_';;
+				static::$wp_prefix = 'wp_';
 			break;
 		}
 
@@ -94,7 +94,7 @@ class DB {
 			$credentials['database']);
 
 		if ($this->connection->connect_error) {
-		    throw new Exception("\nConnection failed: " . $this->type . ' ' . $this->connection->connect_error . "\n");
+			throw new Exception("\nConnection failed: " . $this->type . ' ' . $this->connection->connect_error . "\n");
 		}
 	
 		return $this->connection;
@@ -184,7 +184,9 @@ class DB {
 	}
 
 	public function record($sql) {
+
 		$numRows = $this->query($sql);
+
 		if ($numRows > 1) {
 			throw new Exception('record query returned more rows than the expected single row: ' . $sql);
 		}
@@ -202,8 +204,9 @@ class DB {
 	}
 
 	public function getRecord() {
-	
+
 		if ($this->result) {
+
 			$row = $this->result->fetch_object();
 			return $row;
 		} else {

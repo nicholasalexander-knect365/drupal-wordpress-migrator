@@ -4,7 +4,10 @@ use PHPUnit\Framework\TestCase;
 //use PHPUnit\DbUnit\TestCaseTrait;
 
 require "DB.class.php";
+require "WPTermMeta.class.php";
 require "common.php";
+
+define('DRUPAL_WP', 'DRUPAL_WP');
 
 class MigratorTest extends TestCase {
 	
@@ -36,11 +39,17 @@ class MigratorTest extends TestCase {
 		$this->assertGreaterThan(0, count($records));
 	}
 
-	public function testContent() 
+	public function testWPContentExists() 
 	{
 		$this->connectDB();
 		$record = $this->wp->record("SELECT COUNT(*) as c FROM wp_posts");
-		var_dump($record);
-		$this->assertGreaterThan(0, $record->c);
+		$this->assertGreaterThan(0, (integer) $record->c);
+	}
+
+	public function testTermId() {
+		$this->connectDB();
+		$wp_termmeta = new WPTermMeta($this->wp);
+		$termMetaId = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
+		$this->assertGreaterThan(0, $termMetaId);
 	}
 }

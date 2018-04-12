@@ -124,54 +124,14 @@ class Taxonomy {
 
 		$this->initialise_regardless = $init;
 
-		if ($this->initialise_regardless && $this->termsAlreadyExist()) {
-			$this->cleanUp();
+		if ($this->initialise_regardless) { //} && $this->termsAlreadyExist()) {
+			Initialise::cleanUp($this->db, $this->verbose);
 		} else {
 			return;
 		}
 	}
 
-	private function removeTerms() {
 
-		$wp_terms = DB::wptable('terms');
-
-		$sql = "DELETE FROM $wp_terms WHERE term_id>1";
-		$this->db->query($sql);
-		$sql = "ALTER TABLE $wp_terms AUTO_INCREMENT = 2";
-		$this->db->query($sql);
-	}
-
-	private function cleanUp() {
-		if ($this->verbose) {
-			print "\nCleaning up...";
-		}
-		$this->removeTerms();
-
-		$wp_posts = DB::wptable('posts');
-		$wp_termmeta = DB::wptable('termmeta');
-		$wp_term_taxonomy = DB::wptable('term_taxonomy');
-		$wp_term_relationships = DB::wptable('term_relationships');
-
-		$sql = "DELETE FROM $wp_posts";
-		$this->db->query($sql);
-		$sql = "ALTER TABLE $wp_posts AUTO_INCREMENT = 1";
-		$this->db->query($sql);
-
-		$sql = "DELETE FROM $wp_termmeta";
-		$this->db->query($sql);
-		$sql = "ALTER TABLE $wp_term_taxonomy AUTO_INCREMENT = 1";
-		$this->db->query($sql);
-
-		$sql = "DELETE FROM $wp_term_taxonomy";
-		$this->db->query($sql);
-		$sql = "ALTER TABLE $wp_term_taxonomy AUTO_INCREMENT = 1";
-		$this->db->query($sql);
-
-		$sql = "DELETE FROM $wp_term_relationships";
-		$this->db->query($sql);
-		$sql = "ALTER TABLE $wp_term_relationships AUTO_INCREMENT = 1";
-		$this->db->query($sql);
-	}
 
 	// TERMS 
 	private function termsAlreadyExist() {
