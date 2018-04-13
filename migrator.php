@@ -29,7 +29,8 @@ define('DRUPAL_WP', 'DRUPAL_WP');
  * v101/2 import images
  * v102/3 options 
  * v104 node import
- * v105 fields import (includes tags, images and content_types)
+ * v105 fields export (includes tags, images and content_types)
+ * v106 fields import into wordpress
  */
 
 $maxChunk = 1000000;
@@ -55,11 +56,6 @@ foreach ($options->all as $opt) {
 }
 $options->showAll();
 
-// if ($options->get('defaults')) {
-// 	$options->setDefaults();
-// 	$options->showAll();
-// }
-
 if ($options->get('help')) {
 	die("\nHELP Mode\n\n");
 }
@@ -69,7 +65,7 @@ try {
 	$wp = new DB($server, 'wp');
 	$d7 = new DB($server, 'd7');
 } catch (Exception $e) {
-	die( 'DB ' . $e->getMessage());
+	die( 'DB connection error: ' . $e->getMessage());
 }
 
 if ($option['files']) {
@@ -293,49 +289,37 @@ if ($debug && $verbose) {
 }
 
 								preg_match('/(.*?)_(.*)/', $shorterField, $parts);
-// print($shorterField);
-// debug($parts, 0);
+								
 
-// not sure what this means....
-//   why do we get primary with nids that are not this nid??
-if ($parts[1]  && $parts[1] === 'primary') {
-	$nid_check = $data[1]->$field;
-	if ((integer) $nid_check === (integer) $node->nid) {
-		debug('nid matched ' . $data);
-		dd('check');
-	}
-}
+								// this does not trigger - may want to look at why?
+								if ($parts[1]  && $parts[1] === 'primary') {
+									$nid_check = $data[1]->$field;
+									if ((integer) $nid_check === (integer) $node->nid) {
+										debug('nid matched ' . $data);
+										dd('check');
+									}
+								}
 
 
-								// if (preg_match('/_event_/', $data[0])) {
-
-								// 	$event->$shorterField = $data[1]->$field;
-
-								// } else if (preg_match('/_report_/', $data[0])) {
-
-								// 	$event->$shorterField = $data[1]->$field;
-
-								// } else {
-
-								// 	debug('unknown object ' . $data[0]);
-								// }
 							}
 						}
-if ($debug && $verbose) {
-	if (count((array) $object)) {
-		debug($object);
-	}
-	if (count((array) $event)) {
-		print "\n";
-		print 'event:';
-		debug($event);
-	}
-	if (count((array) $report)) {
-		print "\n";
-		print 'report:';
-		debug($report);
-	}
-}
+
+						if ($debug && $verbose) {
+							if (count((array) $object)) {
+								debug($object);
+							}
+							if (count((array) $event)) {
+								print "\n";
+								print 'event:';
+								debug($event);
+							}
+							if (count((array) $report)) {
+								print "\n";
+								print 'report:';
+								debug($report);
+							}
+						}
+
 						$fieldUpdate = [];
 						foreach($object as $key => $value) {
 								$fieldUpdate[$key] = isset($value) ? $value : '';
@@ -343,92 +327,6 @@ if ($debug && $verbose) {
 
 						$postmeta->createFields($wpPostId, $fieldUpdate);
 					}
-							// switch ($data[0]) {
-							// 	case 'field_primary_event':
-							// 		$event->nid = $data[1]->field_primary_event_nid;
-							// 		break;
-							// 	case 'field_event_date':
-							// 		$event->start_date = date_format(date_create($data[1]->field_event_date_value), 'Y-m-d h:i:s');
-							// 		$event->end_date   = date_format(date_create($data[1]->field_event_date_value2), 'Y-m-d h:i:s');
-							// 		break;
-							// 	case 'field_event_location':
-							// 		$event->venue = $data[1]->field_event_location_value;
-							// 		break;
-							// 	case 'field_event_url':
-							// 		$event->url = $data[1]->field_event_url_url;
-							// 		break;
-							// 	case 'field_event_organiser':
-							// 		$event->organiser = $data[1]->field_event_organiser_value;
-							// 		break;
-							// 	case 'field_event_organiser_email':
-							// 		$event->organiser_email = $data[1]->field_event_organiser_email_email;
-							// 		break;
-							// 	case 'field_event_attendees':
-							// 		$event->attendees = $data[1]->field_event_attendees_value;
-							// 		break;
-
-							// 	case 'field_report_image_fid':
-							// 		$report->image_fid = $data[1]->field_report_image_fid;
-							// 		break;
-							// 	case 'field_report_image_alt':
-							// 		$report->image_alt = $data[1]->field_report_image_alt;
-							// 		break;
-							// 	case 'field_report_image_title':
-							// 		$report->image_title = $data[1]->field_report_image_title;
-							// 		break;
-							// 	case 'field_report_image_width':
-							// 		$report->image_width = $data[1]->field_report_image_width;
-							// 		break;
-							// 	case 'field_report_image_height':
-							// 		$report->image_height = $data[1]->field_report_image_height;
-							// 		break;
-
-							// 	case 'field_report_teaser_value':
-							// 		$report->teaser_value = $data[1]->field_report_teaser_value;
-							// 		break;
-							// 	case 'field_report_teaser_format':
-							// 		$report->teaser_format = $data[1]->field_report_teaser_format;
-							// 		break;
-
-							// 	case 'field_report_url_url':
-							// 		$report->report_url_url = $data[1]->field_report_url_url;
-							// 		break;								
-							// 	case 'field_report_url_title':
-							// 		$report->report_url_title = $data[1]->field_report_url_title;
-							// 		break;
-							// 	case 'field_report_url_attributes':
-							// 		$report->field_report_url_attributes = $data[1]->field_report_url_attributes;
-							// 		break;
-							// 	case 'field_report_teaser_format':
-							// 		$report->teaser_format = $data[1]->field_report_teaser_format;
-							// 		break;
-
-
-							// 	default:
-							// 		if (empty($unassigned[$data[0]])) {
-							// 			$unassigned[$data[0]] = 1;
-							// 		} else {
-							// 			$unassigned[$data[0]]++;
-							// 		}
-							// 		break;
-							// }
-	
-					// 	}
-					// }
-
-					// if (isset($event->start_date)) {
-
-						// $postmeta->createEventFields($wpPostId, [ 
-						// 	'start_date' 	=> isset($event->start_date) ? $event->start_date : '',
-						// 	'end_date' 		=> isset($event->end_date) ? $event->end_date : '',
-						// 	'venue'			=> isset($event->venue) ? $event->venue : '',
-						// 	'url'			=> isset($event->url) ? $event->url : '',
-						// 	'organiser' 	=> isset($event->organiser) ? $event->organiser : '',
-						// 	'organiser_email' => isset($event->organiser_email) ? $event->organiser_email : '',
-						// 	'attendees' 	=> isset($event->attendees) ? $event->attendees : ''
-						// ]);
-					// }
-
 				}
 			}
 		}
