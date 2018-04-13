@@ -39,6 +39,7 @@ class Options {
 
 	public function __construct() {
 		// these are the defaults, use options to override
+		$this->defaults 	= false;
 		$this->help  		= false;
 		$this->verbose 		= false;
 		$this->quiet   		= false;
@@ -57,15 +58,6 @@ class Options {
 		$this->imageStore 	= 'images/';
 		$this->clean  		= false;
 		$this->images 		= false;
-	}
-
-	public function show($opt) {
-		dd('show is deprecated');
-		if ($this->verbose) {
-
-		} else {
-
-		}
 	}
 
 	public function showAll() {
@@ -123,39 +115,39 @@ class Options {
 			foreach ($options as $option => $value) {
 
 				switch ($option) {
-					case 'p' :
+					case 'p':
 						$this->progress = true;
 						break;
 
-					case 'q' :
+					case 'q':
 						$this->quiet = true;
 						break;
 
-					case 'v' :
+					case 'v':
 						$this->verbose = true;
 						break;
 
-					case 'h' :
+					case 'h':
 						$this->help = true;
 						break;
 
-					case 'f' :
+					case 'f':
 						$this->files = true;
 						break;
 
-					case 'n' :
+					case 'n':
 						$this->nodes = true;
 						break;
 
-					case 't' :
+					case 't':
 						$this->taxonomy = true;
 						break;
 
-					case 'c' : 
+					case 'c':
 						$this->fields = true;
 						break;
 
-					case 'server' :
+					case 'server':
 						$this->server = $value;
 						break; 
 
@@ -171,11 +163,11 @@ class Options {
 						$this->drupalPath = $value;
 						break;
 
-					case 'imageStore' :
+					case 'imageStore':
 						$this->imageStore = $value;
 						break; 
 
-					case 'images' : 
+					case 'images':
 						$this->images = true;
 						break;
 
@@ -211,9 +203,6 @@ class Options {
 			if ($this->progress) {
 				$this->verbose = '.';
 			}
-
-		} else {
-			$this->setDefaults();
 		}
 	}
 }

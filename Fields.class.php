@@ -15,7 +15,9 @@ class Fields {
 
 	// config instances define the field name for the fid
 	public function getConfigInstance($fid) {
-		$sql = "SELECT id, field_name, entity_type, bundle, data, deleted FROM field_config_instance WHERE field_id=$fid";
+		$sql = "SELECT id, field_name, entity_type, bundle, data, deleted 
+				FROM field_config_instance 
+				WHERE field_id=$fid";
 		$records = $this->db->records($sql);
 		return $records;
 	}
@@ -27,7 +29,9 @@ class Fields {
 
 	public function getFieldDataBody() {
 		$nid = $this->nid;
-		$sql = "SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, body_value, body_summary, body_format FROM field_data_body WHERE entity_id=$nid";
+		$sql = "SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, body_value, body_summary, body_format 
+				FROM field_data_body 
+				WHERE entity_id=$nid";
 		$records = $this->db->records($sql);
 		if ($records && count($records) === 1) {
 			return $records[0];
@@ -51,7 +55,9 @@ class Fields {
 
 	public function getFieldImages() {
 		$nid = $this->nid;
-		$sql = "SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, field_image_fid, field_image_alt, field_image_title FROM field_data_field_image WHERE entity_id=$nid";
+		$sql = "SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, field_image_fid, field_image_alt, field_image_title 
+			FROM field_data_field_image 
+			WHERE entity_id=$nid";
 		$records = $this->db->records($sql);
 		if ($records && count($records) === 1) {
 			return $records[0];
@@ -61,7 +67,9 @@ class Fields {
 
 	public function getFieldComments() {
 		$nid = $this->nid;
-		$sql = "SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, comment_body_value, comment_body_format FROM field_data_comment_body WHERE entity_id=$nid";
+		$sql = "SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, comment_body_value, comment_body_format 
+			FROM field_data_comment_body 
+			WHERE entity_id=$nid";
 		$records = $this->db->records($sql);
 		if ($records && count($records) === 1) {
 			return $records[0];
