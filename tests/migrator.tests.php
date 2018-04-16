@@ -48,7 +48,13 @@ class MigratorTest extends TestCase {
 	{
 		$this->connectDB();
 		$record = $this->wp->record("SELECT COUNT(*) as c FROM wp_posts");
-		$this->assertGreaterThan(0, (integer) $record->c);
+		if (empty($record) || (integer) $record->c === 0) {
+			print "\nNo WP Posts exist yet.\n";
+			die();
+			$this->assertEquals(0, (integer) $record->c);
+		} else {
+			$this->assertGreaterThan(0, (integer) $record->c);
+		}
 	}
 
 	public function testTermId() {
@@ -62,7 +68,7 @@ class MigratorTest extends TestCase {
 		$this->connectDB();
 		print "\n\n* * * test Tags";
 
-$tags = [];
+		$tags = [];
 		foreach($tags as $tag) {
 			$items = $this->termExists('post_tag', $taxonomy);
 			if (empty($items)) {
@@ -122,15 +128,19 @@ $tags = [];
 
 	public function testTaxonomyTypesExist() {
 		$this->connectDB();
+		$this->checkTaxonomyType('channels');
 		$this->checkTaxonomyType('category');
 		$this->checkTaxonomyType('subject');
+		$this->checkTaxonomyType('type');
 		$this->checkTaxonomyType('brief');
 	}
 
 	public function testTaxonomyUse() {
 		$this->connectDB();
+		$this->checkTaxonomyUse('channels');
 		$this->checkTaxonomyUse('category');
 		$this->checkTaxonomyUse('subject');
+		$this->checkTaxonomyUse('type');
 		$this->checkTaxonomyUse('brief');
 	}
 }

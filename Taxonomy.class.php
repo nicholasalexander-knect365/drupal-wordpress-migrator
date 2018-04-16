@@ -402,16 +402,22 @@ class Taxonomy {
 	// testing
 	public function getTaxonomyList($type) {
 		switch ($type) {
+			case 'channels':
+				$taxonomies = ['connected-car',  'insurance', 'autoonmous', 'mobility', 'security',];
+				break;
 			case 'category';
-				$taxonomies = ['mobility', 'autonomous', 'fleet', 'infotainment', 'insurance', 'adas', 'telematics', 'electric-vehicles'];
+				$taxonomies = [ 'fleet', 'infotainment', 'adas', 'telematics', 'electric-vehicles'];
 				break;
 			case 'subject':
 				$taxonomies = ['user-experience-hmi', 'connected-car', 'security', 'data-analytics', 'artificial-intelligence', 'smart-cities', 'digital-transformation', 'investment-ma', 'regulation', 'commercial-vehicle'];
 				break;
+			case 'type':
+				$taxonomies = ['industry-insight', 'executive-viewpoint' ,'press-release', 'intelligence-type'];
+				break;
 			case 'brief':
 				$taxonomies = ['yes', 'no'];
 				break;
-			default: 
+			default:
 				die("\n" . $type . ' in testTaxonomyTypeExists has no implementation');
 		}
 		return $taxonomies;
