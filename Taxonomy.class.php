@@ -109,7 +109,7 @@ class Taxonomy {
 				$slug = 'channels';
 				break;
 		}	
-		return [$name, $slug];		
+		return [$name, $slug];
 	}
 
 	// more generic ... maps taxonmy types
@@ -398,4 +398,53 @@ class Taxonomy {
 		$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId);
 
 	}
+
+	// testing
+	public function getTaxonomyList($type) {
+		switch ($type) {
+			case 'category';
+				$taxonomies = ['mobility', 'autonomous', 'fleet', 'infotainment', 'insurance', 'adas', 'telematics', 'electric-vehicles'];
+				break;
+			case 'subject':
+				$taxonomies = ['user-experience-hmi', 'connected-car', 'security', 'data-analytics', 'artificial-intelligence', 'smart-cities', 'digital-transformation', 'investment-ma', 'regulation', 'commercial-vehicle'];
+				break;
+			case 'brief':
+				$taxonomies = ['yes', 'no'];
+				break;
+			default: 
+				die("\n" . $type . ' in testTaxonomyTypeExists has no implementation');
+		}
+		return $taxonomies;
+	}
+
+	// establishment of a taxonomy term
+	public function termExists($search, $taxonomy) {
+		$sql = "SELECT COUNT(*) AS c 
+				FROM wp_terms t
+				LEFT JOIN wp_term_taxonomy wtt ON t.term_id=wtt.term_id
+				WHERE t.slug LIKE '$taxonomy' AND wtt.taxonomy <> 'post_tag'";
+
+		$record = $this->db->record($sql);
+		if (is_null($record)) {
+			return 0;
+		}
+		return (integer) $record->c;
+	}
+
+	// 2. uses of a specific taxonomy without tags
+	public function countTaxonomyUse($taxonomy) {
+		$sql = "SELECT COUNT(*) AS c FROM wp_posts post
+				INNER JOIN wp_term_relationships wr ON wr.object_id=post.ID
+				LEFT JOIN wp_term_taxonomy wtt ON wr.term_taxonomy_id=wtt.term_id
+				LEFT JOIN wp_terms t ON t.term_id=wtt.term_id
+				WHERE t.slug LIKE '$taxonomy' and wtt.taxonomy <> 'post_tag'";
+
+		$record = $this->db->record($sql);
+		if (is_null($record)) {
+			return 0;
+		}
+		return (integer) $record->c;
+	}
+
+
 }

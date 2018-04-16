@@ -14,12 +14,13 @@ class DB {
 	private $result;
 	private $rows;
 
-	public function __construct($server = 'local', $type) {
+	public function __construct($server = 'local', $type, $verbose = false) {
 
 		$connection = [];
 
-		print "\n" . ucfirst($server) . ' : ' . $type . ' connect request...';
-
+		if ($verbose) {
+			print "\n" . ucfirst($server) . ' : ' . $type . ' connect request...';
+		}
 		switch ($server) {
 			case 'vm':
 				$this->credentials['wp'] = [
@@ -65,7 +66,7 @@ class DB {
 		}
 
 		$this->db = $this->connector($type);
-		if ($this->db) {
+		if ($this->db && $verbose) {
 			print "connected.";
 		}
 	}
@@ -190,8 +191,12 @@ class DB {
 		if ($numRows > 1) {
 			throw new Exception('record query returned more rows than the expected single row: ' . $sql);
 		}
-		$record = $this->getRecord();
-		return $record;
+		if ($numRows) {
+			$record = $this->getRecord();
+			return $record;
+		} else {
+			return null;
+		}
 	} 
 
 	public function records($sql) {
