@@ -66,16 +66,17 @@ class MigratorTest extends TestCase {
 
 	public function testTagsExist() {
 		$this->connectDB();
+		$taxonomy = new Taxonomy($this->wp);
 		print "\n\n* * * test Tags";
 
-		$tags = [];
+		$tags = $taxonomy->getTags();
 		foreach($tags as $tag) {
-			$items = $this->termExists('post_tag', $taxonomy);
+			$items = $taxonomy->tagExists($tag->slug);
 			if (empty($items)) {
 				print "\nPost TAG $taxonomy has NOT yet been used.";
-			} else {
 				$this->assertEquals(0, $items);
-				print "\nTerm $taxonomy used $items times.";
+			} else {
+				print "\nTerm ".$tag->slug." used $items times.";
 				$this->assertGreaterThan(0, $items);
 			}
 		}

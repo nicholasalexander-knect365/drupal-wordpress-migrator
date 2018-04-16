@@ -423,6 +423,27 @@ class Taxonomy {
 		return $taxonomies;
 	}
 
+	public function getTags() {
+		$sql = "SELECT t.*, wtt.* FROM wp_terms t
+				LEFT JOIN wp_term_taxonomy wtt ON t.term_id=wtt.term_id
+				WHERE wtt.taxonomy = 'post_tag'";
+		$records = $this->db->records($sql);
+		return $records;
+	}
+	// establishment of a taxonomy term
+	public function tagExists($search) {
+		$sql = "SELECT COUNT(*) AS c 
+				FROM wp_terms t
+				LEFT JOIN wp_term_taxonomy wtt ON t.term_id=wtt.term_id
+				WHERE t.slug LIKE '$search' AND wtt.taxonomy = 'post_tag'";
+
+		$record = $this->db->record($sql);
+		if (is_null($record)) {
+			return 0;
+		}
+		return (integer) $record->c;
+	}
+
 	// establishment of a taxonomy term
 	public function termExists($search, $taxonomy) {
 		$sql = "SELECT COUNT(*) AS c 
