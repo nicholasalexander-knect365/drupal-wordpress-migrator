@@ -16,28 +16,28 @@ You need:
 
 ## Do the following
 
-* Create the Wordpress Site instance and record its ID number
-* Add yourself as a user to the site
+1. Create the Wordpress Site instance and record its ID number
+2. Add yourself as a user to the site
 
-* Setup Apache/DNS as required so site is accessible
+3. Setup Apache/DNS as required so site is accessible
 
-* install the migrator tar xvfz migrator.tar.gz
-* make an image store directory ./images
+4. install the migrator tar xvfz migrator.tar.gz
+	* make an image store directory ./images
 
-* configure the database: 
-** edit DB.class.php and add a section for the staging/live server with the database credentials for the server
-** 
-* in the migrator directory, run the unit test:
-** phpunit tests/migrator.tests.php > unitest-prerun.txt
-* run the migrator, configure for the server, turn on verbose
-** php migrator.php --server=staging --drupalPath=/var/www/drupal7/tuauto --imageStore=/images --clean --images --init -v
-** import the images into the media library 
-*** (you may have to copy /images to a local machine to drag and drop them into the media library)
-*** images that occur in a post internally
+6. configure the database: 
+	* edit DB.class.php and add a section for the staging/live server with the database credentials for the server
+ 
+7. in the migrator directory, run the unit test:
+	*  phpunit tests/migrator.tests.php > unitest-prerun.txt
+	* run the migrator, configure for the server, turn on verbose
+	* php migrator.php --server=staging --drupalPath=/var/www/drupal7/tuauto --imageStore=/images --clean --images --init -v
+	* import the images into the media library 
+	* (you may have to copy /images to a local machine to drag and drop them into the media library)
+	* images that occur in a post internally
 
-** output shows progress
-* when it finishes, rerun the unit test
-** phpunit tests/migrator.tests.php > unittest-postrun.txt
+8. output shows progress
+	* when it finishes, rerun the unit test
+	* phpunit tests/migrator.tests.php > unittest-postrun.txt
 
 
 
