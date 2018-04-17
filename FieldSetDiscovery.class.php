@@ -2,7 +2,6 @@
 
 require_once "DB.class.php";
 
-
 abstract class FieldSetDiscovery {
 
 	protected $bundle;

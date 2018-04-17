@@ -22,18 +22,18 @@ class Options {
 	public $images;
 
 	public $all = [
-		'd' => 'defaults', 
-		'h' => 'help', 
-		'q' => 'quiet', 
-		'v' => 'verbose', 
-		'p' => 'progress', 
-		'f' => 'files', 
-		'n' => 'nodes', 
-		't' => 'taxonomy', 
-		'c' => 'fields', 
-		'init' => 'initialise', 
-		'clean' => 'clean', 
-		'images' => 'images'
+		'd' => 'defaults',
+		'h' => 'help',
+		'q' => 'quiet',
+		'v' => 'verbose',
+		'p' => 'progress',
+		'f' => 'files',
+		'n' => 'nodes',
+		't' => 'taxonomy',
+		'c' => 'fields',
+		'init' 		=> 'initialise',
+		'clean' 	=> 'clean',
+		'images' 	=> 'images'
 	];
 
 

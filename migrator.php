@@ -46,7 +46,6 @@ $s3bucket 	= $options->get('s3bucket');
 $drupalPath = $options->get('drupalPath');
 $imageStore = $options->get('imageStore');
 $server 	= $options->get('server');
-
 $verbose    = $options->get('verbose');
 
 $option = [];
@@ -114,12 +113,25 @@ $d7_fields = new Fields($d7);
 $fieldSet = new FieldSet($d7);
 $wp_fields = new Fields($wp);
 
+
+$drupal_nodes = null;
+
+if ($option['initialise']) {
+
+	// build the term_taxonomy if not already present
+	if ($wp_taxonomy->checkTerms()) {
+		$wp_taxonomy->buildTerms();
+	}
+	Initialise::purge($wp);
+	Initialise::cleanUp($wp);
+}
+
 // use termmeta to record nodeIds converted to wordpress IDs
 $wp_termmeta = new WPTermMeta($wp);
 $wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
 
 $nodeSource = 'drupal';
-if (isset($wp_termmeta_term_id) && !$option['nodes']) {
+if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$option['nodes'] && !$option['initialise'])) {
 	message("\nDrupal node data has already been imported to Wordpress.");
 	message("You can either clear it with the --init or -d[efaults] flag");
 	message("or the wp-posts will be used, and the other tables will be imported...\n");
@@ -134,16 +146,6 @@ if ($option['taxonomy']) {
 	$taxonomyNames = [];
 	$taxonomies = $d7_taxonomy->fullTaxonomyList();
 	$wp_taxonomy->createTerms($taxonomies);
-}
-
-$drupal_nodes = null;
-
-if ($option['initialise']) {
-	// build the term_taxonomy if not already present
-	if ($wp_taxonomy->checkTerms()) {
-		$wp_taxonomy->buildTerms();
-	}
-	Initialise::purge($wp);
 }
 
 if ($option['fields']) {

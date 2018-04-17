@@ -30,7 +30,13 @@ You need:
 7. in the migrator directory, run the unit test:
 	*  phpunit tests/migrator.tests.php > unitest-prerun.txt
 	* run the migrator, configure for the server, turn on verbose
-	* php migrator.php --server=staging --drupalPath=/var/www/drupal7/tuauto --imageStore=/images --clean --images --init -v
+	* php migrator.php --server=staging --drupalPath=/var/www/drupal7/tuauto --imageStore=images --clean --images --init --taxonomy --nodes -c -f -p
+
+DBUG: --init did not seem to work (wordpress has data in it error)
+      -d works if you edit the drupalPath in migrator.php and edit DB to select the right server
+
+
+
 	* import the images into the media library 
 	* (you may have to copy /images to a local machine to drag and drop them into the media library)
 	* images that occur in a post internally
@@ -38,8 +44,6 @@ You need:
 8. output shows progress
 	* when it finishes, rerun the unit test
 	* phpunit tests/migrator.tests.php > unittest-postrun.txt
-
-
 
 # Versions 
 ## History
@@ -56,5 +60,6 @@ You need:
 
 ## Release versions
 * STAGING RELEASE 17 April 2018
-* TAG tag prerelease03
+* v107 addresses images and featured images
+* TBD: TAG tag prerelease03
 
