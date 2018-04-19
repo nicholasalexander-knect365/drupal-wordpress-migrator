@@ -97,7 +97,7 @@ class Options {
 		if (count($argv) > 1) {
 
 			$shortOpts = 'dvqpfntch';
-			$longOpts  = ['server:', 'drupalPath:', 'imageStore:', 'init', 'clean', 'images'];
+			$longOpts  = ['server:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'images'];
 			$options = getopt($shortOpts, $longOpts);
 
 			if (empty($options)) {
@@ -151,7 +151,7 @@ class Options {
 						$this->server = $value;
 						break; 
 
-					case 'init':
+					case 'initialise':
 						$this->initialise = true;
 						break;
 
@@ -185,7 +185,7 @@ class Options {
 				print "\n --drupalPath=set Drupal path";
 				print "\n --imageStore=set images directory";
 				print "\nControls:";
-				print "\n --init   ... clears ALL data";
+				print "\n --initialise   ... clears ALL data";
 				print "\n --clean  ... strips html content";
 				print "\n --images ... clears default images directory";
 				print "\n --noFiles=[no files]\n";

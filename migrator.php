@@ -20,21 +20,8 @@ require "common.php";
 
 define('DRUPAL_WP', 'DRUPAL_WP');
 
-/*
- * v100 while adding new features,
- * maintain old features:
- * but turn them on selectively
- * for testing new features
- *
- * v101/2 import images
- * v102/3 options 
- * v104 node import
- * v105 fields export (includes tags, images and content_types)
- * v106 fields import into wordpress
- */
-
 $maxChunk = 1000000;
-$init = true;
+//$init = true;
 
 $debug = false;
 
@@ -67,7 +54,9 @@ try {
 	die( 'DB connection error: ' . $e->getMessage());
 }
 
+// the files option is required to clear images
 if ($option['files']) {
+	// the images option clears images
 	if ($option['images']) {
 		if (is_dir($imageStore)) {
 			$files = glob($imageStore . '/*');
@@ -98,8 +87,8 @@ if ($option['files']) {
 	}
 }
 
-$wp_taxonomy = new Taxonomy($wp, $verbose);
-$d7_taxonomy = new Taxonomy($d7);
+$wp_taxonomy = new Taxonomy($wp, $options);
+$d7_taxonomy = new Taxonomy($d7, $options);
 
 // If the wordpress instance of Taxonomy needs to get drupal data: 
 $wp_taxonomy->setDrupalDb($d7);
@@ -117,13 +106,13 @@ $wp_fields = new Fields($wp);
 $drupal_nodes = null;
 
 if ($option['initialise']) {
+	$initialise = new Initialise($wp, $options);
 
 	// build the term_taxonomy if not already present
 	if ($wp_taxonomy->checkTerms()) {
 		$wp_taxonomy->buildTerms();
 	}
-	Initialise::purge($wp);
-	Initialise::cleanUp($wp);
+	$initialise->cleanUp($wp);
 }
 
 // use termmeta to record nodeIds converted to wordpress IDs
@@ -141,7 +130,6 @@ if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$option['nodes'] &&
 }
 
 if ($option['taxonomy']) {
-	$wp_taxonomy->initialise($init);
 	$vocabularies = $d7_taxonomy->getVocabulary();
 	$taxonomyNames = [];
 	$taxonomies = $d7_taxonomy->fullTaxonomyList();
@@ -151,7 +139,7 @@ if ($option['taxonomy']) {
 if ($option['fields']) {
 	$records = $fieldSet->getFieldData();
 	$fieldTables = [];
-	foreach($records as $key => $numberFound) {
+	foreach ($records as $key => $numberFound) {
 		$fields = $fieldSet->getFieldData($key);
 		foreach ($fields as $field) {
 			$fieldTables[] = $key . '_' . $field;
@@ -180,9 +168,11 @@ if ($verbose) {
 
 $unassigned = [];
 
+$TESTLIMIT = 3;
+
 for ($c = 0; $c < $chunks; $c++) {
 
-	$drupal_nodes = $d7_node->getNodeChunk();
+	$drupal_nodes = $d7_node->getNodeChunk($TESTLIMIT);
 
 	if (isset($drupal_nodes) && count($drupal_nodes)) {
 

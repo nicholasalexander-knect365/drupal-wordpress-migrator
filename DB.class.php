@@ -22,6 +22,7 @@ class DB {
 			print "\n" . ucfirst($server) . ' : ' . $type . ' connect request...';
 		}
 		switch ($server) {
+			// vm is a replication of the live environment
 			case 'vm':
 				$this->credentials['wp'] = [
 					'database' => 'newprod_local',
@@ -39,14 +40,46 @@ class DB {
 				static::$wp_prefix = 'wp_38_';
 				break;
 
+			// dev user is a replication of staging build, to test rebuilds
+			case 'dev':
+				$this->credentials['wp'] = [
+					'database' => 'telecoms_dev',
+					'username' => 'dev',
+					'password' => '2j34kh342342',
+					'host' => 'localhost'
+				];
+				$this->credentials['d7'] = [
+					'database' => 'd7telematics',
+					'username' => 'root',
+					'password' => 'root',
+					'host' => 'localhost'
+				];
+				static::$wp_prefix = 'wp_39_';
+				break;
+
+			// developer does not build - read only access to wordpress
+			case 'developer':
+				$this->credentials['wp'] = [
+					'database' => 'telecoms_dev',
+					'username' => 'developer',
+					'password' => 'hkjhkjh234ks7df89s7df9',
+					'host' => '192.168.26.1'
+				];
+				static::$wp_prefix = 'wp_39_';
+				break;
+
 			case 'staging':
 				die('Staging server test: no database defined!');
+				static::$wp_prefix = 'wp_39_';
 				break;
 
 			case 'live':
 				die('LIVE server: no database defined!');
+				static::$wp_prefix = 'wp_39_';
 				break;
 
+			// development in local environment using a specific dataabse
+			// case 'tuauto':
 			default:
 				$this->credentials['wp'] = [
 					'database' => 'tuautowp',

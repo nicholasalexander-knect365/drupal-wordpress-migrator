@@ -65,10 +65,14 @@ class Node {
 		$limit = $this->limit;
 	}
 
-	public function getNodeChunk() {
+	public function getNodeChunk($limiter = null) {
 		
 		$start = $this->start;
-		$limit = $this->limit;
+		if ($limiter) {
+			$limit = $limiter;
+		} else {
+			$limit = $this->limit;
+		}
 
 		$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content,p.field_precis_value as precis
 				FROM node n

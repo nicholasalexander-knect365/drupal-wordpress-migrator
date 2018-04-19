@@ -11,8 +11,6 @@ class Taxonomy {
 
 	public $db;
 	public $drupalDB;
-	private $verbose;
-	private $initialise_regardless;
 
 	private $mapped = [
 		'category' 					=> 'Category',
@@ -45,12 +43,11 @@ class Taxonomy {
 	];
 
 	public $terms = [];
+	public $options;
 
-
-	public function __construct($db, $verbose = true) {
+	public function __construct($db, $options) {
 		$this->db = $db;
-		$this->verbose = $verbose;
-		$this->initialise_regardless = false;
+		$this->options = $options;
 	}
 
 	public function setDrupalDb($db) {
@@ -58,16 +55,9 @@ class Taxonomy {
 	}
 
 	public function __destroy() {
-		if ($this->verbose) {
+		if ($this->options->verbose) {
 			print "\nFinished\n";
 		}
-	}
-
-	public function setVerbose() {
-		$this->verbose = true;
-	}
-	public function isVerbose() {
-		return $this->verbose;
 	}
 
 
@@ -119,31 +109,14 @@ class Taxonomy {
 	}
 
 
-	// initialisation functions
-	public function initialise($init = false) {
-
-		$this->initialise_regardless = $init;
-
-		if ($this->initialise_regardless) { //} && $this->termsAlreadyExist()) {
-			Initialise::cleanUp($this->db, $this->verbose);
-		} else {
-			return;
-		}
-	}
-
-
-
 	// TERMS 
 	private function termsAlreadyExist() {
 
 		$wp_terms = DB::wptable('terms');
 
 		$this->db->query("SELECT COUNT(*) as c from $wp_terms");
-
 		$item = $this->db->getRecord();
-
 		if ((integer) $item->c > 1) {
-
 			return true;
 		}
 		return false;
@@ -202,14 +175,10 @@ class Taxonomy {
 
 		$wp_terms = DB::wptable('terms');
 
-		if ($this->termsAlreadyExist()) {
-			$this->removeTerms();
-		}
-
-		if ($this->verbose === true) {
+		if ($this->options->verbose === true) {
 			print "\nCreating " . count($taxonomies) . " taxonomy terms";
-		} else if (is_string($this->verbose)) {
-			print $this->verbose;
+		} else if (is_string($this->options->verbose)) {
+			print $this->options->verbose;
 		}
 
 		foreach ($taxonomies as $taxonomy) {
@@ -303,7 +272,9 @@ class Taxonomy {
 
 	// wp only
 	private function makeTermMeta($term_id, $name, $description, $postId) {
+
 			$wp_termmeta = DB::wptable('termmeta');
+
 			$meta_key = addslashes($name);
 			$meta_value = addslashes($description);
 
@@ -385,7 +356,7 @@ class Taxonomy {
 		$termData = $this->getTermData($taxonomy);
 		$term_id = $taxonomy->tid;
 
-		if ($this->verbose > 1) {
+		if ($this->options->verbose > 1) {
 			print "\nMaking Wordpress Term Data for $term_id";
 		}
 
