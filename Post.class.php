@@ -229,8 +229,7 @@ class Post {
 			$values[$field] = $value;
 		}
 
-		$sql = "REPLACE into $wp_posts (" . implode(', ', array_keys($values)) . ") VALUES ('" . implode("', '", $values) ."')";
-
+		$sql = "INSERT into $wp_posts (" . implode(', ', array_keys($values)) . ") VALUES ('" . implode("', '", $values) ."')";
 		$this->db->query($sql); 
 		$post_id = $this->db->lastInsertId();
 

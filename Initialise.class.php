@@ -45,8 +45,7 @@ class Initialise {
 			$this->resetCounter($db, $wp_term_relationships);
 
 			$sql = "DELETE FROM $wp_posts 
-					WHERE post_type <> 'nav_menu_item' 
-					  AND post_type <> 'page'";
+					WHERE post_type <> 'nav_menu_item'";
 			$db->query($sql);
 			$this->resetCounter($db, $wp_posts);
 
