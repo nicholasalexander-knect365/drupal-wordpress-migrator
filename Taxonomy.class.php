@@ -184,11 +184,11 @@ class Taxonomy {
 		foreach ($taxonomies as $taxonomy) {
 
 			$name = $this->makeWPTermName($taxonomy->name);
-			if (strtolower($taxonomy->type) !== 'tags') {
+			// if (strtolower($taxonomy->type) !== 'tags') {
 				$slug = $this->slugify($name);
-			} else {
-				$slug = 'post_tag';
-			}
+			// } else {
+			// 	$slug = 'post_tag';
+			// }
 			$term_group = 0;
 
 			$sql = "INSERT INTO $wp_terms (name, slug, term_group)
@@ -360,10 +360,10 @@ class Taxonomy {
 			print "\nMaking Wordpress Term Data for $term_id";
 		}
 
-		if (strtolower($taxonomy->category) === 'tags') {
+		// if (strtolower($taxonomy->category) === 'tags') {
 
-			$taxonomy->slug = 'post_tag';
-		}
+		// 	$taxonomy->slug = 'tag';
+		// }
 
 		$term_taxonomy_id = $this->makeTermTaxonomy($taxonomy);
 		$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId);

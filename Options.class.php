@@ -31,7 +31,7 @@ class Options {
 		'n' => 'nodes',
 		't' => 'taxonomy',
 		'c' => 'fields',
-		'init' 		=> 'initialise',
+		'initialise'=> 'initialise',
 		'clean' 	=> 'clean',
 		'images' 	=> 'images'
 	];

@@ -14,37 +14,6 @@ class Initialise {
 		$this->options = $options;
 	}
 
-	// public function preserveMenuTaxonomy() {
-
-	// 	$wp_terms = DB::wptable('terms');
-	// 	$wp_posts = DB::wptable('posts');
-	// 	$wp_term_taxonomy = DB::wptable('term_taxonomy');
-
-	// 	$sql = "SELECT * FROM $wp_terms AS t 
-	// 			LEFT JOIN $wp_term_taxonomy AS tt ON tt.term_id = t.term_id
- // 				WHERE tt.taxonomy = 'nav_menu'";
- // 		$this->menus = $this->db->records($sql);
-	// }
-
-	// public function createMenuTaxonomy() {
-		
-	// 	$wp_terms = DB::wptable('terms');
-	// 	$wp_posts = DB::wptable('posts');
-	// 	$wp_term_taxonomy = DB::wptable('term_taxonomy');
-
-	// 	if (isset($this->menus) && count($this->menus)) {
-	// 		foreach ($this->menus as $menu) {
-	// 			$sqlStr = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES (%d, %s, %s, %d, %d)";
-	// 			$sql = sprintf($sqlStr, $menu->term_id, $menu->taxonomy, '', $menu->parent, $menu->count);
-	// 			$this->db->query($sql);
-
-	// 			$sqlStr = "INSERT INTO $wp_terms (name, slug, term_group) VALUES (%s, %s, %d)";
-	// 			$sql = sprintf($sqlStr, $menu->name, $menu->slug, $menu->term_group);
-	// 			$this->db->query($sql);
-	// 		}
-	// 	}
-	// }
-
 	private function resetCounter($db, $table) {
 		$sql = "SELECT COUNT(*) AS c FROM $table";
 		$record = $db->record($sql);
@@ -82,21 +51,21 @@ class Initialise {
 			$this->resetCounter($db, $wp_posts);
 
 			$sql = "DELETE $wp_terms 
-					FROM $wp_terms t
-					INNER JOIN $wp_term_taxonomy tx ON tx.term_id=t.term_id
-					WHERE t.term_id>1 AND tx.taxonomy <> 'nav_menu'";
+					FROM $wp_terms 
+					INNER JOIN $wp_term_taxonomy ON $wp_term_taxonomy.term_id=$wp_terms.term_id
+					WHERE $wp_terms.term_id > 1 AND $wp_term_taxonomy.taxonomy <> 'nav_menu'";
 			$db->query($sql);
 			$this->resetCounter($db, $wp_terms);
-
+// dd(DB::strip($sql));
 			$sql = "DELETE $wp_termmeta 
-					FROM $wp_termmeta tm
-					INNER JOIN $wp_term_taxonomy tx on tm.term_id=tx.term_id
-					LEFT JOIN $wp_terms t ON t.term_id=tm.term_id
-					WHERE tx.taxonomy <> 'nav_menu'";
+					FROM $wp_termmeta 
+					INNER JOIN $wp_term_taxonomy ON $wp_termmeta.term_id=$wp_term_taxonomy.term_id
+					LEFT JOIN $wp_terms ON $wp_terms.term_id=$wp_termmeta.term_id
+					WHERE $wp_term_taxonomy.taxonomy <> 'nav_menu'";
 			$db->query($sql);
 			$this->resetCounter($db, $wp_termmeta);
 
-			$sql = "DELETE FROM $wp_term_taxonomy WHERE taxonomy <> 'nav_menu";
+			$sql = "DELETE FROM $wp_term_taxonomy WHERE taxonomy <> 'nav_menu'";
 			$db->query($sql);
 			$this->resetCounter($db, $wp_term_taxonomy);
 
