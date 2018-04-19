@@ -52,7 +52,6 @@ class Initialise {
 		$recordCount++;
 		$sql = "ALTER TABLE $table AUTO_INCREMENT = $recordCount";
 		$db->query($sql);
-debug($sql);
 	}
 
 	public function cleanUp($db) {
@@ -60,63 +59,25 @@ debug($sql);
 		if ($this->options->verbose) {
 			print "\nCleaning up...";
 		}
-		// full initialise clears everything
+
 		if ($this->options->initialise) {
 
-			// preserve menus
-			//$this->preserveMenuTaxonomy();
-
-// 			$sql = "SELECT p.* 
-// 					FROM wp_posts AS p 
-// 					LEFT JOIN wp_term_relationships AS tr ON tr.object_id = p.ID
-// 					LEFT JOIN wp_term_taxonomy AS tt ON tt.term_taxonomy_id = tr.term_taxonomy_id
-// 					WHERE p.post_type = 'nav_menu_item' 
-// 					  AND tt.taxonomy = 'nav_menu'";
-// dd(DB::strip($sql));
-//					  AND tt.term_id = termIdFortheMenus...";
 			$wp_posts = DB::wptable('posts');
 			$wp_termmeta = DB::wptable('termmeta');
 			$wp_term_taxonomy = DB::wptable('term_taxonomy');
 			$wp_term_relationships = DB::wptable('term_relationships');
 			$wp_terms = DB::wptable('terms');
 
-			// //$sql = "DELETE $wp_term_relationships 
-			// $sql = "SELECT *
-			// 		FROM $wp_term_relationships tr
-			// 		LEFT JOIN $wp_posts p ON p.ID=tr.object_id
-			// 		LEFT JOIN $wp_term_taxonomy tt on tt.term_taxonomy_id=tr.term_taxonomy_id
-			// 		WHERE p.post_type <> 'nav_menu_item'";
-
 			$sql = "DELETE $wp_term_relationships 
 					FROM $wp_term_relationships 
 					INNER JOIN $wp_posts on $wp_posts.ID=$wp_term_relationships.object_id
 					WHERE $wp_posts.post_type <> 'nav_menu_item'";
-
-
-
 			$db->query($sql);
-
 			$this->resetCounter($db, $wp_term_relationships);
-
-			// $sql = "SELECT COUNT(*) AS c FROM $wp_term_relationships";
-			// $record = $db->record($sql);
-			// $recordCount = $record->c;
-			// $recordCount++;
-			// $sql = "ALTER TABLE $wp_term_relationships AUTO_INCREMENT = $recordCount";
-			// $db->query($sql);
 
 			$sql = "DELETE FROM $wp_posts WHERE post_type <> 'nav_menu_item'";
 			$db->query($sql);
-
 			$this->resetCounter($db, $wp_posts);
-
-			// $sql = "SELECT COUNT(*) AS c FROM $wp_posts";
-			// $record = $db->record($sql);
-			// $recordCount = $record->c;
-			// $recordCount++;
-
-			// $sql = "ALTER TABLE $wp_posts AUTO_INCREMENT = $recordCount";
-			// $db->query($sql);
 
 			$sql = "DELETE $wp_terms 
 					FROM $wp_terms t
@@ -136,15 +97,6 @@ debug($sql);
 			$sql = "DELETE FROM $wp_term_taxonomy WHERE taxonomy <> 'nav_menu";
 			$db->query($sql);
 			$this->resetCounter($db, $wp_term_taxonomy);
-			// $sql = "SELECT COUNT(*) AS c FROM $wp_term_taxonomy";
-			// $record = $db->record($sql);
-			// $recordCount = $record->c;
-			// $recordCount++;
-			// $sql = "ALTER TABLE $wp_term_taxonomy AUTO_INCREMENT = $recordCount";
-			// $db->query($sql);
-
-			// reestablish menus
-			//$this->createMenuTaxonomy();
 
 		}
 	}
