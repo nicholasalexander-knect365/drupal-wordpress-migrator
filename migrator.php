@@ -168,7 +168,8 @@ if ($verbose) {
 
 $unassigned = [];
 
-$TESTLIMIT = 3;
+// set a value ONLY for a test version that only does a few posts
+$TESTLIMIT = null;
 
 for ($c = 0; $c < $chunks; $c++) {
 
