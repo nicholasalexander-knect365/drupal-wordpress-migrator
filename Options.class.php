@@ -31,6 +31,7 @@ class Options {
 		'n' => 'nodes',
 		't' => 'taxonomy',
 		'c' => 'fields',
+		'acf' => 'fields',
 		'initialise'=> 'initialise',
 		'clean' 	=> 'clean',
 		'images' 	=> 'images'
@@ -97,7 +98,7 @@ class Options {
 		if (count($argv) > 1) {
 
 			$shortOpts = 'dvqpfntch';
-			$longOpts  = ['server:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'images'];
+			$longOpts  = ['server:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'images', 'acf'];
 			$options = getopt($shortOpts, $longOpts);
 
 			if (empty($options)) {
@@ -144,6 +145,7 @@ class Options {
 						break;
 
 					case 'c':
+					case 'acf':
 						$this->fields = true;
 						break;
 
@@ -196,7 +198,7 @@ class Options {
 				print "\n-f Files (Images)";
 				print "\n-n Nodes";
 				print "\n-t Taxonomy";
-				print "\n-c Field Content";
+				print "\n-c Field Content (or use --acf)";
 				print "\n";
 			}
 

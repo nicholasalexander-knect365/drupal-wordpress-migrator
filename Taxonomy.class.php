@@ -29,7 +29,7 @@ class Taxonomy {
 		'insurance telematics' 		=> 'Insurance',
 		'safety, adas & autonomous'	=> 'ADAS',
 		'telematics for evs'		=> 'Electric Vehicles',
-		'navigation and lbs'		=> 'Uncategorised'
+		'navigation and lbs'		=> 'Navigation'
 
 
 	];
