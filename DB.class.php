@@ -129,12 +129,18 @@ class DB {
 		}
 		$this->wpMultiSiteConfig($this->config->project);
 
-		if (static::$wp_prefix === 'wp_') {
-			print "\nSingle site configuration (test)";
-		} else if (!preg_match('/^wp_[\d]{1,2}_$/', static::$wp_prefix)) {
-			throw new Exception('wp prefix format looks incorrect: ' . static::$wp_prefix . ' in multisite config');
+		if ($this->type === 'wp') {
+			if (static::$wp_prefix === 'wp_') {
+				print "\nWordpress single site configuration";
+			} else if (!preg_match('/^wp_[\d]+_$/', static::$wp_prefix)) {
+				throw new Exception('wp prefix format looks incorrect: ' . static::$wp_prefix . ' in multisite config');
+			} else {
+				print "\nWordpress multi-site configuration: " . static::$wp_prefix;
+			}
+		} else if ($this->type === 'd7') {
+			print "\nDrupal 7 configured database connection.";
 		} else {
-			print "\nMulti site configuration: " . static::$wp_prefix;
+			throw new Exception($this->type . ' database configuration supported?');
 		}
 	}
 

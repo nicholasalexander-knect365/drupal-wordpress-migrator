@@ -14,6 +14,7 @@ class Files {
 	public $connection;
 	public $drupalPath;
 	public $imageStore;
+	public $imagesDestination;
 	private $verbose = false;
 	public $s3Bucket = 'http://pentontuautodrupalfs.s3.amazonaws.com';
 
@@ -61,6 +62,76 @@ class Files {
 		}
 	}
 
+	public function setImagesDestination($config) {
+
+		$wordpressDirectory = $config->wordpressPath . '/wp-content/';
+
+		if ($config->dbPrefix === 'wp_') {
+			$wordpressDirectory .= 'uploads';
+		} else {
+			preg_match('/wp_([\d]+)_/', $config->dbPrefix, $match);
+			$id = $match[1];
+			$wordpressDirectory .= sprintf('blogs.dir/%d/files', (integer) $id);
+		}
+		$this->imagesDestination = $wordpressDirectory;
+	}
+
+	private function source($uri) {
+		
+		if (preg_match('/^([\w]+):\/\//', $uri, $matched)) {
+			return $matched[1];
+		} else {
+			throw new Exception('Unsupported image link: ' . $uri);
+		}
+	}
+
+	private function storeImage($file) {
+
+		$fileType = $this->source($file->uri);
+
+		switch ($fileType) {
+			case 'public' :
+				$path = $this->drupalPath . '/sites/default/files/' . $file->filename;
+				if ($this->verbose === true) {
+					print "\nCopying image ".$path;
+				}
+				if (file_exists($path)) {	
+					if (!copy($path, $this->imageStore . '/' . $file->filename)) {
+						throw new Exception('could not copy ' . $path);
+					}
+				} else {
+					print "\n$path does not exist";
+				}
+				break;
+
+			case 's3':
+				$path = $this->s3Bucket . '/' . $file->filename;
+				try {
+					$fileData = file_get_contents($path);
+					if (strlen($fileData) > 14) {
+						if (is_string($this->verbose)) {
+							print $this->verbose;
+						} else if ($this->verbose === true) {
+							print "\nImage data size: " . strlen($fileData);
+						}
+						$fd = fopen($this->imageStore . '/' . $file->filename, 'w+');
+						fputs($fd, $fileData);
+						fclose($fd);							
+					}
+					if ($this->verbose === true) {
+						print "\nGetting s3 image ".$path;
+					}
+				} catch (Exception $e) {
+					die("could not get file ".$e->getMessage());
+				}
+				break;
+
+			default: 
+				print "\nDo not know how to get this image " . $path . " type is " . $fileType;
+		}
+	}
+
+
 	private function fileList($nid) {
 
 		$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename as filename, fm.uri as uri, fm.filesize, fm.status, fm.timestamp 
@@ -72,17 +143,6 @@ class Files {
 
 		return $files;
 	} 
-
-
-	private function source($uri) {
-		
-		if (preg_match('/^([\w]+):\/\//', $uri, $matched)) {
-			return $matched[1];
-		} else {
-			throw new Exception('Unsupported image link: ' . $uri);
-		}
-	}
-
 
 	public function getFiles($nid) {
 
@@ -98,61 +158,47 @@ class Files {
 		});
 
 		try {
-			
 			if ($files = $this->fileList($nid)) {
-
 				foreach ($files as $file) {
-
-					$fileType = $this->source($file->uri); 
-					
-					switch ($fileType) {
-
-						case 'public' :
-							$path = $this->drupalPath . '/sites/default/files/' . $file->filename;
-							if ($this->verbose === true) {
-								print "\nCopying image ".$path;
-							}
-							if (file_exists($path)) {	
-								if (!copy($path, $this->imageStore . '/' . $file->filename)) {
-									throw new Exception('could not copy ' . $path);
-								}
-							} else {
-								print "\n$path does not exist";
-							}
-							break;
-
-						case 's3':
-							$path = $this->s3Bucket . '/' . $file->filename;
-							try {
-								$fileData = file_get_contents($path);
-								if (strlen($fileData) > 14) {
-									if (is_string($this->verbose)) {
-										print $this->verbose;
-									} else if ($this->verbose === true) {
-										print "\nImage data size: " . strlen($fileData);
-									}
-									$fd = fopen($this->imageStore . '/' . $file->filename, 'w+');
-									fputs($fd, $fileData);
-									fclose($fd);							
-								}
-								if ($this->verbose === true) {
-									print "\nGetting s3 image ".$path;
-								}
-							} catch (Exception $e) {
-								die("could not get file ".$e->getMessage());
-							}
-							break;
-
-						default: 
-							print "\nDo not know how to get this image " . $path . " type is " . $fileType;
-					}
+					$this->storeImage($file);
 				}
 			}
 		} catch (ErrorException $e) {
 			print("did not get file ".$e->getMessage());
 		}
-
 		return $files;
+	}
+
+	public function moveFile($fileObject) {
+
+// the images destination is futher split by the assets timestamp...
+
+		$source = $this->imageStore . $fileObject->filename;
+
+		// get the year and month from the timestamp
+		$year = date('Y', $fileObject->timestamp);
+		$month = date('m', $fileObject->timestamp); 
+		$destination = sprintf('%s/%d/%d', $this->imagesDestination, $year, $month);
+		// does the destination directory exist?
+		if (!file_exists($destination)) {
+			try {
+				debug('making directory ' . $destination);
+				mkdir($destination, 0775, true);
+				chgrp($destination, 'www-data');
+			} catch(Exception $e) {
+				throw new Exception('can not make a directory for ' . $destination . " " .$e->getMessage());
+			}
+		}
+		$destination =  sprintf('%s/%d/%d', $this->imagesDestination, $year, $month);
+		$destinationFilename = $destination . '/' . $fileObject->filename;
+
+		try {
+			debug('MOVE ' . $source . ' >>TO>> ' . $destinationFilename);
+			rename($source, $destinationFilename);
+			chmod($destinationFilename, 0664);
+		} catch(Exception $e) {
+			throw new Exception('Problem writing to file '.$destinationFilename . " " . $e->getMessage());
+		}
 	}
 
 	/* 

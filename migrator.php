@@ -59,6 +59,8 @@ try {
 $wp->configure($options);
 $d7->configure($options);
 
+
+
 // the files option is required to clear images
 if ($option['files']) {
 	// the images option clears images
@@ -81,8 +83,12 @@ if ($option['files']) {
 		'progress' 	=> $option['progress']
 	]);
 
+	$options->dbPrefix = DB::$wp_prefix;
+
 	$files->setDrupalPath($drupalPath);
 	$files->setImageStore($imageStore);
+	$files->setImagesDestination($options);
+
 	if ($verbose) {
 		print "\nimages will be imported to $imageStore";
 	}
@@ -106,7 +112,6 @@ $wp_post = new Post($wp);
 $d7_fields = new Fields($d7);
 $fieldSet = new FieldSet($d7);
 $wp_fields = new Fields($wp);
-
 
 $drupal_nodes = null;
 
@@ -201,23 +206,35 @@ for ($c = 0; $c < $chunks; $c++) {
 			}
 
 			if ($option['files']) {
-				$images = $files->getFiles($node->nid);
-				if ($images) {
-					$largest = null;
 
-					foreach ($images as $image) {
-						// get all sizes for this image
-						$best = $files->getBestVersion($image->filename);
-
-						// where to store the images for this post?
-						// move the image into the wordpress location
-						// set the featured image
-
-						if (!$option['quiet'] && !$option['progress'] && ($verbose === true || $files->isVerbose())) {
-							print "\n" . $best->fid . ' ' . $best->type . ' ' . $best->filename . ' ' . $best->uri . "\n";
-						}
-					}
+				// getFiles stores a local copy
+				$fileSet = $files->getFiles($node->nid);
+				foreach ($fileSet as $file) {
+					debug($file);
+					$files->moveFile($file);
 				}
+
+				// fileSet may contain one more more images and other media assets (mp3s)
+// 				if ($images) {
+
+// 					$largest = null;
+// if (count($images) > 1) {
+// 	debug($images);
+// }
+// 					foreach ($images as $image) {
+// 						// get all sizes for this image
+// 						$best = $files->getBestVersion($image->filename);
+// 						//$files->moveImage($best);
+
+// 						// where to store the images for this post?
+// 						// move the image into the wordpress location
+// 						// set the featured image
+
+// 						if (!$option['quiet'] && !$option['progress'] && ($verbose === true || $files->isVerbose())) {
+// 							print "\n" . $best->fid . ' ' . $best->type . ' ' . $best->filename . ' ' . $best->uri . "\n";
+// 						}
+// 					}
+// 				}
 			}
 
 			if ($option['taxonomy']) {
