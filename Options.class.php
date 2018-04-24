@@ -9,6 +9,7 @@ class Options {
 	
 	public $initialise;
 	public $server;
+	public $project;
 
 	public $nodes;
 	public $taxonomy;
@@ -16,10 +17,13 @@ class Options {
 	public $fields;
 
 	public $s3bucket;
+	public $wordpressPath;
 	public $drupalPath;
 	public $imageStore;
 	public $clean;
 	public $images;
+
+	public $sqlDebug;
 
 	public $all = [
 		'd' => 'defaults',
@@ -32,11 +36,11 @@ class Options {
 		't' => 'taxonomy',
 		'c' => 'fields',
 		'acf' => 'fields',
+		'project' => 'project',
 		'initialise'=> 'initialise',
 		'clean' 	=> 'clean',
 		'images' 	=> 'images'
 	];
-
 
 	public function __construct() {
 		// these are the defaults, use options to override
@@ -54,11 +58,15 @@ class Options {
 		$this->files 		= false;
 		$this->fields 		= false;
 
-		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
+		$this->wordpressPath = '/home/nicholas/Dev/wordpress/tuauto';
 		$this->drupalPath 	= '../drupal7/tu-auto';
+		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
 		$this->imageStore 	= 'images/';
+		$this->project 		= 'tu-auto';
+
 		$this->clean  		= false;
 		$this->images 		= false;
+		$this->sqlDebug		= false;
 	}
 
 	public function showAll() {
@@ -67,8 +75,12 @@ class Options {
 				print "\nOption " . $opt . " is ";
 				print $this->$opt ? 'set' : 'NOT set';
 			} else {
-				print " " . $key;
-				print $this->$opt ? '+' : '-';
+				if (isset($this->$opt)) {
+					print " " . $key;
+					print $this->$opt ? '+' : '-';
+				} else {
+					throw new Exception($key . ' has no option??');
+				}
 			}
 		}
 	}
@@ -89,6 +101,7 @@ class Options {
 		$this->initialise = true;
 		$this->clean 	= false;
 		$this->images 	= true;
+		$this->sqlDebug = false;
 	}
 
 	public function setAll() {
@@ -98,7 +111,7 @@ class Options {
 		if (count($argv) > 1) {
 
 			$shortOpts = 'dvqpfntch';
-			$longOpts  = ['server:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'images', 'acf'];
+			$longOpts  = ['server:', 'project:', 'wordpressPath:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'images', 'acf', 'sql'];
 			$options = getopt($shortOpts, $longOpts);
 
 			if (empty($options)) {
@@ -108,13 +121,13 @@ class Options {
 			// default option
 			if (in_array('d', array_keys($options))) {
 				$this->defaults = true;
+				$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
 				$this->server = isset($options['server']) ? $options['server'] : 'local';
 				$this->setDefaults();
 				return;
 			}
 
 			foreach ($options as $option => $value) {
-
 				switch ($option) {
 					case 'p':
 						$this->progress = true;
@@ -153,12 +166,20 @@ class Options {
 						$this->server = $value;
 						break; 
 
+					case 'project':
+						$this->project = $value;
+						break;
+
 					case 'initialise':
 						$this->initialise = true;
 						break;
 
 					case 'clean':
 						$this->clean = true;
+						break;
+
+					case 'wordpressPath':
+						$this->wordpressPath = $value;
 						break;
 
 					case 'drupalPath':
@@ -172,6 +193,9 @@ class Options {
 					case 'images':
 						$this->images = true;
 						break;
+					case 'sql':
+						$this->sqlDebug = true;
+						break;
 
 					default: 
 						throw new Exception('invaid option? ' . $option);
@@ -183,7 +207,9 @@ class Options {
 				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -c]\n";
 				print "\nServer:";
 				print "\n --server=[local,vm,staging,live]";
+				print "\n --project=[name of project, e.g. tuauto, ioti]";
 				print "\nSettings:";
+				print "\n --wordpressPath=set Wordpress path (must contain wp-config.php)";
 				print "\n --drupalPath=set Drupal path";
 				print "\n --imageStore=set images directory";
 				print "\nControls:";

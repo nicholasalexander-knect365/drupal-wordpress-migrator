@@ -8,100 +8,17 @@ class DB {
 	public $wp;
 	public $d7;
 
-	private $type;
+	private $config;
+	private $server;
+	private $type; 			// wp or d7 expected
 	private $credentials;
 	private $connection;
 	private $result;
 	private $rows;
 
-	public function __construct($server = 'local', $type, $verbose = false) {
-
-		$connection = [];
-
-		if ($verbose) {
-			print "\n" . ucfirst($server) . ' : ' . $type . ' connect request...';
-		}
-		switch ($server) {
-			// vm is a replication of the live environment
-			case 'vm':
-				$this->credentials['wp'] = [
-					'database' => 'newprod_local',
-					'username' => 'root',
-					'password' => 'root',
-					'host' => 'localhost'
-				];
-
-				$this->credentials['d7'] = [
-					'database' => 'd7telematics',
-					'username' => 'root',
-					'password' => 'root',
-					'host' => 'localhost'
-				];
-				static::$wp_prefix = 'wp_38_';
-				break;
-
-			// dev user is a replication of staging build, to test rebuilds
-			case 'dev':
-				$this->credentials['wp'] = [
-					'database' => 'telecoms_dev',
-					'username' => 'dev',
-					'password' => '2j34kh342342',
-					'host' => 'localhost'
-				];
-				$this->credentials['d7'] = [
-					'database' => 'd7telematics',
-					'username' => 'root',
-					'password' => 'root',
-					'host' => 'localhost'
-				];
-				static::$wp_prefix = 'wp_39_';
-				break;
-
-			// developer does not build - read only access to wordpress
-			case 'developer':
-				$this->credentials['wp'] = [
-					'database' => 'telecoms_dev',
-					'username' => 'developer',
-					'password' => 'hkjhkjh234ks7df89s7df9',
-					'host' => '192.168.26.1'
-				];
-				static::$wp_prefix = 'wp_39_';
-				break;
-
-			case 'staging':
-				die('Staging server test: no database defined!');
-				static::$wp_prefix = 'wp_39_';
-				break;
-
-			case 'live':
-				die('LIVE server: no database defined!');
-				static::$wp_prefix = 'wp_39_';
-				break;
-
-			// development in local environment using a specific dataabse
-			// case 'tuauto':
-			default:
-				$this->credentials['wp'] = [
-					'database' => 'tuautowp',
-					'username' => 'tuauto',
-					'password' => 'tuauto',
-					'host' => 'localhost',
-				];
-
-				$this->credentials['d7'] = [
-					'database' => 'd7telematics',
-					'username' => 'd7telematics',
-					'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
-					'host' => 'localhost'
-				];
-				static::$wp_prefix = 'wp_';
-			break;
-		}
-
-		$this->db = $this->connector($type);
-		if ($this->db && $verbose) {
-			print "connected.";
-		}
+	public function __construct($server = 'local', $type) {
+		$this->server = $server;
+		$this->type = $type;
 	}
 
 	private function connector($type = '') {
@@ -109,6 +26,7 @@ class DB {
 			throw new Exception('Programming error: to connect to a Database, please use a type (wp or d7).');
 		}
 		$this->type = $type;
+
 		switch ($this->type) {
 			case 'wp' :
 				$credentials = $this->credentials['wp'];
@@ -120,7 +38,6 @@ class DB {
 				die('Programming error: connection type ' . $type . ' has not been defined.');
 		}
 
-
 		$this->connection = new mysqli(
 			$credentials['host'],
 			$credentials['username'],
@@ -130,8 +47,95 @@ class DB {
 		if ($this->connection->connect_error) {
 			throw new Exception("\nConnection failed: " . $this->type . ' ' . $this->connection->connect_error . "\n");
 		}
-	
+
 		return $this->connection;
+	}
+
+	private function wpConfig() {
+
+		$wp_config = $this->config->wordpressPath . '/wp-config.php';
+
+		$this->credentials['wp'] = [];
+
+		if (file_exists($wp_config)) {
+			$fd = fopen($wp_config, 'r');
+			if (empty($fd)) {
+				throw new Exception('can not read wp-config: ' . $wp_config);
+			}
+			while($line = fgets($fd, 4096)) {
+
+				if (preg_match("/'DB_([A-Z]+)'/", $line, $match)) {
+
+					preg_match("/^define\(['\"]DB_[\w]+['\"][\s]*,[\s]*['\"]([\w]+)['\"]\);$/", $line, $matched);
+
+					if ($match[1] === 'NAME') {
+						$this->credentials['wp']['database'] = $matched[1];
+					}
+					if ($match[1] === 'USER') {
+						$this->credentials['wp']['username'] = $matched[1];
+					}
+					if ($match[1] === 'PASSWORD') {
+						$this->credentials['wp']['password'] = $matched[1];
+					}
+					if ($match[1] === 'HOST') {
+						$this->credentials['wp']['host'] = $matched[1];
+					}
+				}
+			}
+		} else {
+			throw new Exception('wp-config does not exist PATH: ' . $wp_config);
+		}
+	}
+
+	private function wpMultiSiteConfig($project) {
+
+		// find the project name in the wp_domain_mapping table
+		$sql = "SELECT * FROM wp_blogs WHERE domain LIKE '%$project%' LIMIT 1";
+		$record = $this->record($sql);
+		if (isset($record) && !empty($record) && count($record) === 1) {
+			$blog_id = $record->blog_id;
+		} else {
+			static::$wp_prefix = 'wp_';
+			return;
+		}
+		static::$wp_prefix = sprintf('wp_%d_', $blog_id);
+	}
+
+	public function configure($config = null) {
+
+		$this->config = $config;
+		if ($this->config->verbose) {
+			print "\n" . ucfirst($this->config->server) . ' : ' . $this->type . ' connect request...';
+		}
+
+		switch ($this->config->project) {
+			case 'tuauto':
+				$this->credentials['d7'] = [
+					'database' => 'd7telematics',
+					'username' => 'd7telematics',
+					'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
+					'host' => 'localhost'
+				];
+				break;
+			default: 
+				throw new Exception('Have to know which site you are migrating with --project setting');
+		}
+
+		$this->wpConfig();
+
+		$this->db = $this->connector($this->type);
+		if ($this->db && $this->config->verbose) {
+			print "connected.";
+		}
+		$this->wpMultiSiteConfig($this->config->project);
+
+		if (static::$wp_prefix === 'wp_') {
+			print "\nSingle site configuration (test)";
+		} else if (!preg_match('/^wp_[\d]{1,2}_$/', static::$wp_prefix)) {
+			throw new Exception('wp prefix format looks incorrect: ' . static::$wp_prefix . ' in multisite config');
+		} else {
+			print "\nMulti site configuration: " . static::$wp_prefix;
+		}
 	}
 
 	public static function wptable($type) {
@@ -160,12 +164,14 @@ class DB {
 
 		$rowCount = 0;
 
+		if ($this->config->sqlDebug) {
+			debug("\n".$this->type . ': ' .static::strip($sql) . "\n");
+		}
+
 		try {
 			$result = $this->connection->query($sql);
 		} catch (Exception $e) {
-			if ($result === false) {
-				print "\nQuery failed! $sql \n";
-			}
+			print "\nQuery failed! $sql \n";
 			die($e->getMessage());
 		}
 

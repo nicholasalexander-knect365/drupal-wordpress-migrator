@@ -29,6 +29,7 @@ $debug = false;
 $options = new Options();
 $options->setAll();
 
+$project 	= $options->get('project');
 $s3bucket 	= $options->get('s3bucket');
 $drupalPath = $options->get('drupalPath');
 $imageStore = $options->get('imageStore');
@@ -53,6 +54,10 @@ try {
 } catch (Exception $e) {
 	die( 'DB connection error: ' . $e->getMessage());
 }
+
+// configure the wordpress environment
+$wp->configure($options);
+$d7->configure($options);
 
 // the files option is required to clear images
 if ($option['files']) {
@@ -203,6 +208,10 @@ for ($c = 0; $c < $chunks; $c++) {
 					foreach ($images as $image) {
 						// get all sizes for this image
 						$best = $files->getBestVersion($image->filename);
+
+						// where to store the images for this post?
+						// move the image into the wordpress location
+						// set the featured image
 
 						if (!$option['quiet'] && !$option['progress'] && ($verbose === true || $files->isVerbose())) {
 							print "\n" . $best->fid . ' ' . $best->type . ' ' . $best->filename . ' ' . $best->uri . "\n";
