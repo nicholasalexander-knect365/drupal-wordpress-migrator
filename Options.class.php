@@ -177,6 +177,11 @@ class Options {
 					$this->defaults = true;
 					$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
 					$this->server = isset($options['server']) ? $options['server'] : 'local';
+					if ($this->server === 'local') {
+						$this->wordpressPath = isset($options['wordpressPath']) ? $options['wordpressPath'] : '';
+					} else {
+						throw new Exception("need to know the wordpressPath setting");
+					}
 					$this->setDefaults();
 					return;
 				}
