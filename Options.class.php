@@ -68,6 +68,7 @@ class Options {
 		$this->clean  		= false;
 		$this->images 		= false;
 		$this->sqlDebug		= false;
+		$this->siteId 		= NULL;
 	}
 
 	public function showAll() {
