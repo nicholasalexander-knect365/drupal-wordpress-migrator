@@ -135,9 +135,11 @@ class DB {
 		if ($this->db && $this->config->verbose) {
 			print "connected.";
 		}
-		$this->wpMultiSiteConfig($this->config->project);
-
+		
 		if ($this->type === 'wp') {
+
+			$this->wpMultiSiteConfig($this->config->project);
+
 			$sql = "SHOW TABLES like 'wp_blogs'";
 			$record = $this->record($sql);
 

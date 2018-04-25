@@ -395,17 +395,24 @@ class Taxonomy {
 	}
 
 	public function getTags() {
-		$sql = "SELECT t.*, wtt.* FROM wp_terms t
-				LEFT JOIN wp_term_taxonomy wtt ON t.term_id=wtt.term_id
+		
+		$wp_terms = DB::wptable('terms');
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
+
+		$sql = "SELECT t.*, wtt.* FROM $wp_terms t
+				LEFT JOIN $wp_term_taxonomy wtt ON t.term_id=wtt.term_id
 				WHERE wtt.taxonomy = 'post_tag'";
 		$records = $this->db->records($sql);
 		return $records;
 	}
 	// establishment of a taxonomy term
 	public function tagExists($search) {
+
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
+
 		$sql = "SELECT COUNT(*) AS c 
 				FROM wp_terms t
-				LEFT JOIN wp_term_taxonomy wtt ON t.term_id=wtt.term_id
+				LEFT JOIN $wp_term_taxonomy wtt ON t.term_id=wtt.term_id
 				WHERE t.slug LIKE '$search' AND wtt.taxonomy = 'post_tag'";
 
 		$record = $this->db->record($sql);
@@ -417,9 +424,13 @@ class Taxonomy {
 
 	// establishment of a taxonomy term
 	public function termExists($search, $taxonomy) {
+
+		$wp_terms = DB::wptable('terms');
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
+
 		$sql = "SELECT COUNT(*) AS c 
-				FROM wp_terms t
-				LEFT JOIN wp_term_taxonomy wtt ON t.term_id=wtt.term_id
+				FROM $wp_terms t
+				LEFT JOIN $wp_term_taxonomy wtt ON t.term_id=wtt.term_id
 				WHERE t.slug LIKE '$taxonomy' AND wtt.taxonomy <> 'post_tag'";
 
 		$record = $this->db->record($sql);
@@ -431,10 +442,16 @@ class Taxonomy {
 
 	// 2. uses of a specific taxonomy without tags
 	public function countTaxonomyUse($taxonomy) {
-		$sql = "SELECT COUNT(*) AS c FROM wp_posts post
-				INNER JOIN wp_term_relationships wr ON wr.object_id=post.ID
-				LEFT JOIN wp_term_taxonomy wtt ON wr.term_taxonomy_id=wtt.term_id
-				LEFT JOIN wp_terms t ON t.term_id=wtt.term_id
+
+		$wp_term_relationships = DB::wptable('term_relationships');
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
+		$wp_terms = DB::wptable('terms');
+		$wp_posts = DB::wptable('posts');
+
+		$sql = "SELECT COUNT(*) AS c FROM $wp_posts post
+				INNER JOIN $wp_term_relationships wr ON wr.object_id=post.ID
+				LEFT JOIN $wp_term_taxonomy wtt ON wr.term_taxonomy_id=wtt.term_id
+				LEFT JOIN $wp_terms t ON t.term_id=wtt.term_id
 				WHERE t.slug LIKE '$taxonomy' and wtt.taxonomy <> 'post_tag'";
 
 		$record = $this->db->record($sql);
@@ -443,6 +460,4 @@ class Taxonomy {
 		}
 		return (integer) $record->c;
 	}
-
-
 }
