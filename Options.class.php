@@ -175,6 +175,8 @@ class Options {
 				// default option
 				if (in_array('d', array_keys($options))) {
 					$this->defaults = true;
+					$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
+					$this->server = isset($options['server']) ? $options['server'] : 'local';
 					$this->setDefaults();
 					return;
 				}
