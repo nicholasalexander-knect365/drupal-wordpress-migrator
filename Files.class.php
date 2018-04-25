@@ -72,6 +72,7 @@ class Files {
 		} else {
 			$id = $config->siteId;
 			$wordpressDirectory .= sprintf('blogs.dir/%d/files', (integer) $id);
+
 		}
 		$this->imagesDestination = $wordpressDirectory;
 	}

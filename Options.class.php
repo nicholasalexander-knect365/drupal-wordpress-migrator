@@ -59,7 +59,7 @@ class Options {
 		$this->files 		= false;
 		$this->fields 		= false;
 
-		$this->wordpressPath = '/home/nicholas/Dev/wordpress/tuauto';
+		$this->wordpressPath = '';
 		$this->drupalPath 	= '../drupal7/tu-auto';
 		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
 		$this->imageStore 	= 'images/';
