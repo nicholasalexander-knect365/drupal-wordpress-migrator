@@ -130,15 +130,20 @@ class DB {
 		$this->wpMultiSiteConfig($this->config->project);
 
 		if ($this->type === 'wp') {
-			if ($this->config->siteId) {
+			$sql = "SHOW TABLES like wp_blogs";
+			$record = $this->record($sql);
+			if ($record && count($record && $this->config->siteId) {
 				if ($this->config->server !== 'local') {
 					print "\nWordpress MultiSite loading siteId: ".$this->config->siteId;
 				} else {
 					throw new Exception('CHECK FOR CONFIG ERROR: local server is not usually multisite?');
 				}
-			} else {
+			} else if ($this->config->server !== 'local') {
 				print "\nWordpress local loading data";
+			} else {
+				throw new Exception('Not multisite, yet server=local not set.  Please check your configuration!');
 			}
+
 		} else if ($this->type === 'd7') {
 			print "\nDrupal 7 configured database connection.";
 		} else {
