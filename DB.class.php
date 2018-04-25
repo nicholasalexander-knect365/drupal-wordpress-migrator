@@ -132,7 +132,7 @@ class DB {
 		if ($this->type === 'wp') {
 			$sql = "SHOW TABLES like wp_blogs";
 			$record = $this->record($sql);
-			if ($record && count($record && $this->config->siteId) {
+			if ($record && count($record && $this->config->siteId)) {
 				if ($this->config->server !== 'local') {
 					print "\nWordpress MultiSite loading siteId: ".$this->config->siteId;
 				} else {
