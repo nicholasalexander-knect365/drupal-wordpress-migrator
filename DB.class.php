@@ -89,9 +89,12 @@ class DB {
 
 	private function wpMultiSiteConfig($project) {
 
-		// find the project name in the wp_domain_mapping table
+		// the project's domain name exists in wp_domain_mapping on the staging site,
+		// but not necessarily on the vm site (and not on a local)
+		// using wp_blogs as a test for local/multisite
 		$sql = "SELECT * FROM wp_blogs WHERE domain LIKE '%$project%' LIMIT 1";
 		$record = $this->record($sql);
+
 		if (isset($record) && !empty($record) && count($record) === 1) {
 			$blog_id = $record->blog_id;
 		} else {
@@ -103,6 +106,7 @@ class DB {
 			}
 		}
 		static::$wp_prefix = sprintf('wp_%d_', $blog_id);
+
 	}
 
 	public function configure($config = null) {
