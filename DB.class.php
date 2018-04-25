@@ -113,7 +113,7 @@ class DB {
 
 		$this->config = $config;
 		if ($this->config->verbose) {
-			print "\n" . ucfirst($this->config->server) . ' : ' . $this->type . ' connect request...';
+			print "\n" . ucfirst($this->config->server) . ' : ' . $this->type . ' connect request... for project '.$this->config->project;
 		}
 
 		switch ($this->config->project) {
@@ -148,7 +148,7 @@ class DB {
 					throw new Exception('CHECK FOR CONFIG ERROR: local server is not usually multisite.  If you are running on another server, please specify it with a --server=[vm,staging,live] directive');
 				}
 				print "\nWordpress MultiSite loading siteId: ".$this->config->siteId;
-			} else if ($this->config->server !== 'local') {
+			} else if ($this->config->server === 'local') {
 				print "\nWordpress local loading data";
 			} else {
 				throw new Exception('Not multisite, yet server=local not set.  Please check your configuration!');

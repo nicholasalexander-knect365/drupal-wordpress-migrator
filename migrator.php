@@ -26,6 +26,7 @@ $maxChunk = 1000000;
 //$init = true;
 
 $debug = false;
+$once = 0;
 
 /* control options */
 try {
@@ -126,6 +127,9 @@ $wp_fields = new Fields($wp);
 $drupal_nodes = null;
 
 if ($option['initialise']) {
+	if ($once++ > 1) {
+		throw new Exception('Initialise called more than once???');
+	}
 	$initialise = new Initialise($wp, $options);
 
 	// build the term_taxonomy if not already present
