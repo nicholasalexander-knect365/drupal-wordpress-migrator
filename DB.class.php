@@ -95,8 +95,12 @@ class DB {
 		if (isset($record) && !empty($record) && count($record) === 1) {
 			$blog_id = $record->blog_id;
 		} else {
-			static::$wp_prefix = 'wp_';
-			return;
+			if ($this->config->server === 'local') {
+				static::$wp_prefix = 'wp_';
+				return;
+			} else {
+				throw new Exception("ERROR: can not find $project in multisite configuration");
+			}
 		}
 		static::$wp_prefix = sprintf('wp_%d_', $blog_id);
 	}
