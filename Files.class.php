@@ -66,12 +66,13 @@ class Files {
 
 		$wordpressDirectory = $config->wordpressPath . '/wp-content/';
 
-		if ($config->dbPrefix === 'wp_') {
+		if ($config->wordpressPath !== '/var/www/public') {
 			$wordpressDirectory .= 'uploads';
 		} else {
-			preg_match('/wp_([\d]+)_/', $config->dbPrefix, $match);
-			$id = $match[1];
-			$wordpressDirectory .= sprintf('blogs.dir/%d/files', (integer) $id);
+			if (preg_match('/wp_([\d]+)_/', $config->dbPrefix, $match)) {
+				$id = $match[1];
+				$wordpressDirectory .= sprintf('blogs.dir/%d/files', (integer) $id);
+			}
 		}
 		$this->imagesDestination = $wordpressDirectory;
 	}
