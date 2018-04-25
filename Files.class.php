@@ -66,11 +66,11 @@ class Files {
 
 		$wordpressDirectory = $config->wordpressPath . '/wp-content/';
 
-		if ($config->dbPrefix === 'wp_') {
+		// multisite test -  our multisite is on /var/www/public
+		if ($config->wordpressPath !== '/var/www/public') {
 			$wordpressDirectory .= 'uploads';
 		} else {
-			preg_match('/wp_([\d]+)_/', $config->dbPrefix, $match);
-			$id = $match[1];
+			$id = $config->siteId;
 			$wordpressDirectory .= sprintf('blogs.dir/%d/files', (integer) $id);
 		}
 		$this->imagesDestination = $wordpressDirectory;

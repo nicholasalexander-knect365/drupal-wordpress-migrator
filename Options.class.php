@@ -10,6 +10,7 @@ class Options {
 	public $initialise;
 	public $server;
 	public $project;
+	public $siteId;
 
 	public $nodes;
 	public $taxonomy;
@@ -104,6 +105,18 @@ class Options {
 		$this->sqlDebug = false;
 	}
 
+	private function serverOptions() {
+		$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
+		$this->server = isset($options['server']) ? $options['server'] : 'local';
+		if ($this->project === 'tuauto' && $this->server !== 'local') {
+			$this->siteId = 39;
+		}
+		if ($this->projecct === 'ioti' && $this->server !== 'local') {
+			$this->siteid = 38;
+		}
+
+	}
+
 	public function setAll() {
 		
 		global $argv;
@@ -161,8 +174,6 @@ class Options {
 				// default option
 				if (in_array('d', array_keys($options))) {
 					$this->defaults = true;
-					$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
-					$this->server = isset($options['server']) ? $options['server'] : 'local';
 					$this->setDefaults();
 					return;
 				}
