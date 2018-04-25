@@ -1,6 +1,8 @@
 <?php
 
 require "DB.class.php";
+require "WP.class.php";
+
 require "Initialise.class.php";
 require "Options.class.php";
 require "Post.class.php";
@@ -26,27 +28,37 @@ $maxChunk = 1000000;
 $debug = false;
 
 /* control options */
-$options = new Options();
-$options->setAll();
+try {
+	$options = new Options();
+	$options->setAll();
 
-$project 	= $options->get('project');
-$s3bucket 	= $options->get('s3bucket');
-$drupalPath = $options->get('drupalPath');
-$imageStore = $options->get('imageStore');
-$server 	= $options->get('server');
-$verbose    = $options->get('verbose');
+	// [tuauto, ioti, ...]
+	$project 	= $options->get('project');
+	// where the s3 files are
+	$s3bucket 	= $options->get('s3bucket');
+	// where the drupal files are
+	$drupalPath = $options->get('drupalPath');
+	// temporary image store
+	$imageStore = $options->get('imageStore');
+	// server = [local. vm, staging ] now only advisory as we read wp-config.php
+	$server 	= $options->get('server');
+	// tell me more
+	$verbose    = $options->get('verbose');
 
-$option = [];
+	$option = [];
 
-foreach ($options->all as $opt) {
-	$option[$opt] = $options->get($opt);
+	foreach ($options->all as $opt) {
+		$option[$opt] = $options->get($opt);
+	}
+	$options->showAll();
+
+	if ($options->get('help')) {
+		die("\nHELP Mode\n\n");
+	}
+} catch (Exception $e) {
+	debug("Option setting error\n" . $e->getMessage() . "\n\n");
+	die;
 }
-$options->showAll();
-
-if ($options->get('help')) {
-	die("\nHELP Mode\n\n");
-}
-
 /* connect databases */
 try {
 	$wp = new DB($server, 'wp');
@@ -58,8 +70,6 @@ try {
 // configure the wordpress environment
 $wp->configure($options);
 $d7->configure($options);
-
-
 
 // the files option is required to clear images
 if ($option['files']) {
@@ -190,10 +200,22 @@ for ($c = 0; $c < $chunks; $c++) {
 		foreach ($drupal_nodes as $node) {
 			
 			$wpPostId = null;
+			$fileSet = null;
+
+			if ($option['files']) {
+				// getFiles stores a local copy
+				$fileSet = $files->getFiles($node->nid);
+				if (isset($fileSet)) {
+					foreach ($fileSet as $file) {
+						$files->moveFile($file);
+
+					}
+				}
+			}
 
 			if ($option['nodes'] && $nodeSource === 'drupal') {
 				$d7_node->setNode($node);
-				$wpPostId = $wp_post->makePost($node, $options);
+				$wpPostId = $wp_post->makePost($node, $options, $fileSet, $files->getImagesDestination());
 				if ($wpPostId) {
 					$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
 				} else {
@@ -205,37 +227,7 @@ for ($c = 0; $c < $chunks; $c++) {
 				$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
 			}
 
-			if ($option['files']) {
 
-				// getFiles stores a local copy
-				$fileSet = $files->getFiles($node->nid);
-				foreach ($fileSet as $file) {
-					debug($file);
-					$files->moveFile($file);
-				}
-
-				// fileSet may contain one more more images and other media assets (mp3s)
-// 				if ($images) {
-
-// 					$largest = null;
-// if (count($images) > 1) {
-// 	debug($images);
-// }
-// 					foreach ($images as $image) {
-// 						// get all sizes for this image
-// 						$best = $files->getBestVersion($image->filename);
-// 						//$files->moveImage($best);
-
-// 						// where to store the images for this post?
-// 						// move the image into the wordpress location
-// 						// set the featured image
-
-// 						if (!$option['quiet'] && !$option['progress'] && ($verbose === true || $files->isVerbose())) {
-// 							print "\n" . $best->fid . ' ' . $best->type . ' ' . $best->filename . ' ' . $best->uri . "\n";
-// 						}
-// 					}
-// 				}
-			}
 
 			if ($option['taxonomy']) {
 

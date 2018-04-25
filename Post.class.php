@@ -140,13 +140,14 @@ class Post {
         return $str;
 	}
 
-	public function makePost($drupal_data, $options = NULL) {
+	public function makePost($drupal_data, $options = NULL, $fileSet = NULL, $wordpressPath) {
 
 		$wp_posts = DB::wptable('posts');
 
 		$values = [];
 		$metas = [];
 		static $running = 0;
+		$featuredImage = NULL;
 
 		foreach($drupal_data as $key => $value) {
 	
@@ -186,7 +187,48 @@ class Post {
 						if ($options && $options->clean) {
 							$value = strip_tags($value);
 						}
-						$values[$wpKey] = $value;	
+						if ($fileSet) {
+							foreach ($fileSet as $file) {
+								$filename = basename($file->filename);
+								$replaceFilename = $filename;
+								$preview  = preg_replace(['/.jpg$/', '/.gif$/', '/.png$/'], ['.preview.jpg', '.preview.gif', '.preview.png'], basename($file->filename));
+
+								$nomatch = true;
+								if (preg_match('/src=["]([\w:\/\-\.\_]+)?["]/i', $value, $matched)) {
+									if (count($matched)>0 && strpos($matched[1], $filename)) {
+										debug($filename .  ' filename occurance in src attr');
+										//debug($value);
+										$nomatch = false;
+									}
+								}
+								if (preg_match('/src=["]([\w:\/\-\.\_]+)?["]/i', $value, $matched)) {
+									if (count($matched)>0 && strpos($matched[1], $preview)) {
+										debug($preview . ' preview occurance in src attr');
+										$replaceFilename = $preview;
+										//debug($value);
+										$nomatch = false;
+									}
+								}
+								// if (preg_match('/title=["]([\w:\/\-\.\_]+)?["]/i', $value, $matched)) {
+								// 	if (count($matched)>0 && strpos($matched[1], $filename)) {
+								// 		debug($filename . ' filename occurs in title attr');
+								// 		//debug($value);
+								// 		$nomatch = false;
+								// 	}
+								// }
+								// if the file is not in the text, use it as a featured image
+								if ($nomatch) {
+									$featuredImage = $filename;
+								} else {
+									// replace the file in the content!
+									//debug($filename);
+									$value = preg_replace("/src=\".*?$replaceFilename\"/", "src=\"$wordpressPath/$filename\"" , $value);
+									//debug($file);
+									//debug($value);
+								}
+							}
+						}
+						$values[$wpKey] = $value;
 						break;
 
 					case 'status':
@@ -196,9 +238,11 @@ class Post {
 							$values[$wpKey] = 'draft';
 						}
 						break;
+
 					case 'uid': 
 						$values[$wpKey] = 1;
 						break;
+
 					case 'comment':
 						if ($value === 1) {
 							$values[$wpKey] = 'open';
@@ -232,6 +276,12 @@ class Post {
 		$sql = "INSERT into $wp_posts (" . implode(', ', array_keys($values)) . ") VALUES ('" . implode("', '", $values) ."')";
 		$this->db->query($sql); 
 		$post_id = $this->db->lastInsertId();
+
+		// set featured image
+		if (isset($featuredImage)) {
+			$wp = new WP($this->db, $options);
+			$wp->featuredImage($post_id, $featuredImage);
+		}
 
 		// meta processing: 
 		// create values in postmeta 

@@ -118,100 +118,22 @@ class Options {
 				dd('nothing set');
 			}
 
-			// default option
-			if (in_array('d', array_keys($options))) {
-				$this->defaults = true;
-				$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
-				$this->server = isset($options['server']) ? $options['server'] : 'local';
-				$this->setDefaults();
-				return;
-			}
+			if (in_array('h', array_keys($options))) {
+			//if ($this->help) {
+				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -c]";
+				print "\n";
 
-			foreach ($options as $option => $value) {
-				switch ($option) {
-					case 'p':
-						$this->progress = true;
-						break;
-
-					case 'q':
-						$this->quiet = true;
-						break;
-
-					case 'v':
-						$this->verbose = true;
-						break;
-
-					case 'h':
-						$this->help = true;
-						break;
-
-					case 'f':
-						$this->files = true;
-						break;
-
-					case 'n':
-						$this->nodes = true;
-						break;
-
-					case 't':
-						$this->taxonomy = true;
-						break;
-
-					case 'c':
-					case 'acf':
-						$this->fields = true;
-						break;
-
-					case 'server':
-						$this->server = $value;
-						break; 
-
-					case 'project':
-						$this->project = $value;
-						break;
-
-					case 'initialise':
-						$this->initialise = true;
-						break;
-
-					case 'clean':
-						$this->clean = true;
-						break;
-
-					case 'wordpressPath':
-						$this->wordpressPath = $value;
-						break;
-
-					case 'drupalPath':
-						$this->drupalPath = $value;
-						break;
-
-					case 'imageStore':
-						$this->imageStore = $value;
-						break; 
-
-					case 'images':
-						$this->images = true;
-						break;
-					case 'sql':
-						$this->sqlDebug = true;
-						break;
-
-					default: 
-						throw new Exception('invaid option? ' . $option);
-						break;
-				}
-			}
-
-			if ($this->help) {
-				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -c]\n";
 				print "\nServer:";
 				print "\n --server=[local,vm,staging,live]";
 				print "\n --project=[name of project, e.g. tuauto, ioti]";
+				print "\n";
+
 				print "\nSettings:";
 				print "\n --wordpressPath=set Wordpress path (must contain wp-config.php)";
 				print "\n --drupalPath=set Drupal path";
 				print "\n --imageStore=set images directory";
+				print "\n";
+
 				print "\nControls:";
 				print "\n --initialise   ... clears ALL data";
 				print "\n --clean  ... strips html content";
@@ -226,6 +148,100 @@ class Options {
 				print "\n-t Taxonomy";
 				print "\n-c Field Content (or use --acf)";
 				print "\n";
+				print "\n";
+				die;
+
+			} else {
+
+				$this->wordpressPath = isset($options['wordpressPath']) ? $options['wordpressPath'] : '';
+				if (empty($this->wordpressPath)) {
+					throw new Exception('Need to know the wordpress path, use --wordpressPath=/path/to/wp-config');
+				}
+
+				// default option
+				if (in_array('d', array_keys($options))) {
+					$this->defaults = true;
+					$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
+					$this->server = isset($options['server']) ? $options['server'] : 'local';
+					$this->setDefaults();
+					return;
+				}
+
+				foreach ($options as $option => $value) {
+					switch ($option) {
+						case 'p':
+							$this->progress = true;
+							break;
+
+						case 'q':
+							$this->quiet = true;
+							break;
+
+						case 'v':
+							$this->verbose = true;
+							break;
+
+						case 'h':
+							$this->help = true;
+							break;
+
+						case 'f':
+							$this->files = true;
+							break;
+
+						case 'n':
+							$this->nodes = true;
+							break;
+
+						case 't':
+							$this->taxonomy = true;
+							break;
+
+						case 'c':
+						case 'acf':
+							$this->fields = true;
+							break;
+
+						case 'server':
+							$this->server = $value;
+							break; 
+
+						case 'project':
+							$this->project = $value;
+							break;
+
+						case 'initialise':
+							$this->initialise = true;
+							break;
+
+						case 'clean':
+							$this->clean = true;
+							break;
+
+						case 'wordpressPath':
+							$this->wordpressPath = $value;
+							break;
+
+						case 'drupalPath':
+							$this->drupalPath = $value;
+							break;
+
+						case 'imageStore':
+							$this->imageStore = $value;
+							break; 
+
+						case 'images':
+							$this->images = true;
+							break;
+						case 'sql':
+							$this->sqlDebug = true;
+							break;
+
+						default: 
+							throw new Exception('invaid option? ' . $option);
+							break;
+					}
+				}
 			}
 
 			if ($this->progress) {

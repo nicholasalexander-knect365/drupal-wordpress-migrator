@@ -76,6 +76,10 @@ class Files {
 		$this->imagesDestination = $wordpressDirectory;
 	}
 
+	public function getImagesDestination() {
+		return $this->imagesDestination;
+	}
+
 	private function source($uri) {
 		
 		if (preg_match('/^([\w]+):\/\//', $uri, $matched)) {
@@ -95,7 +99,7 @@ class Files {
 				if ($this->verbose === true) {
 					print "\nCopying image ".$path;
 				}
-				if (file_exists($path)) {	
+				if (file_exists($path)) {
 					if (!copy($path, $this->imageStore . '/' . $file->filename)) {
 						throw new Exception('could not copy ' . $path);
 					}
@@ -116,7 +120,7 @@ class Files {
 						}
 						$fd = fopen($this->imageStore . '/' . $file->filename, 'w+');
 						fputs($fd, $fileData);
-						fclose($fd);							
+						fclose($fd);
 					}
 					if ($this->verbose === true) {
 						print "\nGetting s3 image ".$path;
@@ -171,20 +175,20 @@ class Files {
 
 	public function moveFile($fileObject) {
 
-// the images destination is futher split by the assets timestamp...
-
 		$source = $this->imageStore . $fileObject->filename;
 
 		// get the year and month from the timestamp
 		$year = date('Y', $fileObject->timestamp);
 		$month = date('m', $fileObject->timestamp); 
 		$destination = sprintf('%s/%d/%d', $this->imagesDestination, $year, $month);
+
 		// does the destination directory exist?
 		if (!file_exists($destination)) {
 			try {
-				debug('making directory ' . $destination);
+				if ($this->verbose) {
+					print "\nMaking directory $destination";
+				}
 				mkdir($destination, 0775, true);
-				chgrp($destination, 'www-data');
 			} catch(Exception $e) {
 				throw new Exception('can not make a directory for ' . $destination . " " .$e->getMessage());
 			}
@@ -193,7 +197,9 @@ class Files {
 		$destinationFilename = $destination . '/' . $fileObject->filename;
 
 		try {
-			debug('MOVE ' . $source . ' >>TO>> ' . $destinationFilename);
+			if ($this->verbose && false) {
+				print "\nMOVE $source >>TO>> $destinationFilename";
+			}
 			rename($source, $destinationFilename);
 			chmod($destinationFilename, 0664);
 		} catch(Exception $e) {
@@ -204,8 +210,7 @@ class Files {
 	/* 
 	 * TODO: Deprecate this?? - there may be multiple versions but best version appears to be the base path
 	 *
-	 * ... may not be required as all larger images appear to be:
-	 * DRUPAL_HOME . '/sites/default/files'
+	 * ... REDUNDANT?  no reason we can not have multiple images or files, but maybe a way to idenfity featured image?
 	 */
 	public function getBestVersion($filename) {
 
