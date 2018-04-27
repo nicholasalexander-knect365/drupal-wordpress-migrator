@@ -140,17 +140,20 @@ class Post {
         return $str;
 	}
 
-	public function makePost($drupal_data, $options = NULL, $fileSet = NULL, $wordpressPath) {
+	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath) { //, $fileSet = NULL, $wordpressPath) {
 
 		$wp_posts = DB::wptable('posts');
 
 		$values = [];
 		$metas = [];
+
 		static $running = 0;
-		$featuredImage = NULL;
+
+		$nid = $drupal_data->nid;
+		$fileSet = $files->fileList($nid);
 
 		foreach($drupal_data as $key => $value) {
-	
+
 			$wpKey = static::$mapped[$key];
 
 			// if drupal fields are prefixed make_ 
@@ -180,52 +183,43 @@ class Post {
 				switch ($key) {
 
 					case 'title': 
-						$values[$wpKey] = substr($value, 0, 200);
+						$values[$wpKey] = $value;
+						$values['post_name'] = substr(Taxonomy::slugify($values[$wpKey]), 0, 200);
+						if (strlen($values['post_name']) === 0) {
+							$values['post_name'] = 'tu-auto-' . $running++;
+						}
 						break;
 
 					case 'content':
 						if ($options && $options->clean) {
 							$value = strip_tags($value);
 						}
+
 						if ($fileSet) {
+
+							// replace the filename in content: 
+							// drupal uses image.preview.png for thumbnails
+							// but we only want the actual filename
+
 							foreach ($fileSet as $file) {
+
 								$filename = basename($file->filename);
 								$replaceFilename = $filename;
 								$preview  = preg_replace(['/.jpg$/', '/.gif$/', '/.png$/'], ['.preview.jpg', '.preview.gif', '.preview.png'], basename($file->filename));
 
-								$nomatch = true;
-								if (preg_match('/src=["]([\w:\/\-\.\_]+)?["]/i', $value, $matched)) {
-									if (count($matched)>0 && strpos($matched[1], $filename)) {
-										debug($filename .  ' filename occurance in src attr');
-										//debug($value);
-										$nomatch = false;
-									}
-								}
-								if (preg_match('/src=["]([\w:\/\-\.\_]+)?["]/i', $value, $matched)) {
-									if (count($matched)>0 && strpos($matched[1], $preview)) {
-										debug($preview . ' preview occurance in src attr');
-										$replaceFilename = $preview;
-										//debug($value);
-										$nomatch = false;
-									}
-								}
-								// if (preg_match('/title=["]([\w:\/\-\.\_]+)?["]/i', $value, $matched)) {
+								// if (preg_match('/src=["]([\w:\/\-\.\_]+)?["]/i', $value, $matched)) {
 								// 	if (count($matched)>0 && strpos($matched[1], $filename)) {
-								// 		debug($filename . ' filename occurs in title attr');
-								// 		//debug($value);
-								// 		$nomatch = false;
+
 								// 	}
 								// }
-								// if the file is not in the text, use it as a featured image
-								if ($nomatch) {
-									$featuredImage = $filename;
-								} else {
-									// replace the file in the content!
-									//debug($filename);
-									$value = preg_replace("/src=\".*?$replaceFilename\"/", "src=\"$wordpressPath/$filename\"" , $value);
-									//debug($file);
-									//debug($value);
+								if (preg_match('/src=["]([\w:\/\-\.\_]+)?["]/i', $value, $matched)) {
+									if (count($matched)>0 && strpos($matched[1], $preview)) {
+										$replaceFilename = $preview;
+									}
 								}
+
+								$value = preg_replace("/src=\".*?$replaceFilename\"/", "src=\"$wordpressPath/$filename\"" , $value);
+
 							}
 						}
 						$values[$wpKey] = $value;
@@ -250,21 +244,18 @@ class Post {
 							$values[$wpKey] = 'closed';
 						}
 						break;
-					case 'title' :
-						$values[$wpKey] = $value;
-						$values['post_name'] = Taxonomy::slugify($value);
-						if (strlen($values['post_name']) === 0) {
-							$values['post_name'] = 'tu-auto-' . $running++;
-						}
-						break;
+
 					case 'type' : 
 						$values['post_type'] = static::$mapPostType[$value];
 						break;
 
+					case 'name' :
+
+
 					default: 
 						$values[$wpKey] = $value;
 				}
-			}			
+			}
 		}
 		foreach(static::$null_fields as $field) {
 			$values[$field] = '';
@@ -277,27 +268,37 @@ class Post {
 		$this->db->query($sql); 
 		$post_id = $this->db->lastInsertId();
 
-		// set featured image
-		if (isset($featuredImage)) {
-			$wp = new WP($this->db, $options);
-			$wp->featuredImage($post_id, $featuredImage);
-		}
+if (!$post_id) {
+	debug($sql);
+}
 
-		// meta processing: 
-		// create values in postmeta 
-		foreach ($metas as $key => $value) {
-			// $action = static::$mapped[$drupalKey];
-			if (preg_match('/^make_/', $value)) {
-				// rules to derive this field
-				switch ($value) {
-					case 'make_post_author':
-						var_dump($key, $value);
-				}
-			}
-		}
-		if (!$post_id) {
-			debug($sql);
-		}
 		return $post_id;
+
+		// if (isset($filename)) {
+		// 	$featured = !$nomatch;
+		// 	$wp->addMediaLibrary($post_id, $filename, $featured);
+		// }
+
+		// // // set featured image
+		// // if (isset($featuredImage)) {
+		// // 	$wp->featuredImage($post_id, $featuredImage);
+		// // }
+
+		// // meta processing: 
+		// // create values in postmeta 
+		// foreach ($metas as $key => $value) {
+		// 	// $action = static::$mapped[$drupalKey];
+		// 	if (preg_match('/^make_/', $value)) {
+		// 		// rules to derive this field
+		// 		switch ($value) {
+		// 			case 'make_post_author':
+		// 				var_dump($key, $value);
+		// 		}
+		// 	}
+		// }
+		// if (!$post_id) {
+		// 	debug($sql);
+		// }
+		// return $post_id;
 	}
 }

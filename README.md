@@ -16,7 +16,14 @@ You need:
 
 ## Do the following
 
+0. Install the migrator in your HOME directory
+	* cd 
+	* mkdir migrator
+	* cd migrator
+	* git clone git@github.com:nicholasalexander-knect365/drupal-wordpress-migrator.git
+
 1. Create the Wordpress Site instance and record its ID number
+
 2. Add yourself as a user to the site
 
 3. Setup Apache/DNS as required so site is accessible
@@ -30,7 +37,16 @@ You need:
 7. in the migrator directory, run the unit test:
 	*  phpunit tests/migrator.tests.php > unitest-prerun.txt
 	* run the migrator, configure for the server, turn on verbose
-	* php migrator.php --server=staging --drupalPath=/var/www/drupal7/tuauto --imageStore=images --clean --images --init --taxonomy --nodes -c -f -p
+	* php migrator.php --server=staging --wordpressPath=/var/www/public --drupalPath=/var/www/drupal7/tuauto --imageStore=images --clean --images --init --taxonomy --nodes -c -f -p -n
+	or
+	* php migrator.php --server=staging --wordpressPath=/var/www/public --drupalPath=/var/www/drupal8/tuauto --project=tuauto -d
+
+8. run the image importation script, from the Wordpress directory
+	* chmod 755 importCmds.sh
+	* cd $WORDPRESS_ROOT
+	* ../migrator/importCmds.sh
+
+NB: The image importer script associates images to posts in this import.  If Nodes are imported again (i.e. to --clean the html) you must rerun the image importer after clearing out the media library
 
 DBUG: --init did not seem to work (wordpress has data in it error)
       -d works if you edit the drupalPath in migrator.php and edit DB to select the right server

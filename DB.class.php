@@ -16,9 +16,10 @@ class DB {
 	private $result;
 	private $rows;
 
-	public function __construct($server = 'local', $type) {
+	public function __construct($server = 'local', $type, $config) {
 		$this->server = $server;
 		$this->type = $type;
+		$this->config = $config;
 	}
 
 	private function connector($type = '') {
@@ -188,6 +189,13 @@ class DB {
 
 		if ($this->config->sqlDebug) {
 			debug("\n".$this->type . ': ' .static::strip($sql) . "\n");
+		}
+
+		if (empty($sql)) {
+			throw new Exception('DB::query ... call with empty string?');
+		}
+		if (empty($this->connection)) {
+			throw new Exception('DB::query ... no connection?');
 		}
 
 		try {

@@ -29,9 +29,7 @@ class Taxonomy {
 		'insurance telematics' 		=> 'Insurance',
 		'safety, adas & autonomous'	=> 'ADAS',
 		'telematics for evs'		=> 'Electric Vehicles',
-		'navigation and lbs'		=> 'Navigation'
-
-
+		'navigation and lbs'		=> 'Connected Car'
 	];
 
 	private $termMeta = [
@@ -70,6 +68,9 @@ class Taxonomy {
 				$name = 'Mobility';
 				$slug = 'channels';
 				break;
+			case 'Telematics':
+				$name = 'Telematics';
+				$slug = 'subjects';
 			case 'Autonomous':
 			case 'Autonomous Car':
 				$name = 'Autonomous';
@@ -94,16 +95,23 @@ class Taxonomy {
 				$name = 'Electric Vehicles';
 				$slug = 'categories';
 				break;
+			case 'Navigation & LBS':
+				$name = 'Connected Car';
+				$slug = 'channels';
+				break;
 			case 'Security':
 			case 'Connected Car':
 				$slug = 'channels';
 				break;
-		}	
+		}
 		return [$name, $slug];
 	}
 
 	// more generic ... maps taxonmy types
 	private function remap($taxonomyType) {
+
+		die('private function remap called??');
+
 		return $this->mapped[strtolower($taxonomyType)];
 
 	}
@@ -302,6 +310,7 @@ class Taxonomy {
 
 		$name = $this->makeWPTermName($taxonomy->name);
 		$slug = $this->slugify($this->makeWPTermName($taxonomy->category));
+
 		list($name, $slug) = $this->remapNameCategory($name, $slug);
 
 		if (strlen($taxonomy->description)) {

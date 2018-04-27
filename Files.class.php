@@ -28,11 +28,7 @@ class Files {
 		}
 		$this->type = 'node';
 
-		$this->verbose = isset($args['verbose']);
-		$this->verbose = isset($args['quiet']);
-		if ($args['progress']) {
-			$this->verbose = '.';
-		}
+		$this->verbose = isset($args['verbose']) ? $args['verbose'] : false;
 	}
 
 	public function setDrupalPath($path) {
@@ -90,9 +86,10 @@ class Files {
 		}
 	}
 
-	private function storeImage($file) {
+	private function storeImageData($file) {
 
 		$fileType = $this->source($file->uri);
+//debug('STOREIMAGEDATA:' . $file->uri . ' '. $fileType);
 
 		switch ($fileType) {
 			case 'public' :
@@ -101,8 +98,11 @@ class Files {
 					print "\nCopying image ".$path;
 				}
 				if (file_exists($path)) {
-					if (!copy($path, $this->imageStore . '/' . $file->filename)) {
-						throw new Exception('could not copy ' . $path);
+					try {
+						copy($path, $this->imageStore . '/' . $file->filename);
+						debug('copy from '.$path.' to '.$this->imageStore . '/' .$file->filename);
+					} catch(Exception $e) {
+						debug('could not copy ' . $path);
 					}
 				} else {
 					print "\n$path does not exist";
@@ -114,15 +114,25 @@ class Files {
 				try {
 					$fileData = file_get_contents($path);
 					if (strlen($fileData) > 14) {
-						if (is_string($this->verbose)) {
-							print $this->verbose;
-						} else if ($this->verbose === true) {
+						// if (is_string($this->verbose)) {
+						// 	print $this->verbose;
+						// } else 
+						if ($this->verbose === true) {
 							print "\nImage data size: " . strlen($fileData);
 						}
+
 						$fd = fopen($this->imageStore . '/' . $file->filename, 'w+');
 						fputs($fd, $fileData);
 						fclose($fd);
+						debug('stored s3 image in ' .$this->imageStore . '/' . $file->filename );
+
 					}
+					else {
+						if ($this->verbose === true) {
+							debug("no content in $path - only ".strlen($fileData) . ' bytes??');
+						}
+					}
+
 					if ($this->verbose === true) {
 						print "\nGetting s3 image ".$path;
 					}
@@ -134,10 +144,11 @@ class Files {
 			default: 
 				print "\nDo not know how to get this image " . $path . " type is " . $fileType;
 		}
+		//debug('IMG STORE:'. $this->imageStore . '/' . $file->filename);
 	}
 
 
-	private function fileList($nid) {
+	public function fileList($nid) {
 
 		$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename as filename, fm.uri as uri, fm.filesize, fm.status, fm.timestamp 
 				FROM file_managed fm
@@ -165,7 +176,8 @@ class Files {
 		try {
 			if ($files = $this->fileList($nid)) {
 				foreach ($files as $file) {
-					$this->storeImage($file);
+					$this->storeImageData($file);
+
 				}
 			}
 		} catch (ErrorException $e) {
@@ -174,7 +186,10 @@ class Files {
 		return $files;
 	}
 
+	// bad idea: we should use wp-cli to do this
 	public function moveFile($fileObject) {
+
+		$wp = new WP($this->db, $options);
 
 		$source = $this->imageStore . $fileObject->filename;
 
@@ -186,7 +201,7 @@ class Files {
 		// does the destination directory exist?
 		if (!file_exists($destination)) {
 			try {
-				if ($this->verbose) {
+				if ($this->verbose === true) {
 					print "\nMaking directory $destination";
 				}
 				mkdir($destination, 0775, true);
@@ -194,15 +209,17 @@ class Files {
 				throw new Exception('can not make a directory for ' . $destination . " " .$e->getMessage());
 			}
 		}
+
 		$destination =  sprintf('%s/%d/%d', $this->imagesDestination, $year, $month);
 		$destinationFilename = $destination . '/' . $fileObject->filename;
 
 		try {
-			if ($this->verbose && false) {
+			if ($this->verbose === true) {
 				print "\nMOVE $source >>TO>> $destinationFilename";
 			}
 			rename($source, $destinationFilename);
 			chmod($destinationFilename, 0664);
+
 		} catch(Exception $e) {
 			throw new Exception('Problem writing to file '.$destinationFilename . " " . $e->getMessage());
 		}

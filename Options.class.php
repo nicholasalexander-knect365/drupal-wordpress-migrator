@@ -62,7 +62,7 @@ class Options {
 		$this->wordpressPath = '';
 		$this->drupalPath 	= '../drupal7/tu-auto';
 		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
-		$this->imageStore 	= 'images/';
+		$this->imageStore 	= getenv('HOME') . '/tmp/images';
 		$this->project 		= 'tu-auto';
 
 		$this->clean  		= false;
@@ -122,45 +122,54 @@ class Options {
 		
 		global $argv;
 
-		if (count($argv) > 1) {
+		$firstArg = 1;
+
+		if ($argv[1] === 'tests/migrator.tests.php') {
+			$firstArg = 2;
+		}
+
+		if (count($argv) > $firstArg) {
 
 			$shortOpts = 'dvqpfntch';
 			$longOpts  = ['server:', 'project:', 'wordpressPath:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'images', 'acf', 'sql'];
 			$options = getopt($shortOpts, $longOpts);
 
 			if (empty($options)) {
-				dd('nothing set');
+				dd('No options were set '.print_r($argv,1));
 			}
 
 			if (in_array('h', array_keys($options))) {
 			//if ($this->help) {
 				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -c]";
+				print "\n*  mandatory switches";
 				print "\n";
 
 				print "\nServer:";
-				print "\n --server=[local,vm,staging,live]";
-				print "\n --project=[name of project, e.g. tuauto, ioti]";
+				print "\n*  --server=[local,vm,staging,live]";
+				print "\n*  --project=[name of project, e.g. tuauto, ioti]";
 				print "\n";
 
 				print "\nSettings:";
-				print "\n --wordpressPath=set Wordpress path (must contain wp-config.php)";
-				print "\n --drupalPath=set Drupal path";
-				print "\n --imageStore=set images directory";
+				print "\n* --wordpressPath=set Wordpress path (must contain wp-config.php)";
+				print "\n* --drupalPath=set Drupal path";
+				print "\n  --imageStore=set temp images directory (default ./images)";
+				print "\n  --sql show sql statments in verbose mode";
 				print "\n";
 
 				print "\nControls:";
-				print "\n --initialise   ... clears ALL data";
-				print "\n --clean  ... strips html content";
-				print "\n --images ... clears default images directory";
-				print "\n --noFiles=[no files]\n";
-				print "\n-v Verbose";
-				print "\n-d Defaults";
-				print "\n-q Quiet";
-				print "\n-p Progress indicators";
-				print "\n-f Files (Images)";
-				print "\n-n Nodes";
-				print "\n-t Taxonomy";
-				print "\n-c Field Content (or use --acf)";
+				print "\n  --initialise   ... clears ALL data";
+				print "\n  --clean        ... strips html content";
+				print "\n  --images       ... clears default images directory";
+				print "\n  --noFiles=[no files]\n";
+				print "\n  -v Verbose";
+				print "\n  -q Quiet";
+				print "\n  -p Progress indicators";
+
+				print "\n\n  -d Defaults, or:";
+				print "\n  -f Files (Images)";
+				print "\n  -n Nodes";
+				print "\n  -t Taxonomy";
+				print "\n  -c Field Content (or use --acf)";
 				print "\n";
 				print "\n";
 				die;
@@ -257,7 +266,7 @@ class Options {
 							break;
 
 						default: 
-							throw new Exception('invaid option? ' . $option);
+							throw new Exception('invalid option? ' . $option);
 							break;
 					}
 				}

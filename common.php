@@ -18,6 +18,10 @@ function message($v) {
 	}
 }
 
+function home() {
+	return getenv('HOME');
+}
+
 function debug($v, $singleton = 0) {
 	global $verbose;
 	

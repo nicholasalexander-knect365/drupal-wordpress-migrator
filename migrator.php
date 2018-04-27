@@ -62,8 +62,8 @@ try {
 }
 /* connect databases */
 try {
-	$wp = new DB($server, 'wp');
-	$d7 = new DB($server, 'd7');
+	$wp = new DB($server, 'wp', $options);
+	$d7 = new DB($server, 'd7', $options);
 } catch (Exception $e) {
 	die( 'DB connection error: ' . $e->getMessage());
 }
@@ -72,8 +72,15 @@ try {
 $wp->configure($options);
 $d7->configure($options);
 
+$wordpress = new WP($wp, $options);
+
 // the files option is required to clear images
 if ($option['files']) {
+
+	// 		
+	$cmdPath = 'importCmds.sh';
+	$cmdFile = fopen($cmdPath, 'w+');
+
 	// the images option clears images
 	if ($option['images']) {
 		if (is_dir($imageStore)) {
@@ -195,6 +202,10 @@ $unassigned = [];
 // set a value ONLY for a test version that only does a few posts
 $TESTLIMIT = null;
 
+// do not clear users unless it is specified
+// read and transfer all users if -u specified
+//
+
 for ($c = 0; $c < $chunks; $c++) {
 
 	$drupal_nodes = $d7_node->getNodeChunk($TESTLIMIT);
@@ -202,24 +213,13 @@ for ($c = 0; $c < $chunks; $c++) {
 	if (isset($drupal_nodes) && count($drupal_nodes)) {
 
 		foreach ($drupal_nodes as $node) {
-			
+
 			$wpPostId = null;
 			$fileSet = null;
 
-			if ($option['files']) {
-				// getFiles stores a local copy
-				$fileSet = $files->getFiles($node->nid);
-				if (isset($fileSet)) {
-					foreach ($fileSet as $file) {
-						$files->moveFile($file);
-
-					}
-				}
-			}
-
 			if ($option['nodes'] && $nodeSource === 'drupal') {
 				$d7_node->setNode($node);
-				$wpPostId = $wp_post->makePost($node, $options, $fileSet, $files->getImagesDestination());
+				$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore); //$files->getImagesDestination());
 				if ($wpPostId) {
 					$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
 				} else {
@@ -231,7 +231,19 @@ for ($c = 0; $c < $chunks; $c++) {
 				$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
 			}
 
+			if ($option['files']) {
+				// getFiles stores a local copy
+				$fileSet = $files->getFiles($node->nid);
 
+				if (isset($fileSet)) {
+					foreach ($fileSet as $file) {
+						//$files->moveFile($file);
+						if ($wpPostId) {
+							$wordpress->addMediaLibrary($wpPostId, $file, $options);
+						}
+					}
+				}
+			}
 
 			if ($option['taxonomy']) {
 

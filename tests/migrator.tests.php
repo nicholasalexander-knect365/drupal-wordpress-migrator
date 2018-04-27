@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 require "DB.class.php";
 require "WPTermMeta.class.php";
 require "Taxonomy.class.php";
+require "Options.class.php";
 require "common.php";
 
 define('DRUPAL_WP', 'DRUPAL_WP');
@@ -17,6 +18,7 @@ class MigratorTest extends TestCase {
 	private $db;
 	private $wp;
 	private $d7;
+	private $options;
 
 	// public function __construct() {
 	// 	$this->connectDB();
@@ -30,8 +32,23 @@ class MigratorTest extends TestCase {
 	
 	private function connectDB() 
 	{
-		$this->wp = new DB('local', 'wp');
-		$this->d7 = new DB('local', 'd7');
+		$this->options = new Options();
+		$this->options->setAll();
+
+		$this->wp = new DB('local', 'wp', $this->options);
+		$this->d7 = new DB('local', 'd7', $this->options);
+		
+		// test with mandatory config settings
+		$this->options->project = 'tuauto';
+		if (getenv('server') === 'local') {
+			$this->options->wordpressPath = '../wordpress/' . $this->options->project;
+		} else {
+			$this->options->wordpressPath = '/var/www/public';
+		}
+
+
+		$this->wp->configure($this->options);
+		$this->d7->configure($this->options);
 		$this->assertObjectHasAttribute('connection', $this->d7);
 		$this->assertObjectHasAttribute('connection', $this->wp);
 
@@ -41,6 +58,7 @@ class MigratorTest extends TestCase {
 		$this->connectDB();
 		$this->wp->query('SHOW tables');
 		$records = $this->wp->getRecords();
+
 		$this->assertGreaterThan(0, count($records));
 	}
 
@@ -66,7 +84,7 @@ class MigratorTest extends TestCase {
 
 	public function testTagsExist() {
 		$this->connectDB();
-		$taxonomy = new Taxonomy($this->wp);
+		$taxonomy = new Taxonomy($this->wp, $this->options);
 		print "\n\n* * * test Tags";
 
 		$tags = $taxonomy->getTags();
@@ -85,9 +103,8 @@ class MigratorTest extends TestCase {
 	private function checkTaxonomyUse($type) {
 
 		print "\n\n* * * $type Taxonomy Uses:";
-
 		$this->connectDB();
-		$taxonomy = new Taxonomy($this->wp);
+		$taxonomy = new Taxonomy($this->wp, $this->options);
 		$taxonomyList = $taxonomy->getTaxonomyList($type);
 
 		foreach ($taxonomyList as $tx) {
@@ -111,7 +128,7 @@ class MigratorTest extends TestCase {
 	private function checkTaxonomyType($type) {
 
 		print "\n\n* * * test Taxonomy $type exist";
-		$taxonomy = new Taxonomy($this->wp);
+		$taxonomy = new Taxonomy($this->wp, $this->options);
 		$taxonomyList = $taxonomy->getTaxonomyList($type);
 
 		foreach($taxonomyList as $tx) {

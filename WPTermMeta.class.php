@@ -60,6 +60,10 @@ class WPTermMeta {
 		if ($this->checkTermMeta($term_id, $meta_key)) {
 			return $this->getTermMetaId($term_id, $meta_key);
 		}
+
+		if (strlen($meta_key) > 255) {
+			$meta_key = substr($meta_key, 0, 255);
+		}
 		$sql = "INSERT INTO $wp_termmeta (term_id, meta_key, meta_value) VALUES ($term_id, '$meta_key', '$meta_value')";
 		$this->db->query($sql);
 		$meta_id = $this->db->lastInsertId();
