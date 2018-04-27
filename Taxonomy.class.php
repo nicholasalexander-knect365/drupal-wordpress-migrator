@@ -70,7 +70,7 @@ class Taxonomy {
 				break;
 			case 'Telematics':
 				$name = 'Telematics';
-				$slug = 'subjects';
+				$slug = 'categories';
 			case 'Autonomous':
 			case 'Autonomous Car':
 				$name = 'Autonomous';

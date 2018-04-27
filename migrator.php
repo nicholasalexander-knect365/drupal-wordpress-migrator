@@ -8,6 +8,7 @@ require "Options.class.php";
 require "Post.class.php";
 require "PostMeta.class.php";
 require "WPTermMeta.class.php";
+require "User.class.php";
 
 require "Node.class.php";
 require "Files.class.php";
@@ -73,6 +74,24 @@ $wp->configure($options);
 $d7->configure($options);
 
 $wordpress = new WP($wp, $options);
+
+// do not clear users unless it is specified
+// read and transfer all users if -u specified
+//
+$users = new User($wp, $d7);
+if ($options->users) {
+	if ($users->doWordpressUsersExist()) {
+		die("\nUsers already exist in the ". $options->project . " Wordpress instance, either remove them or do not use the -u (build users) switch.\n");
+	} else {
+		debug('Importing Drupal users to Wordpress');
+	}
+	$users->getDrupalUsers(); 			debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
+	$users->createWordpressUsers(); 	debug($users->wordpressUsers() . '... users created in Wordpress');
+} else {
+	if (!$users->doWordpressUsersExist()) {
+		die("\nERROR: wordpress users do not yet exist - you need to run with a -u flag\n");
+	}
+}
 
 // the files option is required to clear images
 if ($option['files']) {
@@ -146,6 +165,9 @@ if ($option['initialise']) {
 	$initialise->cleanUp($wp);
 }
 
+
+
+
 // use termmeta to record nodeIds converted to wordpress IDs
 $wp_termmeta = new WPTermMeta($wp);
 $wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
@@ -202,9 +224,6 @@ $unassigned = [];
 // set a value ONLY for a test version that only does a few posts
 $TESTLIMIT = null;
 
-// do not clear users unless it is specified
-// read and transfer all users if -u specified
-//
 
 for ($c = 0; $c < $chunks; $c++) {
 
@@ -219,7 +238,8 @@ for ($c = 0; $c < $chunks; $c++) {
 
 			if ($option['nodes'] && $nodeSource === 'drupal') {
 				$d7_node->setNode($node);
-				$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore); //$files->getImagesDestination());
+				$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
+				$files->getImagesDestination();
 				if ($wpPostId) {
 					$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
 				} else {

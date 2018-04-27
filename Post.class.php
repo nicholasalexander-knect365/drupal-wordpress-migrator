@@ -140,7 +140,7 @@ class Post {
         return $str;
 	}
 
-	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath) { //, $fileSet = NULL, $wordpressPath) {
+	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath, $users) { //, $fileSet = NULL, $wordpressPath) {
 
 		$wp_posts = DB::wptable('posts');
 
@@ -182,7 +182,17 @@ class Post {
 				}
 				switch ($key) {
 
-					case 'title': 
+					case 'uid':
+
+						$drupalUser = $users->getDrupalUserByUid($value);
+						if ($drupalUser) {
+							$wordpressUser = $users->getWordpressUserByEmail($drupalUser->mail);
+						} else {
+							debug("$value user with this uid can not be found in the Drupal Database, post assgined to default user in Wordpress");
+							$wordpressUser = $users->getWordpressUserById(1);
+						}
+
+					case 'title':
 						$values[$wpKey] = $value;
 						$values['post_name'] = substr(Taxonomy::slugify($values[$wpKey]), 0, 200);
 						if (strlen($values['post_name']) === 0) {
@@ -248,9 +258,6 @@ class Post {
 					case 'type' : 
 						$values['post_type'] = static::$mapPostType[$value];
 						break;
-
-					case 'name' :
-
 
 					default: 
 						$values[$wpKey] = $value;

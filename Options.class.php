@@ -14,6 +14,7 @@ class Options {
 
 	public $nodes;
 	public $taxonomy;
+	public $users;
 	public $files;
 	public $fields;
 
@@ -36,6 +37,7 @@ class Options {
 		'n' => 'nodes',
 		't' => 'taxonomy',
 		'c' => 'fields',
+		'u' => 'users',
 		'acf' => 'fields',
 		'project' => 'project',
 		'initialise'=> 'initialise',
@@ -50,14 +52,15 @@ class Options {
 		$this->verbose 		= false;
 		$this->quiet   		= false;
 		$this->progress 	= false;
-		
+
 		$this->initialise 	= false;
-		
 		$this->server 		= 'local';
+
 		$this->nodes 		= false;
 		$this->taxonomy 	= false;
 		$this->files 		= false;
 		$this->fields 		= false;
+		$this->users 		= false;
 
 		$this->wordpressPath = '';
 		$this->drupalPath 	= '../drupal7/tu-auto';
@@ -92,18 +95,19 @@ class Options {
 	}
 
 	public function setDefaults() {
-		$this->progress = true;
-		$this->quiet    = true;
-		$this->verbose  = false;
-		$this->help     = false;
-		$this->files    = true;
-		$this->nodes    = true;
-		$this->taxonomy = true;
-		$this->fields 	= true;
-		$this->initialise = true;
-		$this->clean 	= false;
-		$this->images 	= true;
-		$this->sqlDebug = false;
+		$this->progress 	= true;
+		$this->quiet 		= true;
+		$this->verbose 		= false;
+		$this->help 		= false;
+		$this->files 		= true;
+		$this->nodes 		= true;
+		$this->users 		= false;
+		$this->taxonomy 	= true;
+		$this->fields 		= true;
+		$this->initialise 	= true;
+		$this->clean 		= false;
+		$this->images 		= true;
+		$this->sqlDebug 	= false;
 	}
 
 	private function serverOptions() {
@@ -130,7 +134,7 @@ class Options {
 
 		if (count($argv) > $firstArg) {
 
-			$shortOpts = 'dvqpfntch';
+			$shortOpts = 'dvqpfntcuh';
 			$longOpts  = ['server:', 'project:', 'wordpressPath:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'images', 'acf', 'sql'];
 			$options = getopt($shortOpts, $longOpts);
 
@@ -140,7 +144,7 @@ class Options {
 
 			if (in_array('h', array_keys($options))) {
 			//if ($this->help) {
-				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -c]";
+				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -c -u]";
 				print "\n*  mandatory switches";
 				print "\n";
 
@@ -161,14 +165,15 @@ class Options {
 				print "\n  --clean        ... strips html content";
 				print "\n  --images       ... clears default images directory";
 				print "\n  --noFiles=[no files]\n";
-				print "\n  -v Verbose";
 				print "\n  -q Quiet";
+				print "\n  -v Verbose";
 				print "\n  -p Progress indicators";
-
-				print "\n\n  -d Defaults, or:";
-				print "\n  -f Files (Images)";
+				print "\n";
+				print "\n  -d Defaults, or:";
 				print "\n  -n Nodes";
+				print "\n  -u Users";
 				print "\n  -t Taxonomy";
+				print "\n  -f Files (Images)";
 				print "\n  -c Field Content (or use --acf)";
 				print "\n";
 				print "\n";
@@ -184,14 +189,16 @@ class Options {
 				// default option
 				if (in_array('d', array_keys($options))) {
 					$this->defaults = true;
-					$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
-					$this->server = isset($options['server']) ? $options['server'] : 'local';
+
 					if ($this->server === 'local') {
 						$this->wordpressPath = isset($options['wordpressPath']) ? $options['wordpressPath'] : '';
 					} else {
 						throw new Exception("need to know the wordpressPath setting");
 					}
 					$this->setDefaults();
+					$this->users = in_array('u', array_keys($options));
+					$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
+					$this->server = isset($options['server']) ? $options['server'] : 'local';
 					return;
 				}
 
@@ -230,6 +237,10 @@ class Options {
 							$this->fields = true;
 							break;
 
+						case 'u':
+							$this->users = true;
+							break;
+
 						case 'server':
 							$this->server = $value;
 							break; 
@@ -264,6 +275,7 @@ class Options {
 						case 'sql':
 							$this->sqlDebug = true;
 							break;
+
 
 						default: 
 							throw new Exception('invalid option? ' . $option);
