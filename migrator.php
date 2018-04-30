@@ -99,7 +99,8 @@ if ($option['files']) {
 	$cmdFile = fopen($cmdPath, 'w+');
 
 	// the images option clears images
-	if ($option['clearImages']) {
+	if ($options->clearImages) {
+die('clearImages is deprecated!');
 		if (is_dir($imageStore)) {
 			$files = glob($imageStore . '/*');
 			foreach ($files as $file) {
@@ -112,6 +113,8 @@ if ($option['files']) {
 			dd("ERROR: $imageStore is not a directory");
 		}
 	}
+
+
 	$files = new Files($d7, $s3bucket, [
 		'verbose' 	=> $verbose,
 		'quiet' 	=> $option['quiet'],
@@ -128,8 +131,8 @@ if ($option['files']) {
 		print "\nimages will be imported to $imageStore";
 	}
 } else {
-	if ($option['images']) {
-		print "\nimages option -f not selected, images will not be cleared\n";
+	if ($option['clearImages']) {
+		print "\nclearImages option but -f not selected, images will not be cleared\n";
 	}
 }
 

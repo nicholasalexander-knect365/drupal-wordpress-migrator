@@ -138,7 +138,7 @@ class Options {
 		if (count($argv) > $firstArg) {
 
 			$shortOpts = 'dvqpfntcuh';
-			$longOpts  = ['server:', 'project:', 'wordpressURL:', 'wordpressPath:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'images', 'acf', 'sql'];
+			$longOpts  = ['server:', 'project:', 'wordpressURL:', 'wordpressPath:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'clearImages', 'acf', 'sql'];
 			$options = getopt($shortOpts, $longOpts);
 
 			if (empty($options)) {
@@ -202,7 +202,8 @@ class Options {
 					$this->setDefaults();
 					$this->users = in_array('u', array_keys($options));
 					$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
-					$this->server = isset($options['server']) ? $options['server'] : 'local';
+					$this->server = isset($options['server']) ? $options['server'] : 'staging';
+					$this->wordpressURL = isset($options['wordpressURL']) ? $options['wordpressURL'] : 'http://beta.tu-auto.com';
 					return;
 				}
 
@@ -280,6 +281,7 @@ class Options {
 						case 'clearImages':
 							$this->clearImages = true;
 							break;
+
 						case 'sql':
 							$this->sqlDebug = true;
 							break;
