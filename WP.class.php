@@ -86,7 +86,8 @@ class WP {
 
 		if (file_exists("$imagePath/$url")) {
 		// use wp-cli to add images to the media library
-			$cmd = "wp media import $imagePath/$url --post_id=$wpPostId --title=\"$name\"";
+			$wpUrl = $options->wordpressPath;
+			$cmd = "wp media import $imagePath/$url --post_id=$wpPostId --url='$wpUrl' --title=\"$name\"";
 
 			// guess??
 			$featured = $file->type === 'node';
