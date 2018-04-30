@@ -101,33 +101,43 @@ class User {
 	private function makeWordpressUser($drupalUser) {
 
 		$user_email = $drupalUser->mail;
-		$user_login = $drupalUser->name;
+		if (strlen($user_email) > 4) {
+			$user_login = $drupalUser->name;
 
-		$user_pass = md5( $user_email . '--temp');
-		$user_display_name = $user_nicename = $drupalUser->name;
-		$user_registered = date('Y-m-d H:i:s', $drupalUser->created);
-		$user_status = 0;
+			$user_pass = md5( $user_email . '--temp');
+			$user_display_name = $user_nicename = $drupalUser->name;
+			$user_registered = date('Y-m-d H:i:s', $drupalUser->created);
+			$user_status = 0;
 
-		$sql = "SELECT ID as id FROM wp_users WHERE user_email='$user_email'";
-		$record = $this->db->record($sql);
 
-		if (strlen($user_login) > 0) {
-			if (!$record || !isset($record->id)) {
-				$sql = "INSERT INTO wp_users (user_login, user_pass, user_nicename, user_email, user_registered, user_status)
-						VALUES ('$user_login', '$user_pass', '$user_nicename', '$user_email', '$user_registered', $user_status)";
-				$this->db->query($sql);
-				$user_id = $this->db->lastInsertId();
-			} else {
-				$user_id = $record->id;
+			$sql = "SELECT ID as id FROM wp_users WHERE user_email='$user_email'";
+			$record = $this->db->record($sql);
+
+			if (strlen($user_login) > 0) {
+				if (!$record || !isset($record->id)) {
+					$sql = "INSERT INTO wp_users (user_login, user_pass, user_nicename, user_email, user_registered, user_status)
+							VALUES ('$user_login', '$user_pass', '$user_nicename', '$user_email', '$user_registered', $user_status)";
+					$this->db->query($sql);
+					$user_id = $this->db->lastInsertId();
+				} else {
+					$user_id = $record->id;
+				}
+				return $user_id;
 			}
-			return $user_id;
 		}
 		return null;
 	}
 
 	public function createWordpressUsers() {
 		foreach ($this->drupalUsers as $duser) {
-			$this->makeWordpressUser($duser);
+			$user_id = $this->makeWordpressUser($duser);
+
+			// establish wordpress capabilities:: maybe do this in Wordpress Admin?
+			// if ($user_id) {
+			// 	$capabilities = ['']
+			// 	$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, 'wp_39_capabilities', )"
+			// }
+
 		}
 	}
 
