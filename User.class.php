@@ -36,10 +36,8 @@ class User {
 	}
 
 	public function wordpressUsers() {
-		
-		$wp_users = DB::wptable('users');
 
-		$sql = "SELECT COUNT(*) AS c FROM $wp_users";
+		$sql = "SELECT COUNT(*) AS c FROM wp_users";
 
 		$record = $this->db->record($sql);
 
@@ -75,10 +73,8 @@ class User {
 	// }
 
 	public function getWordpressUserById($id) {
-		
-		$wp_users = DB::wptable('users');
 
-		$sql = "SELECT * from $wp_users where user_id = $id";
+		$sql = "SELECT * from wp_users where user_id = $id";
 		$record = $this->db->record($sql);
 
 		return $record;
@@ -86,18 +82,14 @@ class User {
 
 	public function getWordpressUserByEmail($email) {
 		
-		$wp_users = DB::wptable('users');
-
-		$sql = "SELECT * from $wp_users where user_email = '$email'";
+		$sql = "SELECT * from wp_users where user_email = '$email'";
 		$record = $this->db->record($sql);
 
 		return $record;
 	}
 	public function doWordpressUsersExist() {
-		
-		$wp_users = DB::wptable('users');
 
-		$sql = "SELECT COUNT(*) AS c FROM $wp_users";
+		$sql = "SELECT COUNT(*) AS c FROM wp_users";
 		$record = $this->db->record($sql);
 
 		if ($record && $record->c) {
@@ -107,8 +99,6 @@ class User {
 	}
 
 	private function makeWordpressUser($drupalUser) {
-		
-		$wp_users = DB::wptable('users');
 
 		$user_email = $drupalUser->mail;
 		$user_login = $drupalUser->name;
@@ -118,12 +108,12 @@ class User {
 		$user_registered = date('Y-m-d H:i:s', $drupalUser->created);
 		$user_status = 0;
 
-		$sql = "SELECT ID as id FROM $wp_users WHERE user_email='$user_email'";
+		$sql = "SELECT ID as id FROM wp_users WHERE user_email='$user_email'";
 		$record = $this->db->record($sql);
 
 		if (strlen($user_login) > 0) {
 			if (!$record || !isset($record->id)) {
-				$sql = "INSERT INTO $wp_users (user_login, user_pass, user_nicename, user_email, user_registered, user_status)
+				$sql = "INSERT INTO wp_users (user_login, user_pass, user_nicename, user_email, user_registered, user_status)
 						VALUES ('$user_login', '$user_pass', '$user_nicename', '$user_email', '$user_registered', $user_status)";
 				$this->db->query($sql);
 				$user_id = $this->db->lastInsertId();
@@ -142,18 +132,15 @@ class User {
 	}
 
 	private function addAdminCapabilities($id) {
-		$wp_usermeta = DB::wptable('usermeta');
-		$sql = "INSERT INTO $wp_usermeta (user_id, meta_key, meta_value) VALUES ($id, 'wp_capabilities', 'a:1:{s:13:\"administrator\";s:1:\"1\";}')";
+		$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($id, 'wp_capabilities', 'a:1:{s:13:\"administrator\";s:1:\"1\";}')";
 		$this->db->query($sql);
-		$sql = "INSERT INTO $wp_usermeta (user_id, meta_key, meta_value) VALUES ($id, 'wp_user_level', '10')";
+		$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($id, 'wp_user_level', '10')";
 		$this->db->query($sql);
 
 	}
 	public function makeAdminuser() {
 
-		$wp_users = DB::wptable('users');
-
-		$sql = "SELECT ID, user_login from $wp_users where user_login LIKE 'admin%' LIMIT 1";
+		$sql = "SELECT ID, user_login from wp_users where user_login LIKE 'admin%' LIMIT 1";
 		$record = $this->db->record($sql);
 
 		if ($record && $record->ID) {
