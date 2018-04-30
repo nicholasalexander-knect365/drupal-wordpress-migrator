@@ -8,6 +8,7 @@ class Events {
 
 	public function __construct($db) {
 		$this->db = $db;
+		die('EVENTS class deprecated!');
 	}
 
 	private $tables = [

@@ -81,12 +81,11 @@ $wordpress = new WP($wp, $options);
 $users = new User($wp, $d7);
 if ($options->users) {
 	if ($users->doWordpressUsersExist()) {
-		die("\nUsers already exist in the ". $options->project . " Wordpress instance, either remove them or do not use the -u (build users) switch.\n");
-	} else {
-		debug('Importing Drupal users to Wordpress');
+		debug('Importing Drupal users to existing Wordpress users');
 	}
 	$users->getDrupalUsers(); 			debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
 	$users->createWordpressUsers(); 	debug($users->wordpressUsers() . '... users created in Wordpress');
+	$users->makeAdminUser();
 } else {
 	if (!$users->doWordpressUsersExist()) {
 		die("\nERROR: wordpress users do not yet exist - you need to run with a -u flag\n");

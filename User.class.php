@@ -113,7 +113,7 @@ class User {
 		$user_email = $drupalUser->mail;
 		$user_login = $drupalUser->name;
 
-		$user_pass = md5( $user_email . '-imported');
+		$user_pass = md5( $user_email . '--temp');
 		$user_display_name = $user_nicename = $drupalUser->name;
 		$user_registered = date('Y-m-d H:i:s', $drupalUser->created);
 		$user_status = 0;
@@ -121,20 +121,48 @@ class User {
 		$sql = "SELECT ID as id FROM $wp_users WHERE user_email='$user_email'";
 		$record = $this->db->record($sql);
 
-		if (!$record || !isset($record->id)) {
-			$sql = "INSERT INTO $wp_users (user_login, user_pass, user_nicename, user_email, user_registered, user_status)
-					VALUES ('$user_login', '$user_pass', '$user_nicename', '$user_email', '$user_registered', $user_status)";
-			$this->db->query($sql);
-			$user_id = $this->db->lastInsertId();
-		} else {
-			$user_id = $record->id;
+		if (strlen($user_login) > 0) {
+			if (!$record || !isset($record->id)) {
+				$sql = "INSERT INTO $wp_users (user_login, user_pass, user_nicename, user_email, user_registered, user_status)
+						VALUES ('$user_login', '$user_pass', '$user_nicename', '$user_email', '$user_registered', $user_status)";
+				$this->db->query($sql);
+				$user_id = $this->db->lastInsertId();
+			} else {
+				$user_id = $record->id;
+			}
+			return $user_id;
 		}
-		return $user_id;
+		return null;
 	}
 
 	public function createWordpressUsers() {
 		foreach ($this->drupalUsers as $duser) {
 			$this->makeWordpressUser($duser);
+		}
+	}
+
+	private function addAdminCapabilities($id) {
+		$wp_usermeta = DB::wptable('usermeta');
+		$sql = "INSERT INTO $wp_usermeta (user_id, meta_key, meta_value) VALUES ($id, 'wp_capabilities', 'a:1:{s:13:\"administrator\";s:1:\"1\";}')";
+		$this->db->query($sql);
+		$sql = "INSERT INTO $wp_usermeta (user_id, meta_key, meta_value) VALUES ($id, 'wp_user_level', '10')";
+		$this->db->query($sql);
+
+	}
+	public function makeAdminuser() {
+
+		$wp_users = DB::wptable('users');
+
+		$sql = "SELECT ID, user_login from $wp_users where user_login LIKE 'admin%' LIMIT 1";
+		$record = $this->db->record($sql);
+
+		if ($record && $record->ID) {
+			$username = $record->user_login;
+			$id = $record->ID;
+			$this->addAdminCapabilities($id);
+			print "\nINFO: admin user $username now an administrator";
+		} else {
+			print "\nWARNING: No admin user candidate found";
 		}
 	}
 }

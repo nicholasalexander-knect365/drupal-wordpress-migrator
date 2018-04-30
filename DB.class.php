@@ -170,6 +170,7 @@ class DB {
 			case 'term_relationships':
 			case 'term_taxonomy':
 			case 'users':
+			case 'usermeta':
 				return static::$wp_prefix . $type;
 			default:
 				die('unknown table type for wordpress : '.$type);
