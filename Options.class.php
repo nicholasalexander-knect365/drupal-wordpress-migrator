@@ -43,7 +43,7 @@ class Options {
 		'project' => 'project',
 		'initialise'=> 'initialise',
 		'clean' 	=> 'clean',
-		'clearImages' 	=> 'images'
+		//'clearImages' 	=> 'images'
 	];
 
 	public function __construct() {
@@ -138,7 +138,8 @@ class Options {
 		if (count($argv) > $firstArg) {
 
 			$shortOpts = 'dvqpfntcuh';
-			$longOpts  = ['server:', 'project:', 'wordpressURL:', 'wordpressPath:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'clearImages', 'acf', 'sql'];
+			$longOpts  = ['server:', 'project:', 'wordpressURL:', 'wordpressPath:', 'drupalPath:',
+			 			  'imageStore:', 'initialise', 'clean', 'clearImages', 'acf', 'sql'];
 			$options = getopt($shortOpts, $longOpts);
 
 			if (empty($options)) {
