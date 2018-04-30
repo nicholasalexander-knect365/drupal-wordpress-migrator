@@ -31,26 +31,30 @@ class Files {
 		$this->verbose = isset($args['verbose']) ? $args['verbose'] : false;
 	}
 
-	public function setDrupalPath($path) {
-
-		$this->drupalPath = $path;
-	}
-
-	public function dirEmpty($dir) {
-
-		if (!is_readable($dir)) {
-			die("\n\nERROR: image store directory $dir does not exist or is not writable\n\n");
-		}
-  		return (count(scandir($dir)) == 2);
-	}
-
 	public function isVerbose() {
 
 		return $this->verbose;
 	}
 
-	public function setImageStore($path) {
+	public function setDrupalPath($path) {
 
+		$this->drupalPath = $path;
+	}
+
+// initially I was concerned that images are imported freshly each time, but once we have the image, no need to get it again
+// deprecate this 
+	public function dirEmpty($dir) {
+return;
+		if (!is_readable($dir)) {
+			debug("\n\nWARNING: image store directory $dir does not exist or is not writable\n\n");
+		}
+  		return (count(scandir($dir)) == 2);
+	}
+
+	public function setImageStore($path) {
+	$this->imageStore = $path;
+
+return;
 		if ($this->dirEmpty($path)) {
 			$this->imageStore = $path;
 		} else {
@@ -89,27 +93,34 @@ class Files {
 	private function storeImageData($file) {
 
 		$fileType = $this->source($file->uri);
-//debug('STOREIMAGEDATA:' . $file->uri . ' '. $fileType);
-
+if ($this->verbose) {
+	debug('STOREIMAGEDATA:' . $file->uri . ' '. $fileType);
+}
 		switch ($fileType) {
 			case 'public' :
+
 				$path = $this->drupalPath . '/sites/default/files/' . $file->filename;
-				if ($this->verbose === true) {
+				if ($this->verbose) {
 					print "\nCopying image ".$path;
 				}
 				if (file_exists($path)) {
 					try {
+//debug("copying public: image file ".$path);
 						copy($path, $this->imageStore . '/' . $file->filename);
 						debug('copy from '.$path.' to '.$this->imageStore . '/' .$file->filename);
 					} catch(Exception $e) {
 						debug('could not copy ' . $path);
 					}
 				} else {
-					print "\n$path does not exist";
+					print "\nimage path: $path does not exist";
 				}
 				break;
 
 			case 's3':
+
+//TODO: check if the file has been got before we get it again!
+break;
+// we already have the s3 images
 				$path = $this->s3Bucket . '/' . $file->filename;
 				try {
 					$fileData = file_get_contents($path);

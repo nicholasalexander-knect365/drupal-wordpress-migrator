@@ -95,12 +95,11 @@ if ($options->users) {
 // the files option is required to clear images
 if ($option['files']) {
 
-	// 		
 	$cmdPath = 'importCmds.sh';
 	$cmdFile = fopen($cmdPath, 'w+');
 
 	// the images option clears images
-	if ($option['images']) {
+	if ($option['clearImages']) {
 		if (is_dir($imageStore)) {
 			$files = glob($imageStore . '/*');
 			foreach ($files as $file) {
@@ -163,8 +162,6 @@ if ($option['initialise']) {
 	}
 	$initialise->cleanUp($wp);
 }
-
-
 
 
 // use termmeta to record nodeIds converted to wordpress IDs

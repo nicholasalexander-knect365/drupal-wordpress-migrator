@@ -39,7 +39,7 @@ class WP {
 		// $wp_postmeta = DB::wptable('postmeta');
 
 		$wordpressPath = $options->wordpressPath;
-		$imagePath = $options->imageStore;
+		$imageStore = $options->imageStore;
 
 		$url = $file->filename;
 
@@ -84,10 +84,10 @@ class WP {
 
 		$name = basename($url);
 
-		if (file_exists("$imagePath/$url")) {
+		if (file_exists("$imageStore/$url")) {
 		// use wp-cli to add images to the media library
 			$wpUrl = $options->wordpressURL;
-			$cmd = "wp media import $imagePath/$url --post_id=$wpPostId --url='$wpUrl' --title=\"$name\"";
+			$cmd = "wp media import $imageStore/$url --post_id=$wpPostId --url='$wpUrl' --title=\"$name\"";
 
 			// guess??
 			$featured = $file->type === 'node';
@@ -97,7 +97,7 @@ class WP {
 			}
 			fputs($this->cmdFile, $cmd . "\n");
 		} else {
-			debug("$imagePath/$url does not exist???");
+			debug("$imageStore/$url did not exist???");
 		}
 	}
 }

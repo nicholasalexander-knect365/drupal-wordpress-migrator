@@ -24,7 +24,7 @@ class Options {
 	public $drupalPath;
 	public $imageStore;
 	public $clean;
-	public $images;
+	public $clearImages;
 
 	public $sqlDebug;
 
@@ -43,7 +43,7 @@ class Options {
 		'project' => 'project',
 		'initialise'=> 'initialise',
 		'clean' 	=> 'clean',
-		'images' 	=> 'images'
+		'clearImages' 	=> 'images'
 	];
 
 	public function __construct() {
@@ -68,11 +68,11 @@ class Options {
 
 		$this->drupalPath 	= '../drupal7/tu-auto';
 		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
-		$this->imageStore 	= getenv('HOME') . '/tmp/images';
+		$this->imageStore 	= getcwd() . '/images';
 		$this->project 		= 'tu-auto';
 
 		$this->clean  		= false;
-		$this->images 		= false;
+		$this->clearImages 	= false;
 		$this->sqlDebug		= false;
 		$this->siteId 		= NULL;
 	}
@@ -109,7 +109,7 @@ class Options {
 		$this->fields 		= true;
 		$this->initialise 	= true;
 		$this->clean 		= false;
-		$this->images 		= true;
+		$this->clearImages 	= true;
 		$this->sqlDebug 	= false;
 	}
 
@@ -138,7 +138,7 @@ class Options {
 		if (count($argv) > $firstArg) {
 
 			$shortOpts = 'dvqpfntcuh';
-			$longOpts  = ['server:', 'project:', 'wordpressPath:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'images', 'acf', 'sql'];
+			$longOpts  = ['server:', 'project:', 'wordpressURL:', 'wordpressPath:', 'drupalPath:', 'imageStore:', 'initialise', 'clean', 'images', 'acf', 'sql'];
 			$options = getopt($shortOpts, $longOpts);
 
 			if (empty($options)) {
@@ -167,7 +167,7 @@ class Options {
 				print "\nControls:";
 				print "\n  --initialise   ... clears ALL data";
 				print "\n  --clean        ... strips html content";
-				print "\n  --images       ... clears default images directory";
+				print "\n  --clearImages  ... clears default images directory";
 				print "\n  --noFiles=[no files]\n";
 				print "\n  -q Quiet";
 				print "\n  -v Verbose";
@@ -277,8 +277,8 @@ class Options {
 							$this->imageStore = $value;
 							break; 
 
-						case 'images':
-							$this->images = true;
+						case 'clearImages':
+							$this->clearImages = true;
 							break;
 						case 'sql':
 							$this->sqlDebug = true;
