@@ -185,7 +185,7 @@ class Post {
 					case 'uid':
 
 						$drupalUser = $users->getDrupalUserByUid($value);
-						if ($drupalUser) {
+						if ($drupalUser && strlen($drupalUser->mail) > 4) {
 							$wordpressUser = $users->getWordpressUserByEmail($drupalUser->mail);
 						} else {
 							debug("$value user with this uid can not be found in the Drupal Database, post assgined to default user in Wordpress");
