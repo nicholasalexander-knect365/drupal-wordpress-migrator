@@ -20,6 +20,7 @@ class Options {
 
 	public $s3bucket;
 	public $wordpressPath;
+	public $wordpressURL;
 	public $drupalPath;
 	public $imageStore;
 	public $clean;
@@ -63,6 +64,8 @@ class Options {
 		$this->users 		= false;
 
 		$this->wordpressPath = '';
+		$this->wordpressURL  = 'http://tuauto.telecoms.local';
+
 		$this->drupalPath 	= '../drupal7/tu-auto';
 		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
 		$this->imageStore 	= getenv('HOME') . '/tmp/images';
@@ -155,6 +158,7 @@ class Options {
 
 				print "\nSettings:";
 				print "\n* --wordpressPath=set Wordpress path (must contain wp-config.php)";
+				print "\n* --wordpressURL=the target site base URL (required for Multisite)";
 				print "\n* --drupalPath=set Drupal path";
 				print "\n  --imageStore=set temp images directory (default ./images)";
 				print "\n  --sql show sql statments in verbose mode";
@@ -259,6 +263,10 @@ class Options {
 
 						case 'wordpressPath':
 							$this->wordpressPath = $value;
+							break;
+
+						case 'wordpressURL':
+							$this->wordpressURL = $value;
 							break;
 
 						case 'drupalPath':

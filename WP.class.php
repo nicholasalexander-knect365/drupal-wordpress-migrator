@@ -86,7 +86,7 @@ class WP {
 
 		if (file_exists("$imagePath/$url")) {
 		// use wp-cli to add images to the media library
-			$wpUrl = $options->wordpressPath;
+			$wpUrl = $options->wordpressURL;
 			$cmd = "wp media import $imagePath/$url --post_id=$wpPostId --url='$wpUrl' --title=\"$name\"";
 
 			// guess??
