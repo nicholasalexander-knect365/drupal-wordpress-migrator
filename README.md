@@ -52,6 +52,11 @@ php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --
 
 NB: The image importer script associates images to posts in this import.  If Nodes are imported again (i.e. to --clean the html) you must rerun the image importer after clearing out the media library
 
+9. Content only can be replaced with replaceContent.php.  NB: this rereads the Drupal source and replaces all posts in Wordpress.  ANY CHANGES made in Wordpress since the migration WILL BE OVERWRITTEN.
+
+> php replaceContent.php --project=tuauto --wordpressPath=/home/nicholas/Dev/wordpress/tuauto --clean
+
+
 DBUG: --init did not seem to work (wordpress has data in it error)
       -d works if you edit the drupalPath in migrator.php and edit DB to select the right server
 

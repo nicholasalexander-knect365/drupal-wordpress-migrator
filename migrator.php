@@ -2,11 +2,14 @@
 
 /*
 TODO: 
+
 maybe run a quick scan for all full size images and dump out the image dimensions to see if they're all something crappily small?
+
 if so we can raise it as an issue but they might just have to live with it for migrated content
 might also be worth finding the relevant article on the existing site and confirming that the images aren't any larger over there - maybe they only upload smaller images to staging for some reason
 
 staging cli: 
+
 php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c --initialise
 
 */

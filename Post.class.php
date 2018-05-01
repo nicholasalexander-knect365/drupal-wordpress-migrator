@@ -219,7 +219,7 @@ class Post {
 
 					case 'content':
 						if ($options && $options->clean) {
-							$value = strip_tags($value);
+							$value = preg_replace('/ style\=[\'"].*?[\'"]/', '', $value);
 						}
 
 						if ($fileSet) {
