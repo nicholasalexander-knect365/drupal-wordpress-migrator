@@ -49,17 +49,12 @@ try {
 	$options->setAll();
 
 	// [tuauto, ioti, ...]
-	$project 	= $options->get('project');
-	// where the s3 files are
+	$project 	= $options->get('project');			// valid: tuauto, ioti
 	$s3bucket 	= $options->get('s3bucket');
-	// where the drupal files are
-	$drupalPath = $options->get('drupalPath');
-	// temporary image store
-	$imageStore = $options->get('imageStore');
-	// server = [local. vm, staging ] now only advisory as we read wp-config.php
-	$server 	= $options->get('server');
-	// tell me more
-	$verbose    = $options->get('verbose');
+	$drupalPath = $options->get('drupalPath');		// where the drupal files are
+	$imageStore = $options->get('imageStore');		// temporary image store
+	$server 	= $options->get('server');			// server = [local. vm, staging] (now only advisory as we read wp-config.php)
+	$verbose    = $options->get('verbose');			// tell me more
 
 	$option = [];
 
