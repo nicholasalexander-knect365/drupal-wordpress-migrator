@@ -140,6 +140,23 @@ class Post {
         return $str;
 	}
 
+	public function replacePostContent($wpPostId, $drupalNode) {
+		$wp_posts = DB::wptable('posts');
+		$wp_postmeta = DB::wptable('postmeta');
+
+		$sql = "SELECT * FROM $wp_posts WHERE ID=$wpPostId";
+		$record = $this->db->record($sql);
+
+		$post_content = $this->prepare($drupalNode->content);
+		$sql = "UPDATE $wp_posts set post_content = '$post_content' WHERE ID=$wpPostId LIMIT 1";
+//print "\n\n$sql\n";
+		try {
+			$this->db->query($sql);
+		} catch (Exception $e) {
+			throw new Exception($sql . "\nError in SQL statement " . $e->getMessage());
+		}
+	}
+
 	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath, $users) { //, $fileSet = NULL, $wordpressPath) {
 
 		$wp_posts = DB::wptable('posts');

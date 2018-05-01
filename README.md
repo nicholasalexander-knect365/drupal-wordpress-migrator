@@ -41,6 +41,10 @@ You need:
 	or
 	* php migrator.php --server=staging --wordpressPath=/var/www/public --drupalPath=/var/www/drupal8/tuauto --project=tuauto -d
 
+7a. 01/05/2018 run with these parameters on staging:
+
+php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c --initialise
+
 8. run the image importation script, from the Wordpress directory
 	* chmod 755 importCmds.sh
 	* cd $WORDPRESS_ROOT
@@ -50,8 +54,6 @@ NB: The image importer script associates images to posts in this import.  If Nod
 
 DBUG: --init did not seem to work (wordpress has data in it error)
       -d works if you edit the drupalPath in migrator.php and edit DB to select the right server
-
-
 
 	* import the images into the media library 
 	* (you may have to copy /images to a local machine to drag and drop them into the media library)
@@ -63,19 +65,13 @@ DBUG: --init did not seem to work (wordpress has data in it error)
 
 # Versions 
 ## History
-* v101 initial tests
-* v102 working with imports, DB module
-* v103 importing taxonomies
-* v104 importing nodes directly
 * TAG prerelease01
-* v105 field_data into ACF
-* multisite - changes required for multisite MERGED to V105
-* v105 additional phpunit, better options
+* v105 field_data into ACF, additional phpunit, better options
 * MASTER & TAG prerelease02
 * v106 ACF import from ACF data, unit tests with taxonomy usage reports
+* v107 addresses images and featured images
 
 ## Release versions
 * STAGING RELEASE 17 April 2018
-* v107 addresses images and featured images
-* TBD: TAG tag prerelease03
+* STAGING RELEASE 01 May 2018 
 

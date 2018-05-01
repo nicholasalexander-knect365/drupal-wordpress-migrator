@@ -66,22 +66,20 @@ class DB {
 				throw new Exception('can not read wp-config: ' . $wp_config);
 			}
 			while($line = fgets($fd, 4096)) {
-
 				if (preg_match("/'DB_([A-Z]+)'/", $line, $match)) {
-
-					preg_match("/^define\(['\"]DB_[\w]+['\"][\s]*,[\s]*['\"]([\w]+)['\"]\);$/", $line, $matched);
-
-					if ($match[1] === 'NAME') {
-						$this->credentials['wp']['database'] = $matched[1];
-					}
-					if ($match[1] === 'USER') {
-						$this->credentials['wp']['username'] = $matched[1];
-					}
-					if ($match[1] === 'PASSWORD') {
-						$this->credentials['wp']['password'] = $matched[1];
-					}
-					if ($match[1] === 'HOST') {
-						$this->credentials['wp']['host'] = $matched[1];
+						if (preg_match("/^define\(['\"]DB_[\w]+['\"][\s]*,[\s]*['\"]([\w]+)['\"]\);$/", $line, $matched)) {
+						if ($match[1] === 'NAME') {
+							$this->credentials['wp']['database'] = $matched[1];
+						}
+						if ($match[1] === 'USER') {
+							$this->credentials['wp']['username'] = $matched[1];
+						}
+						if ($match[1] === 'PASSWORD') {
+							$this->credentials['wp']['password'] = $matched[1];
+						}
+						if ($match[1] === 'HOST') {
+							$this->credentials['wp']['host'] = $matched[1];
+						}
 					}
 				}
 			}

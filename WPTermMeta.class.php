@@ -10,7 +10,7 @@ class WPTermMeta {
 		$this->db = $db;
 	}
 
-	// set the term and return its ID OR get the ID
+	// set the term and return its ID, OR get the ID of the $term_name
 	public function getSetTerm($term_name, $term_slug) {
 		$wp_terms = DB::wptable('terms');
 
@@ -70,12 +70,25 @@ class WPTermMeta {
 		return $meta_id;
 	}
 
+	public function getTermMetaKey($term_id, $meta_value) {
+		$wp_termmeta = DB::wptable('termmeta');
+
+		$sql = "SELECT meta_key FROM $wp_termmeta WHERE term_id=$term_id AND meta_value = $meta_value";
+		$record = $this->db->record($sql);
+
+		if ($record && $record->meta_key) {
+			return $record->meta_key;
+		}
+		return NULL;
+	}
+
 	public function getTermMetaValue($term_id, $meta_key) {
 
 		$wp_termmeta = DB::wptable('termmeta');
 
 		$sql = "SELECT meta_value FROM $wp_termmeta WHERE term_id='$term_id' AND meta_key='$meta_key'";
 		$record = $this->db->record($sql);
+
 		if ($record && $record->meta_value) {
 			return $record->meta_value;
 		}

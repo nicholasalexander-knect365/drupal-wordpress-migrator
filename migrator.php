@@ -1,5 +1,16 @@
 <?php
 
+/*
+TODO: 
+maybe run a quick scan for all full size images and dump out the image dimensions to see if they're all something crappily small?
+if so we can raise it as an issue but they might just have to live with it for migrated content
+might also be worth finding the relevant article on the existing site and confirming that the images aren't any larger over there - maybe they only upload smaller images to staging for some reason
+
+staging cli: 
+php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c --initialise
+
+*/
+
 require "DB.class.php";
 require "WP.class.php";
 
@@ -98,21 +109,21 @@ if ($option['files']) {
 	$cmdPath = 'importCmds.sh';
 	$cmdFile = fopen($cmdPath, 'w+');
 
-	// the images option clears images
-	if ($options->clearImages) {
-die('clearImages is deprecated!');
-		if (is_dir($imageStore)) {
-			$files = glob($imageStore . '/*');
-			foreach ($files as $file) {
-				if (is_file($file)) {
-					unlink($file);
-				}
-			}
-			print "\n" . $imageStore . ' cleared of files.';
-		} else {
-			dd("ERROR: $imageStore is not a directory");
-		}
-	}
+// 	// the images option clears images
+// 	if ($options->clearImages) {
+// die('clearImages is deprecated!');
+// 		if (is_dir($imageStore)) {
+// 			$files = glob($imageStore . '/*');
+// 			foreach ($files as $file) {
+// 				if (is_file($file)) {
+// 					unlink($file);
+// 				}
+// 			}
+// 			print "\n" . $imageStore . ' cleared of files.';
+// 		} else {
+// 			dd("ERROR: $imageStore is not a directory");
+// 		}
+// 	}
 
 
 	$files = new Files($d7, $s3bucket, [
@@ -130,10 +141,10 @@ die('clearImages is deprecated!');
 	if ($verbose) {
 		print "\nimages will be imported to $imageStore";
 	}
-} else {
-	if ($option['clearImages']) {
-		print "\nclearImages option but -f not selected, images will not be cleared\n";
-	}
+// } else {
+// 	if ($option['clearImages']) {
+// 		print "\nclearImages option but -f not selected, images will not be cleared\n";
+// 	}
 }
 
 $wp_taxonomy = new Taxonomy($wp, $options);
@@ -154,9 +165,9 @@ $wp_fields = new Fields($wp);
 $drupal_nodes = null;
 
 if ($option['initialise']) {
-	if ($once++ > 1) {
-		throw new Exception('Initialise called more than once???');
-	}
+	// if ($once++ > 1) {
+	// 	throw new Exception('Initialise called more than once???');
+	// }
 	$initialise = new Initialise($wp, $options);
 
 	// build the term_taxonomy if not already present
@@ -174,7 +185,7 @@ $wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
 $nodeSource = 'drupal';
 if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$option['nodes'] && !$option['initialise'])) {
 	message("\nDrupal node data has already been imported to Wordpress.");
-	message("You can either clear it with the --init or -d[efaults] flag");
+	message("You can either clear it with the --initialise or -d[efaults] flag");
 	message("or the wp-posts will be used, and the other tables will be imported...\n");
 	$nodeSource = 'wordpress';
 } else {
@@ -222,7 +233,6 @@ $unassigned = [];
 
 // set a value ONLY for a test version that only does a few posts
 $TESTLIMIT = null;
-
 
 for ($c = 0; $c < $chunks; $c++) {
 
