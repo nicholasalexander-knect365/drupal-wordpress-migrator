@@ -11,6 +11,7 @@ class DB {
 	private $config;
 	private $server;
 	private $type; 			// wp or d7 expected
+	private $host;
 	private $credentials;
 	private $connection;
 	private $result;
@@ -38,6 +39,7 @@ class DB {
 			default:
 				die('Programming error: connection type ' . $type . ' has not been defined.');
 		}
+
 
 		$this->connection = new mysqli(
 			$credentials['host'],
@@ -119,12 +121,21 @@ class DB {
 
 		switch ($this->config->project) {
 			case 'tuauto':
-				$this->credentials['d7'] = [
-					'database' => 'd7telematics',
-					'username' => 'd7telematics',
-					'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
-					'host' => 'localhost'
-				];
+				if ($this->config->server === 'staging') {
+					$this->credentials['d7'] = [
+						'database' => 'd7telematics',
+						'username' => 'd7telematics',
+						'password' => '9FbTCPWWTQi2',
+						'host' => 'mysql'
+					];
+				} else {
+					$this->credentials['d7'] = [
+						'database' => 'd7telematics',
+						'username' => 'd7telematics',
+						'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
+						'host' => 'localhost'
+					];
+				}
 				break;
 			default: 
 				throw new Exception('Have to know which site you are migrating with --project setting');
