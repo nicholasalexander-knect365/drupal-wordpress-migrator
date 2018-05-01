@@ -35,33 +35,32 @@ You need:
 	* edit DB.class.php and add a section for the staging/live server with the database credentials for the server
  
 7. in the migrator directory, run the unit test:
-	*  phpunit tests/migrator.tests.php > unitest-prerun.txt
-	* run the migrator, configure for the server, turn on verbose
-	* php migrator.php --server=staging --wordpressPath=/var/www/public --drupalPath=/var/www/drupal7/tuauto --imageStore=images --clean --images --init --taxonomy --nodes -c -f -p -n
+>	phpunit tests/migrator.tests.php > unitest-prerun.txt
+>	run the migrator, configure for the server, turn on verbose
+>	php migrator.php --server=staging --wordpressPath=/var/www/public --drupalPath=/var/www/drupal7/tuauto --imageStore=images --clean --images --init --taxonomy --nodes -c -f -p -n
 	or
-	* php migrator.php --server=staging --wordpressPath=/var/www/public --drupalPath=/var/www/drupal8/tuauto --project=tuauto -d
+>	php migrator.php --server=staging --wordpressPath=/var/www/public --drupalPath=/var/www/drupal8/tuauto --project=tuauto -d
 
 7a. 01/05/2018 run with these parameters on staging:
 
 php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c --initialise
 
 8. run the image importation script, from the Wordpress directory
->	* chmod 755 importCmds.sh
->	* cd $WORDPRESS_ROOT
->	* ../migrator/importCmds.sh
+>	chmod 755 importCmds.sh
+>	cd $WORDPRESS_ROOT
+>	../migrator/importCmds.sh
 
 NB: The image importer script associates images to posts in this import.  If Nodes are imported again (i.e. to --clean the html) you must rerun the image importer after clearing out the media library
 
 9. Content only can be replaced with replaceContent.php.  NB: this rereads the Drupal source and replaces all posts in Wordpress.  ANY CHANGES made in Wordpress since the migration WILL BE OVERWRITTEN.
 
-> php replaceContent.php --project=tuauto --wordpressPath=/home/nicholas/Dev/wordpress/tuauto --clean
+>	php replaceContent.php --project=tuauto --wordpressPath=/home/nicholas/Dev/wordpress/tuauto --clean
 
 
 DBUG: --init did not seem to work (wordpress has data in it error)
       -d works if you edit the drupalPath in migrator.php and edit DB to select the right server
 
-	* import the images into the media library 
-	* (you may have to copy /images to a local machine to drag and drop them into the media library)
+	* import the images into the media library (you may have to copy /images to a local machine to drag and drop them into the media library)
 	* images that occur in a post internally
 
 8. output shows progress
