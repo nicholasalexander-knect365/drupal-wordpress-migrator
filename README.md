@@ -43,7 +43,7 @@ You need:
 
 7a. 01/05/2018 run with these parameters on staging:
 
-php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c --initialise
+>	php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c --initialise
 
 8. run the image importation script, from the Wordpress directory
 >	chmod 755 importCmds.sh
@@ -73,9 +73,23 @@ DBUG: --init did not seem to work (wordpress has data in it error)
 * v105 field_data into ACF, additional phpunit, better options
 * MASTER & TAG prerelease02
 * v106 ACF import from ACF data, unit tests with taxonomy usage reports
-* v107 addresses images and featured images
+* v107 addresses images and featured images, replace content script, strip content by removing style tags
+* v108 revisit ACF - check the field descriptions match properly, revisit images - audit if all images are being located, why there are many images NOT imported
 
 ## Release versions
 * STAGING RELEASE 17 April 2018
 * STAGING RELEASE 01 May 2018 
 
+
+Tim's comment regarding images: 
+
+* maybe run a quick scan for all full size images and dump out the image dimensions to see if they're all something crappily small?
+
+* if so we can raise it as an issue but they might just have to live with it for migrated content
+might also be worth finding the relevant article on the existing site and confirming that the images aren't any larger over there - maybe they only upload smaller images to staging for some reason
+
+staging cli command: 
+
+php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c --initialise
+
+php replaceContent.php --project=tuauto --wordpressPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --clean
