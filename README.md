@@ -46,9 +46,9 @@ You need:
 php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c --initialise
 
 8. run the image importation script, from the Wordpress directory
-	* chmod 755 importCmds.sh
-	* cd $WORDPRESS_ROOT
-	* ../migrator/importCmds.sh
+>	* chmod 755 importCmds.sh
+>	* cd $WORDPRESS_ROOT
+>	* ../migrator/importCmds.sh
 
 NB: The image importer script associates images to posts in this import.  If Nodes are imported again (i.e. to --clean the html) you must rerun the image importer after clearing out the media library
 
