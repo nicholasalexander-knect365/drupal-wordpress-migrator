@@ -80,6 +80,23 @@ DBUG: --init did not seem to work (wordpress has data in it error)
 * STAGING RELEASE 17 April 2018
 * STAGING RELEASE 01 May 2018 
 
+Improvements
+
+local tests:
+php migrator.php -d --server=local
+
+assumes --wordpressPath --drupalPath and other settings 
+
+vagrant tests:
+php migrator.php -d --server=vm
+
+staging cli command: 
+
+php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c --initialise
+
+php replaceContent.php --project=tuauto --wordpressPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --clean
+
+
 
 Tim's comment regarding images: 
 
@@ -88,11 +105,6 @@ Tim's comment regarding images:
 * if so we can raise it as an issue but they might just have to live with it for migrated content
 might also be worth finding the relevant article on the existing site and confirming that the images aren't any larger over there - maybe they only upload smaller images to staging for some reason
 
-staging cli command: 
-
-php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c --initialise
-
-php replaceContent.php --project=tuauto --wordpressPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --clean
 
 
 !!! MIGRATING TO LIVE - WIP !!!
