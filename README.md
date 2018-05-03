@@ -93,3 +93,18 @@ staging cli command:
 php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c --initialise
 
 php replaceContent.php --project=tuauto --wordpressPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --clean
+
+
+!!! MIGRATING TO LIVE - WIP !!!
+
+The live code environment and sites must be established first.
+
+Users have to be imported in a safe way.  
+
+* Server: LIVE STAGING (UAT server) TEST1 (staging)
+
+* Export database from LIVE to STAGING
+* Export Users from Drupal into an SQL file 
+* Import Users from the SQL file on STAGING to get the USER IDS
+* Extract USER ID + EMAIL address 
+* update the extract users OR REFERENCES TO THEM with the LIVE USER IDs

@@ -69,7 +69,7 @@ class Options {
 		$this->drupalPath 	= '../drupal7/tu-auto';
 		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
 		$this->imageStore 	= getcwd() . '/images';
-		$this->project 		= 'tu-auto';
+		$this->project 		= 'tuauto';
 
 		$this->clean  		= false;
 		$this->clearImages 	= false;
@@ -97,7 +97,19 @@ class Options {
 		return $this->$name;
 	}
 
-	public function setDefaults() {
+	private function serverOptions() {
+		$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
+		$this->server = isset($options['server']) ? $options['server'] : 'local';
+		if ($this->project === 'tuauto' && $this->server !== 'local') {
+			$this->siteId = 39;
+		}
+		if ($this->projecct === 'ioti' && $this->server !== 'local') {
+			$this->siteid = 38;
+		}
+
+	}
+
+	private function setDefaults() {
 		$this->progress 	= true;
 		$this->quiet 		= true;
 		$this->verbose 		= false;
@@ -111,18 +123,6 @@ class Options {
 		$this->clean 		= false;
 		$this->clearImages 	= true;
 		$this->sqlDebug 	= false;
-	}
-
-	private function serverOptions() {
-		$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
-		$this->server = isset($options['server']) ? $options['server'] : 'local';
-		if ($this->project === 'tuauto' && $this->server !== 'local') {
-			$this->siteId = 39;
-		}
-		if ($this->projecct === 'ioti' && $this->server !== 'local') {
-			$this->siteid = 38;
-		}
-
 	}
 
 	public function setAll() {
@@ -147,7 +147,7 @@ class Options {
 			}
 
 			if (in_array('h', array_keys($options))) {
-			//if ($this->help) {
+
 				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -c -u]";
 				print "\n*  mandatory switches";
 				print "\n";
@@ -162,6 +162,7 @@ class Options {
 				print "\n* --wordpressURL=the target site base URL (required for Multisite)";
 				print "\n* --drupalPath=set Drupal path";
 				print "\n  --imageStore=set temp images directory (default ./images)";
+				print "\n  --includeS3import gets images from S3 (explicitly gets S3 images)";
 				print "\n  --sql show sql statments in verbose mode";
 				print "\n";
 
@@ -174,6 +175,7 @@ class Options {
 				print "\n  -v Verbose";
 				print "\n  -p Progress indicators";
 				print "\n";
+
 				print "\n  -d Defaults, or:";
 				print "\n  -n Nodes";
 				print "\n  -u Users";
@@ -187,25 +189,42 @@ class Options {
 			} else {
 
 				$this->wordpressPath = isset($options['wordpressPath']) ? $options['wordpressPath'] : '';
-				if (empty($this->wordpressPath)) {
-					throw new Exception('Need to know the wordpress path, use --wordpressPath=/path/to/wp-config');
-				}
-
 				// default option
 				if (in_array('d', array_keys($options))) {
-					$this->defaults = true;
 
-					if ($this->server === 'local') {
-						$this->wordpressPath = isset($options['wordpressPath']) ? $options['wordpressPath'] : '';
+					$this->server = $options['server'];
+
+					if (isset($this->server) && $this->server === 'vm') {
+						$this->setDefaults();
+						return;
+					} else if (isset($this->server) && $this->server === 'staging') {
+						throw new Exception("\n-d default mode not available on staging:\n\nSuggest command line like:\n\nphp migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c");
 					} else {
-						throw new Exception("need to know the wordpressPath setting");
+						// first: check it is NOT staging!
+						if (getcwd() === '/home/nicholas/Dev/migrator') {
+							// $options['server'] === 'local'
+							$this->wordpressPath = '/home/nicholas/Dev/wordpress/tuauto';
+							$this->wordpressURL = 'http://tuauto.local';
+							$this->drupalPath = '/home/nicholas/Dev/drupal7/tu-auto';
+							$this->project = 'tuauto';
+							$this->verbose = true;
+							$this->files = true;
+							$this->nodes = true;
+							$this->taxonomy = false;
+							$this->fields = true;
+							$this->users = true;
+							$this->initialise = true;
+							$this->clean = true;
+							return;
+						} else {
+							throw new Exception('Please do not use default mode on this server without --server indication');
+						}
 					}
-					$this->setDefaults();
-					$this->users = in_array('u', array_keys($options));
-					$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
-					$this->server = isset($options['server']) ? $options['server'] : 'staging';
-					$this->wordpressURL = isset($options['wordpressURL']) ? $options['wordpressURL'] : 'http://beta.tu-auto.com';
-					return;
+
+				}
+
+				if (empty($this->wordpressPath)) {
+					throw new Exception('Need to know the wordpress path, use --wordpressPath=/path/to/wp-config');
 				}
 
 				foreach ($options as $option => $value) {

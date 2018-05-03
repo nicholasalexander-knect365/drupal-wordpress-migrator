@@ -141,6 +141,7 @@ class Post {
 	}
 
 	public function replacePostContent($wpPostId, $drupalNode) {
+
 		$wp_posts = DB::wptable('posts');
 		$wp_postmeta = DB::wptable('postmeta');
 
@@ -148,8 +149,14 @@ class Post {
 		$record = $this->db->record($sql);
 
 		$post_content = $this->prepare($drupalNode->content);
-		$sql = "UPDATE $wp_posts set post_content = '$post_content' WHERE ID=$wpPostId LIMIT 1";
+		$post_name = Taxonomy::slugify($drupalNode->title);
+
+		$sql = "UPDATE $wp_posts 
+			SET post_name='$post_name', post_content='post_content' 
+			WHERE ID=$wpPostId LIMIT 1";
+
 //print "\n\n$sql\n";
+
 		try {
 			$this->db->query($sql);
 		} catch (Exception $e) {
@@ -157,7 +164,7 @@ class Post {
 		}
 	}
 
-	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath, $users) { //, $fileSet = NULL, $wordpressPath) {
+	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath, $users) {
 
 		$wp_posts = DB::wptable('posts');
 
@@ -200,7 +207,6 @@ class Post {
 				switch ($key) {
 
 					case 'uid':
-
 						$drupalUser = $users->getDrupalUserByUid($value);
 						if ($drupalUser && strlen($drupalUser->mail) > 4) {
 							$wordpressUser = $users->getWordpressUserByEmail($drupalUser->mail);
@@ -208,13 +214,15 @@ class Post {
 							debug("$value user with this uid can not be found in the Drupal Database, post assgined to default user in Wordpress");
 							$wordpressUser = $users->getWordpressUserById(1);
 						}
+						break;
 
 					case 'title':
 						$values[$wpKey] = $value;
 						$values['post_name'] = substr(Taxonomy::slugify($values[$wpKey]), 0, 200);
 						if (strlen($values['post_name']) === 0) {
-							$values['post_name'] = 'tu-auto-' . $running++;
+							$values['post_name'] = $options->project . '-' . $running++;
 						}
+
 						break;
 
 					case 'content':
@@ -234,11 +242,6 @@ class Post {
 								$replaceFilename = $filename;
 								$preview  = preg_replace(['/.jpg$/', '/.gif$/', '/.png$/'], ['.preview.jpg', '.preview.gif', '.preview.png'], basename($file->filename));
 
-								// if (preg_match('/src=["]([\w:\/\-\.\_]+)?["]/i', $value, $matched)) {
-								// 	if (count($matched)>0 && strpos($matched[1], $filename)) {
-
-								// 	}
-								// }
 								if (preg_match('/src=["]([\w:\/\-\.\_]+)?["]/i', $value, $matched)) {
 									if (count($matched)>0 && strpos($matched[1], $preview)) {
 										$replaceFilename = $preview;
@@ -246,7 +249,6 @@ class Post {
 								}
 
 								$value = preg_replace("/src=\".*?$replaceFilename\"/", "src=\"$wordpressPath/$filename\"" , $value);
-
 							}
 						}
 						$values[$wpKey] = $value;

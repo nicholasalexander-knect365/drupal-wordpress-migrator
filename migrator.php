@@ -1,8 +1,21 @@
 <?php
-/*
-
-*/
-
+/***
+ * php migrator.php Version 1.08
+ *
+ * by Nicholas Alexander for Informa Knect365
+ *
+ *purpose: migrate a drupal instance into a wordpress instance
+ *
+ * options -d default mode 
+ * location settings:
+ * --wordpressPath= --drupalPath= --wordpressURL= --imageStore=
+ * conversions included settings:
+ * -f files (images)
+ * -c ACF fields
+ * -t taxonomy
+ * -n nodes
+ * -d default modes (with --server)
+ */
 require "DB.class.php";
 require "WP.class.php";
 
@@ -20,58 +33,22 @@ require "Taxonomy.class.php";
 require "Fields.class.php";
 require "FieldSet.class.php";
 require "Gather.class.php";
-//require "ACF.class.php";
 
+// common routines include script initialisation
 require "common.php";
-
-define('DRUPAL_WP', 'DRUPAL_WP');
-
-$maxChunk = 1000000;
-//$init = true;
-
-$debug = false;
-$once = 0;
-
-/* control options */
-try {
-	$options = new Options();
-	$options->setAll();
-
-	// [tuauto, ioti, ...]
-	$project 	= $options->get('project');			// valid: tuauto, ioti
-	$s3bucket 	= $options->get('s3bucket');
-	$drupalPath = $options->get('drupalPath');		// where the drupal files are
-	$imageStore = $options->get('imageStore');		// temporary image store
-	$server 	= $options->get('server');			// server = [local. vm, staging] (now only advisory as we read wp-config.php)
-	$verbose    = $options->get('verbose');			// tell me more
-
-	$option = [];
-
-	foreach ($options->all as $opt) {
-		$option[$opt] = $options->get($opt);
-	}
-	$options->showAll();
-
-	if ($options->get('help')) {
-		die("\nHELP Mode\n\n");
-	}
-} catch (Exception $e) {
-	debug("Option setting error\n" . $e->getMessage() . "\n\n");
-	die;
-}
-/* connect databases */
-try {
-	$wp = new DB($server, 'wp', $options);
-	$d7 = new DB($server, 'd7', $options);
-} catch (Exception $e) {
-	die( 'DB connection error: ' . $e->getMessage());
-}
-
-// configure the wordpress environment
-$wp->configure($options);
-$d7->configure($options);
+// databases are now available as $wp and $d7
 
 $wordpress = new WP($wp, $options);
+
+/* nodes */
+$d7_node = new Node($d7);
+$wp_post = new Post($wp);
+
+// use termmeta to record nodeIds converted to wordpress IDs
+$wp_termmeta = new WPTermMeta($wp);
+$wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
+
+// migrator initialisations //
 
 // do not clear users unless it is specified
 // read and transfer all users if -u specified
@@ -96,23 +73,6 @@ if ($option['files']) {
 	$cmdPath = 'importCmds.sh';
 	$cmdFile = fopen($cmdPath, 'w+');
 
-// 	// the images option clears images
-// 	if ($options->clearImages) {
-// die('clearImages is deprecated!');
-// 		if (is_dir($imageStore)) {
-// 			$files = glob($imageStore . '/*');
-// 			foreach ($files as $file) {
-// 				if (is_file($file)) {
-// 					unlink($file);
-// 				}
-// 			}
-// 			print "\n" . $imageStore . ' cleared of files.';
-// 		} else {
-// 			dd("ERROR: $imageStore is not a directory");
-// 		}
-// 	}
-
-
 	$files = new Files($d7, $s3bucket, [
 		'verbose' 	=> $verbose,
 		'quiet' 	=> $option['quiet'],
@@ -128,10 +88,6 @@ if ($option['files']) {
 	if ($verbose) {
 		print "\nimages will be imported to $imageStore";
 	}
-// } else {
-// 	if ($option['clearImages']) {
-// 		print "\nclearImages option but -f not selected, images will not be cleared\n";
-// 	}
 }
 
 $wp_taxonomy = new Taxonomy($wp, $options);
@@ -140,13 +96,10 @@ $d7_taxonomy = new Taxonomy($d7, $options);
 // If the wordpress instance of Taxonomy needs to get drupal data: 
 $wp_taxonomy->setDrupalDb($d7);
 
-/* nodes */
-$d7_node = new Node($d7);
-$wp_post = new Post($wp);
-
 /* content types ... */
 $d7_fields = new Fields($d7);
 $fieldSet = new FieldSet($d7);
+
 $wp_fields = new Fields($wp);
 
 $drupal_nodes = null;
@@ -163,11 +116,6 @@ if ($option['initialise']) {
 	}
 	$initialise->cleanUp($wp);
 }
-
-
-// use termmeta to record nodeIds converted to wordpress IDs
-$wp_termmeta = new WPTermMeta($wp);
-$wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
 
 $nodeSource = 'drupal';
 if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$option['nodes'] && !$option['initialise'])) {

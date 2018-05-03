@@ -56,6 +56,17 @@ class DB {
 
 	private function wpConfig() {
 
+		if ($this->config->server === 'local' && empty($this->config->wordpressPath)) {
+			$this->config->wordpressPath = '~/Dev/wordpress/' . $this->config->project;
+
+		} else if ($this->config->server === 'vm' && empty($this->config->wordpressPath)) {
+			$this->config->wordpressPath = '/var/www/public';
+
+		} else if ($this->config->server === 'staging' && empty($this->config->wordpressPath)) {
+			$this->config->wordpressPath = '/srv/www/public';
+			//throw new Exception("ERROR: this server requires a --wordpressPath setting!");
+		}
+
 		$wp_config = $this->config->wordpressPath . '/wp-config.php';
 
 		$this->credentials['wp'] = [];
@@ -84,7 +95,7 @@ class DB {
 				}
 			}
 		} else {
-			throw new Exception('wp-config does not exist PATH: ' . $wp_config);
+			throw new Exception('wp-config does not exist PATH: ' . $wp_config . "\n");
 		}
 	}
 
@@ -116,6 +127,8 @@ class DB {
 		if ($this->config->verbose) {
 			print "\n" . ucfirst($this->config->server) . ' : ' . $this->type . ' connect request... for project '.$this->config->project;
 		}
+
+//dd($this->config);
 
 		switch ($this->config->project) {
 			case 'tuauto':

@@ -18,16 +18,14 @@ class Files {
 	private $verbose = false;
 	public $s3Bucket = 'http://pentontuautodrupalfs.s3.amazonaws.com';
 
-
-	public function __construct(DB $connection, $s3 = '', $args = []) {
+	public function __construct(DB $connection, $s3bucket = '', $args = []) {
 
 		$this->connection = $connection;
 		$this->nid = null;
-		if (strlen($s3)) {
-			$this->s3Bucket = $s3;
+		if (strlen($s3bucket)) {
+			$this->s3Bucket = $s3bucket;
 		}
 		$this->type = 'node';
-
 		$this->verbose = isset($args['verbose']) ? $args['verbose'] : false;
 	}
 
@@ -93,9 +91,11 @@ return;
 	private function storeImageData($file) {
 
 		$fileType = $this->source($file->uri);
+
 if ($this->verbose) {
 	debug('STOREIMAGEDATA:' . $file->uri . ' '. $fileType);
 }
+
 		switch ($fileType) {
 			case 'public' :
 
@@ -117,47 +117,47 @@ if ($this->verbose) {
 				break;
 
 			case 's3':
+				$target = $this->imageStore . '/' . $file->filename;
+				if (!file_exists($target)) {
+					$path = $this->s3Bucket . '/' . $file->filename;
 
-//TODO: check if the file has been got before we get it again!
-break;
-// we already have the s3 images
-				$path = $this->s3Bucket . '/' . $file->filename;
-				try {
-					$fileData = file_get_contents($path);
-					if (strlen($fileData) > 14) {
-						// if (is_string($this->verbose)) {
-						// 	print $this->verbose;
-						// } else 
-						if ($this->verbose === true) {
-							print "\nImage data size: " . strlen($fileData);
+					try {
+						$fileData = file_get_contents($path);
+						if (strlen($fileData) > 14) {
+							// if (is_string($this->verbose)) {
+							// 	print $this->verbose;
+							// } else 
+							if ($this->verbose === true) {
+								print "\nImage data size: " . strlen($fileData);
+							}
+
+							$fd = fopen($target, 'w+');
+							fputs($fd, $fileData);
+							fclose($fd);
+							debug('stored s3 image in ' .$this->imageStore . '/' . $file->filename );
+
+						}
+						else {
+							if ($this->verbose === true) {
+								debug("no content in $path - only ".strlen($fileData) . ' bytes??');
+							}
 						}
 
-						$fd = fopen($this->imageStore . '/' . $file->filename, 'w+');
-						fputs($fd, $fileData);
-						fclose($fd);
-						debug('stored s3 image in ' .$this->imageStore . '/' . $file->filename );
-
-					}
-					else {
 						if ($this->verbose === true) {
-							debug("no content in $path - only ".strlen($fileData) . ' bytes??');
+							print "\nGetting s3 image ".$path;
 						}
+					} catch (Exception $e) {
+						die("could not get file ".$e->getMessage());
 					}
-
-					if ($this->verbose === true) {
-						print "\nGetting s3 image ".$path;
-					}
-				} catch (Exception $e) {
-					die("could not get file ".$e->getMessage());
+				} else {
+					debug($target . ' s3 sourced file has already been imported.');
 				}
 				break;
 
 			default: 
 				print "\nDo not know how to get this image " . $path . " type is " . $fileType;
 		}
-		//debug('IMG STORE:'. $this->imageStore . '/' . $file->filename);
 	}
-
 
 	public function fileList($nid) {
 
