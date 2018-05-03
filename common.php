@@ -21,7 +21,7 @@ try {
 
 	$imageStore = $options->get('imageStore');		// temporary image store
 	$server 	= $options->get('server');			// server = [local. vm, staging]
-	// $verbose    = $options->get('verbose');			// tell me more
+	$verbose    = $options->get('verbose');			// tell me more
 
 	$option = [];
 

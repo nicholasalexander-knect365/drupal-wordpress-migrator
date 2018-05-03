@@ -143,6 +143,9 @@ if ($option['fields']) {
 			$fieldTables[] = $key . '_' . $field;
 		}
 	}
+
+debug($fieldTables);
+
 }
 
 // how many nodes to process?
@@ -254,15 +257,23 @@ for ($c = 0; $c < $chunks; $c++) {
 						if (isset($data) && count($data)) {
 
 // TODO - look at WHY not generalise this  $data[1]->$data[0]
-							$verbose = false;
-if ($debug && $verbose) {
-	debug($node->nid .  print_r($data,1));
+$debug = true;
+$verbose1 = false;
+$verbose2 = false;
+if ($debug && $data[1]) {
+//print "\n";
+	foreach ($data[1] as $k => $v) {
+		if (strlen($v) && $v !== 'a:0:{}') {
+			print "\n" . $node->nid . ' : ' . "$k => $v";
+		}
+	}
 }
-							$verbose = false;
+
 							foreach ($data[1] as $field => $value) {
 
 								$shorterField = preg_replace('/field_/', '', $field);
-if ($debug && $verbose) {
+if ($debug && $verbose1) {
+	debug('shorterField');
 	debug($shorterField);
 }
 
@@ -275,7 +286,8 @@ if ($debug && $verbose) {
 								preg_match('/^(.*)_/', $shorterField, $match);
 								$object = new stdClass(); //$match[1];
 								$object->$shorterField = $data[1]->$field;
-if ($debug && $verbose) {
+if ($debug && $verbose2) {
+	debug('object shorterfield');
 	debug($object->$shorterField);
 }
 
@@ -295,21 +307,21 @@ if ($debug && $verbose) {
 							}
 						}
 
-						if ($debug && $verbose) {
-							if (count((array) $object)) {
-								debug($object);
-							}
-							if (count((array) $event)) {
-								print "\n";
-								print 'event:';
-								debug($event);
-							}
-							if (count((array) $report)) {
-								print "\n";
-								print 'report:';
-								debug($report);
-							}
-						}
+						// if ($debug && $verbose) {
+						// 	if (count((array) $object)) {
+						// 		debug($object);
+						// 	}
+						// 	if (count((array) $event)) {
+						// 		print "\n";
+						// 		print 'event:';
+						// 		debug($event);
+						// 	}
+						// 	if (count((array) $report)) {
+						// 		print "\n";
+						// 		print 'report:';
+						// 		debug($report);
+						// 	}
+						// }
 
 						$fieldUpdate = [];
 						foreach($object as $key => $value) {
