@@ -37,7 +37,6 @@ class Options {
 		'f' => 'files',
 		'n' => 'nodes',
 		't' => 'taxonomy',
-		'c' => 'fields',
 		'u' => 'users',
 		'acf' => 'fields',
 		'project' => 'project',
@@ -181,8 +180,11 @@ class Options {
 				print "\n  -u Users";
 				print "\n  -t Taxonomy";
 				print "\n  -f Files (Images)";
-				print "\n  -c Field Content (or use --acf)";
+				print "\n  --acf ACF Fields";
 				print "\n";
+				print "\n  -d --server=local - sets wordpressPath=~/Dev/wordpress/tuauto --project=tuauto --drupalPath=~/Dev/drupal7/tu-auto/ +verbose +files +nodes -taxonomy +fields +users +initialise +clean";
+				print "\n --d --server=vm sets defaults +progress +quiet -verbose -help +files +nodes -users +taxonomy +fields +initialise -clean +clearImages -sqlDebug --wordpressPath=/var/www/public --wordpressURL=http://tuauto.telecoms.local --drupalPath=/vagrant/drupal7/tu-auto";
+				print "\n --d --server=staging - use explicit args";
 				print "\n";
 				die;
 
@@ -196,9 +198,12 @@ class Options {
 
 					if (isset($this->server) && $this->server === 'vm') {
 						$this->setDefaults();
+						$this->wordpressPath = '/var/www/public';
+						$this->wordpressURL = 'http://tuauto.telecoms.local';
+						$this->drupalPath = '/vagrant/drupal7/tu-auto';
 						return;
 					} else if (isset($this->server) && $this->server === 'staging') {
-						throw new Exception("\n-d default mode not available on staging:\n\nSuggest command line like:\n\nphp migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c");
+						throw new Exception("\n-d default mode not available on staging:\n\nSuggest command line like:\n\nphp migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f --acf");
 					} else {
 						// first: check it is NOT staging!
 						if (getcwd() === '/home/nicholas/Dev/migrator') {
