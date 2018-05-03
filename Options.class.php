@@ -136,7 +136,7 @@ class Options {
 
 		if (count($argv) > $firstArg) {
 
-			$shortOpts = 'dvqpfntcuh';
+			$shortOpts = 'dvqpfntuh';
 			$longOpts  = ['server:', 'project:', 'wordpressURL:', 'wordpressPath:', 'drupalPath:',
 			 			  'imageStore:', 'initialise', 'clean', 'clearImages', 'acf', 'sql'];
 			$options = getopt($shortOpts, $longOpts);
@@ -207,7 +207,6 @@ class Options {
 					} else {
 						// first: check it is NOT staging!
 						if (getcwd() === '/home/nicholas/Dev/migrator') {
-							// $options['server'] === 'local'
 							$this->wordpressPath = '/home/nicholas/Dev/wordpress/tuauto';
 							$this->wordpressURL = 'http://tuauto.local';
 							$this->drupalPath = '/home/nicholas/Dev/drupal7/tu-auto';
@@ -262,7 +261,6 @@ class Options {
 							$this->taxonomy = true;
 							break;
 
-						case 'c':
 						case 'acf':
 							$this->fields = true;
 							break;

@@ -74,7 +74,7 @@ if ($option['files']) {
 	$cmdFile = fopen($cmdPath, 'w+');
 
 	$files = new Files($d7, $s3bucket, [
-		'verbose' 	=> $verbose,
+		'verbose' 	=> $option['verbose'],
 		'quiet' 	=> $option['quiet'],
 		'progress' 	=> $option['progress']
 	]);

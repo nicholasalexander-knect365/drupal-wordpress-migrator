@@ -25,7 +25,7 @@ class Gather extends FieldSetDiscovery {
 	public function migrated_significant() {
 		$sql = "SELECT COUNT(*) AS c 
 				FROM field_data_field_migrated_original_nid 
-				WHERE entity_id != field_data_field_migrated_original_nid";
+				WHERE entity_id <> field_data_field_migrated_original_nid";
 		$record = $this->db->record($sql);
 		return $record['c'] > 2;
 	}

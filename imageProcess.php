@@ -6,6 +6,10 @@
  * by Nicholas Alexander for Informa Knect365
  * 
  * purpose: to check for drupal images that have not been migrated
+ * notes: migrator takes a node first approach: finding images for each node
+ *        this script takes an image centric approach 
+ *      - for each image, look for how it is used, 
+ *        and if it is not, still add it to the media library
  * 
  */
 require "DB.class.php";
@@ -28,3 +32,5 @@ $wordpress = new WP($wp, $options);
 /* nodes */
 $d7_node = new Node($d7);
 $wp_post = new Post($wp);
+
+$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename as filename, fm.uri as uri, fm.filesize, fm.status, fm.timestamp   FROM file_managed fm  JOIN file_usage fu ON fm.fid=fu.fid where fu.type = 'node'";

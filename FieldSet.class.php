@@ -20,14 +20,17 @@ class FieldSet extends FieldSetDiscovery {
 
 		// either list the field labels - i.e. content types
 		if ($label === 'labels') {
+
 			return $fieldsUsed;
+
  		} else {
+
 			// or list the fields related to the field
 			$combined = [];
 			foreach ($fieldTypesContent as $pair) {
 				$record = $pair[0];
-				$field  = $pair[1];			
-				if ($record === $label) {					
+				$field  = $pair[1];
+				if ($record === $label) {
 					$combined[] = $field;
 				}
 			}		
@@ -36,7 +39,7 @@ class FieldSet extends FieldSetDiscovery {
 	}
 
 	public function generate() {
-		$this->setBundle('events');							
+		$this->setBundle('events');
 		$this->findTables();
 	}
 }
