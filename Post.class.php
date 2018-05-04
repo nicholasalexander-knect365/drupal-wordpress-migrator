@@ -148,14 +148,13 @@ class Post {
 		$sql = "SELECT * FROM $wp_posts WHERE ID=$wpPostId";
 		$record = $this->db->record($sql);
 
-		$post_content = $this->prepare($drupalNode->content);
 		$post_name = Taxonomy::slugify($drupalNode->title);
+		$post_content = $this->prepare($drupalNode->content);
 
 		$sql = "UPDATE $wp_posts 
-			SET post_name='$post_name', post_content='post_content' 
+			SET post_name='$post_name', post_content='$post_content' 
 			WHERE ID=$wpPostId LIMIT 1";
-
-//print "\n\n$sql\n";
+				print "\n$post_name";
 
 		try {
 			$this->db->query($sql);
