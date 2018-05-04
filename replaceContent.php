@@ -22,7 +22,6 @@ require "WPTermMeta.class.php";
 require "User.class.php";
 require "Node.class.php";
 require "Taxonomy.class.php";
-
 // common routines including script init
 require "common.php";
 // databases are now available as $wp and $d7

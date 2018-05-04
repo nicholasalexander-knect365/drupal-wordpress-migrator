@@ -155,7 +155,6 @@ class Post {
 			SET post_name='$post_name', post_content='$post_content' 
 			WHERE ID=$wpPostId LIMIT 1";
 				print "\n$post_name";
-
 		try {
 			$this->db->query($sql);
 		} catch (Exception $e) {
