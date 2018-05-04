@@ -148,6 +148,7 @@ class Post {
 		$sql = "SELECT * FROM $wp_posts WHERE ID=$wpPostId";
 		$record = $this->db->record($sql);
 
+		$post_name = Taxonomy::slugify($drupalNode->title);
 		$post_content = $this->prepare($drupalNode->content);
 		$post_name = Taxonomy::slugify($drupalNode->title);
 
