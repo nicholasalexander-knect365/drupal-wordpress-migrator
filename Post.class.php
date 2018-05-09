@@ -208,16 +208,16 @@ class Post {
 				switch ($key) {
 
 					case 'uid':
-debug($wpKey);
+//debug($wpKey);
 						$drupalUser = $users->getDrupalUserByUid($value);
 						if ($drupalUser && strlen($drupalUser->mail) > 4) {
 							$wordpressUser = $users->getWordpressUserByEmail($drupalUser->mail);
 							if ($wordpressUser) {
-debug($wordpressUser);
+//debug($wordpressUser);
 								$values[$wpKey] = $wordpressUser->ID;
 							} else {
 								$values[$wpKey] = $users->makeWordpressUser($drupalUser);
-debug('NEW WP User '.$values[$wpKey]);
+//debug('NEW WP User '.$values[$wpKey]);
 							}
 						} else {
 							debug("$value user with this uid can not be found in the Drupal Database, post assgined to default user in Wordpress");
