@@ -120,7 +120,7 @@ class Options {
 		$this->fields 		= true;
 		$this->initialise 	= true;
 		$this->clean 		= false;
-		$this->clearImages 	= true;
+		$this->clearImages 	= false;
 		$this->sqlDebug 	= false;
 	}
 
@@ -195,12 +195,17 @@ class Options {
 				if (in_array('d', array_keys($options))) {
 
 					$this->server = $options['server'];
-
 					if (isset($this->server) && $this->server === 'vm') {
 						$this->setDefaults();
 						$this->wordpressPath = '/var/www/public';
 						$this->wordpressURL = 'http://tuauto.telecoms.local';
 						$this->drupalPath = '/vagrant/drupal7/tu-auto';
+						return;
+					} else if (isset($this->server) && $this->server === 'vm2') {
+						$this->setDefaults();
+						$this->wordpressPath = '/home/vagrant/Code/client/k365/wp';
+						$this->wordpressURL = 'http://tuauto.local';
+						$this->drupalPath = '/home/vagrant/Code/client/k365/tu-auto';
 						return;
 					} else if (isset($this->server) && $this->server === 'staging') {
 						throw new Exception("\n-d default mode not available on staging:\n\nSuggest command line like:\n\nphp migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f --acf");

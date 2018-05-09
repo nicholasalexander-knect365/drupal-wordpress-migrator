@@ -41,6 +41,7 @@ class DB {
 		}
 
 
+//debug($credentials);
 		$this->connection = new mysqli(
 			$credentials['host'],
 			$credentials['username'],
@@ -48,6 +49,8 @@ class DB {
 			$credentials['database']);
 
 		if ($this->connection->connect_error) {
+			// debug($this->connection);
+			// debug($this->type);
 			throw new Exception("\nConnection failed: " . $this->type . ' ' . $this->connection->connect_error . "\n");
 		}
 
@@ -62,6 +65,9 @@ class DB {
 		} else if ($this->config->server === 'vm' && empty($this->config->wordpressPath)) {
 			$this->config->wordpressPath = '/var/www/public';
 
+		} else if ($this->config->server === 'vm2' && empty($this->config->wordpressPath)) {
+			$this->config->wordpressPath = '/home/vagrant/Code/client/k365/wp';
+
 		} else if ($this->config->server === 'staging' && empty($this->config->wordpressPath)) {
 			$this->config->wordpressPath = '/srv/www/public';
 			//throw new Exception("ERROR: this server requires a --wordpressPath setting!");
@@ -70,7 +76,7 @@ class DB {
 		$wp_config = $this->config->wordpressPath . '/wp-config.php';
 
 		$this->credentials['wp'] = [];
-
+//debug($wp_config);
 		if (file_exists($wp_config)) {
 			$fd = fopen($wp_config, 'r');
 			if (empty($fd)) {
@@ -78,11 +84,13 @@ class DB {
 			}
 			while($line = fgets($fd, 4096)) {
 				if (preg_match("/'DB_([A-Z]+)'/", $line, $match)) {
-						if (preg_match("/^define\(['\"]DB_[\w]+['\"][\s]*,[\s]*['\"]([\w]+)['\"]\);$/", $line, $matched)) {
+					preg_match("/^define\('DB_[A-Z]+'[\s]*,[\s]*'([0-9A-Za-z\.]+)'\);$/", trim($line), $matched);
+					if ($matched && count($matched)) {
 						if ($match[1] === 'NAME') {
 							$this->credentials['wp']['database'] = $matched[1];
 						}
 						if ($match[1] === 'USER') {
+
 							$this->credentials['wp']['username'] = $matched[1];
 						}
 						if ($match[1] === 'PASSWORD') {
@@ -91,9 +99,12 @@ class DB {
 						if ($match[1] === 'HOST') {
 							$this->credentials['wp']['host'] = $matched[1];
 						}
+					} else {
+						debug($line);
 					}
 				}
 			}
+			debug($this->credentials);
 		} else {
 			throw new Exception('wp-config does not exist PATH: ' . $wp_config . "\n");
 		}
@@ -110,7 +121,7 @@ class DB {
 		if (isset($record) && !empty($record) && count($record) === 1) {
 			$blog_id = $record->blog_id;
 		} else {
-			if ($this->config->server === 'local') {
+			if ($this->config->server === 'local' || $this->config->server === 'vm2') {
 				static::$wp_prefix = 'wp_';
 				return;
 			} else {
@@ -171,7 +182,7 @@ class DB {
 					throw new Exception('CHECK FOR CONFIG ERROR: local server is not usually multisite.  If you are running on another server, please specify it with a --server=[vm,staging,live] directive');
 				}
 				print "\nWordpress MultiSite loading siteId: ".$this->config->siteId;
-			} else if ($this->config->server === 'local') {
+			} else if ($this->config->server === 'local' || $this->config->server === 'vm2') {
 				print "\nWordpress local loading data";
 			} else {
 				throw new Exception('Not multisite, yet server=local not set.  Please check your configuration!');

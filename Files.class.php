@@ -119,6 +119,8 @@ if ($this->verbose) {
 			case 's3':
 				$target = $this->imageStore . '/' . $file->filename;
 				if (!file_exists($target)) {
+					
+					//dd('file does not already exist??  ' . $file->filename);
 					$path = $this->s3Bucket . '/' . $file->filename;
 
 					try {

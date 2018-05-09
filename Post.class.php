@@ -3,6 +3,7 @@
 /* create Wordpress POST elements */
 
 include_once "DB.class.php";
+//include_once "User.class.php";
 
 class Post {
 
@@ -162,7 +163,7 @@ class Post {
 		}
 	}
 
-	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath, $users) {
+	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath, \User $users) {
 
 		$wp_posts = DB::wptable('posts');
 
@@ -173,6 +174,8 @@ class Post {
 
 		$nid = $drupal_data->nid;
 		$fileSet = $files->fileList($nid);
+
+//dd($drupal_data);
 
 		foreach($drupal_data as $key => $value) {
 
@@ -205,9 +208,17 @@ class Post {
 				switch ($key) {
 
 					case 'uid':
+debug($wpKey);
 						$drupalUser = $users->getDrupalUserByUid($value);
 						if ($drupalUser && strlen($drupalUser->mail) > 4) {
 							$wordpressUser = $users->getWordpressUserByEmail($drupalUser->mail);
+							if ($wordpressUser) {
+debug($wordpressUser);
+								$values[$wpKey] = $wordpressUser->ID;
+							} else {
+								$values[$wpKey] = $users->makeWordpressUser($drupalUser);
+debug('NEW WP User '.$values[$wpKey]);
+							}
 						} else {
 							debug("$value user with this uid can not be found in the Drupal Database, post assgined to default user in Wordpress");
 							$wordpressUser = $users->getWordpressUserById(1);
@@ -274,6 +285,11 @@ class Post {
 
 					case 'type' : 
 						$values['post_type'] = static::$mapPostType[$value];
+						break;
+
+					case 'author':
+						$values['author'] = $value;
+dd('author detected');
 						break;
 
 					default: 
