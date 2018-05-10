@@ -41,7 +41,7 @@ class DB {
 		}
 
 
-//debug($credentials);
+debug($credentials);
 		$this->connection = new mysqli(
 			$credentials['host'],
 			$credentials['username'],
@@ -84,8 +84,8 @@ class DB {
 				throw new Exception('can not read wp-config: ' . $wp_config);
 			}
 			while($line = fgets($fd, 4096)) {
-				if (preg_match("/'DB_([A-Z]+)'/", $line, $match)) {
-					preg_match("/^define\('DB_[A-Z]+'[\s]*,[\s]*'([0-9A-Za-z\.]+)'\);$/", trim($line), $matched);
+				if (preg_match("/'DB_([A-Z_]+)'/", $line, $match)) {
+					preg_match("/^define\('DB_[A-Z]+'[\s]*,[\s]*'([0-9A-Za-z\._]+)'\);$/", trim($line), $matched);
 					if ($matched && count($matched)) {
 						if ($match[1] === 'NAME') {
 							$this->credentials['wp']['database'] = $matched[1];
@@ -105,7 +105,7 @@ class DB {
 					}
 				}
 			}
-			//debug($this->credentials);
+			debug($this->credentials);
 		} else {
 
 			throw new Exception('wp-config does not exist PATH: ' . $wp_config . "\n");
