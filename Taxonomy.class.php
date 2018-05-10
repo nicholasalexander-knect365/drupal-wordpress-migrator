@@ -415,6 +415,7 @@ class Taxonomy {
 		$records = $this->db->records($sql);
 		return $records;
 	}
+
 	// establishment of a taxonomy term
 	public function tagExists($search) {
 

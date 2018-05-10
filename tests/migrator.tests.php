@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 require "DB.class.php";
 require "WPTermMeta.class.php";
 require "Taxonomy.class.php";
+require "WPTerms.class.php";
 require "Options.class.php";
 require "common.php";
 
@@ -82,15 +83,31 @@ class MigratorTest extends TestCase {
 		$this->assertGreaterThan(0, $termMetaId);
 	}
 
-	public function testTagsHaveSlugs() {
-		$this->connectDB();
-		$taxonomy = new Taxonomy($this->wp, $this->options);
-		print "\n\n* * * test Tags have slugs";
+	// public function testTagsHaveSlugs() {
+	// 	$this->connectDB();
+	// 	$taxonomy = new Taxonomy($this->wp, $this->options);
+	// 	print "\n\n* * * test Tags have slugs with content";
 
-		$tags = $taxonomy->getTags();
-		foreach($tags as $tag) {
-			$this->assertGreaterThan(0, strlen($tag->slug));
-		}
+	// 	$tags = $taxonomy->getTags();
+	// 	foreach($tags as $tag) {
+	// 		$this->assertGreaterThan(0, strlen($tag->slug));
+	// 	}
+	// }
+
+	public function testTagsValid() {
+		$this->connectDB();
+		
+		print "\n\n* * * test Tags appear valid";
+
+		$terms = new WPTerms($this->wp, $this->options);
+		
+		$blankSlugsNotUsed = $terms->testBlankSlugs();
+
+		$this->assertEquals(true, $blankSlugsNotUsed);
+
+		// if ($blankSlugsNotUsed) {
+		// 	$terms->removeBlankSlugs();
+		// }
 	}
 
 	public function testTagsExist() {

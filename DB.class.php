@@ -60,7 +60,7 @@ class DB {
 	private function wpConfig() {
 
 		if ($this->config->server === 'local' && empty($this->config->wordpressPath)) {
-			$this->config->wordpressPath = '~/Dev/wordpress/' . $this->config->project;
+			$this->config->wordpressPath = '/home/nicholas/Dev/wordpress/' . $this->config->project;
 
 		} else if ($this->config->server === 'vm' && empty($this->config->wordpressPath)) {
 			$this->config->wordpressPath = '/var/www/public';
@@ -187,7 +187,7 @@ class DB {
 				}
 				print "\nWordpress MultiSite loading siteId: ".$this->config->siteId;
 			} else if ($this->config->server === 'local' || $this->config->server === 'vm2') {
-				print "\nWordpress local loading data";
+				print "\nLocal mode";
 			} else {
 				throw new Exception('Not multisite, yet server=local not set.  Please check your configuration!');
 			}
