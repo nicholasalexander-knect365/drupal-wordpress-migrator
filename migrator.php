@@ -144,7 +144,7 @@ if ($option['fields']) {
 		}
 	}
 
-debug($fieldTables);
+	if ($verbose) debug($fieldTables);
 
 }
 
@@ -182,7 +182,7 @@ for ($c = 0; $c < $chunks; $c++) {
 
 			$wpPostId = null;
 			$fileSet = null;
-
+//dd($node);
 			if ($option['nodes'] && $nodeSource === 'drupal') {
 				$d7_node->setNode($node);
 				$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
@@ -259,76 +259,64 @@ for ($c = 0; $c < $chunks; $c++) {
 // TODO - look at WHY not generalise this  $data[1]->$data[0]
 $debug = true;
 $verbose1 = false;
-$verbose2 = false;
+$verbose2 = true;
 if ($debug && $data[1]) {
-//print "\n";
+print "\n";
 	foreach ($data[1] as $k => $v) {
 		if (strlen($v) && $v !== 'a:0:{}') {
 			print "\n" . "$k => $v";
 		}
 	}
 }
-
+							$object = new stdClass();
 							foreach ($data[1] as $field => $value) {
-
-								$shorterField = preg_replace('/field_/', '', $field);
-if ($debug && $verbose1) {
-	debug('shorterField');
-	debug($shorterField);
-}
-
-								if (preg_match('/_date_/', $field)) {
-
-									$data[1]->$field = date_format(date_create($data[1]->$field), 'Y-m-d h:i:s');
-								}
-
-								// e.g. $event->report_url_url
-								preg_match('/^(.*)_/', $shorterField, $match);
-								$object = new stdClass(); //$match[1];
-								$object->$shorterField = $data[1]->$field;
-if ($debug && $verbose2) {
-	debug('object shorterfield');
-	debug($object->$shorterField);
-}
-
-								preg_match('/(.*?)_(.*)/', $shorterField, $parts);
-								
-
-								// this does not trigger - may want to look at why?
-								if ($parts[1]  && $parts[1] === 'primary') {
-									$nid_check = $data[1]->$field;
-									if ((integer) $nid_check === (integer) $node->nid) {
-										debug('nid matched ' . $data);
-										dd('check');
+								if (strlen($value) && $value !== 'a:0:{}') {
+									$shorterField = preg_replace('/^field_/', '', $field);
+	if ($debug && $verbose1) {debug('shorterField:' . $shorterField . ' -> ' . $data[1]->$field);}
+									if (preg_match('/_date_/', $field)) {
+										$data[1]->$field = date_format(date_create($data[1]->$field), 'U');
+									}
+									// e.g. $event->report_url_url
+									preg_match('/^(.*)_/', $shorterField, $match);
+									//$object = new stdClass(); //$match[1];
+									$object->$shorterField = $data[1]->$field;
+									if (isset($object->$shorterField) && $object->$shorterField !== 'a:0:{}') {
+	if ($debug && $verbose2) debug('object ' .$shorterField. ' : ' . $object->$shorterField);
+										preg_match('/(.*?)_(.*)/', $shorterField, $parts);
+										// this does not trigger - may want to look at why?
+										if ($parts[1]  && $parts[1] === 'primary') {
+											$nid_check = $data[1]->$field;
+											if ((integer) $nid_check === (integer) $node->nid) {
+												debug('nid matched ' . $data);
+												dd('check');
+											}
+										}
 									}
 								}
-
-
 							}
+							if ($debug && $verbose1) {
+								if (count((array) $object)) {
+									debug($object);
+								}
+								if (count((array) $event)) {
+									print "\n";
+									print 'event:';
+									debug($event);
+								}
+								if (count((array) $report)) {
+									print "\n";
+									print 'report:';
+									debug($report);
+								}
+							}
+							
+							$fieldUpdate = [];
+							foreach($object as $key => $value) {
+									$fieldUpdate[$key] = isset($value) ? $value : '';
+							}
+
+							$postmeta->createFields($wpPostId, $fieldUpdate);
 						}
-
-						// if ($debug && $verbose) {
-						// 	if (count((array) $object)) {
-						// 		debug($object);
-						// 	}
-						// 	if (count((array) $event)) {
-						// 		print "\n";
-						// 		print 'event:';
-						// 		debug($event);
-						// 	}
-						// 	if (count((array) $report)) {
-						// 		print "\n";
-						// 		print 'report:';
-						// 		debug($report);
-						// 	}
-						// }
-
-						$fieldUpdate = [];
-						foreach($object as $key => $value) {
-								$fieldUpdate[$key] = isset($value) ? $value : '';
-						}
-
-						$postmeta->createFields($wpPostId, $fieldUpdate);
 					}
 				}
 			}

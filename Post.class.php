@@ -3,6 +3,7 @@
 /* create Wordpress POST elements */
 
 include_once "DB.class.php";
+//include_once "User.class.php";
 
 class Post {
 
@@ -148,15 +149,13 @@ class Post {
 		$sql = "SELECT * FROM $wp_posts WHERE ID=$wpPostId";
 		$record = $this->db->record($sql);
 
-		$post_content = $this->prepare($drupalNode->content);
 		$post_name = Taxonomy::slugify($drupalNode->title);
+		$post_content = $this->prepare($drupalNode->content);
 
 		$sql = "UPDATE $wp_posts 
-			SET post_name='$post_name', post_content='post_content' 
+			SET post_name='$post_name', post_content='$post_content' 
 			WHERE ID=$wpPostId LIMIT 1";
-
-//print "\n\n$sql\n";
-
+				print "\n$post_name";
 		try {
 			$this->db->query($sql);
 		} catch (Exception $e) {
@@ -164,7 +163,7 @@ class Post {
 		}
 	}
 
-	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath, $users) {
+	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath, \User $users) {
 
 		$wp_posts = DB::wptable('posts');
 
@@ -175,6 +174,8 @@ class Post {
 
 		$nid = $drupal_data->nid;
 		$fileSet = $files->fileList($nid);
+
+//dd($drupal_data);
 
 		foreach($drupal_data as $key => $value) {
 
@@ -207,9 +208,17 @@ class Post {
 				switch ($key) {
 
 					case 'uid':
+//debug($wpKey);
 						$drupalUser = $users->getDrupalUserByUid($value);
 						if ($drupalUser && strlen($drupalUser->mail) > 4) {
 							$wordpressUser = $users->getWordpressUserByEmail($drupalUser->mail);
+							if ($wordpressUser) {
+//debug($wordpressUser);
+								$values[$wpKey] = $wordpressUser->ID;
+							} else {
+								$values[$wpKey] = $users->makeWordpressUser($drupalUser);
+//debug('NEW WP User '.$values[$wpKey]);
+							}
 						} else {
 							debug("$value user with this uid can not be found in the Drupal Database, post assgined to default user in Wordpress");
 							$wordpressUser = $users->getWordpressUserById(1);
@@ -276,6 +285,11 @@ class Post {
 
 					case 'type' : 
 						$values['post_type'] = static::$mapPostType[$value];
+						break;
+
+					case 'author':
+						$values['author'] = $value;
+dd('author detected');
 						break;
 
 					default: 
