@@ -264,7 +264,7 @@ if ($debug && $data[1]) {
 //print "\n";
 	foreach ($data[1] as $k => $v) {
 		if (strlen($v) && $v !== 'a:0:{}') {
-			print "\n" . $node->nid . ' : ' . "$k => $v";
+			print "\n" . "$k => $v";
 		}
 	}
 }
