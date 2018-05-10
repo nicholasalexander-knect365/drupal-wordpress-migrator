@@ -41,7 +41,7 @@ class DB {
 		}
 
 
-//debug($credentials);
+debug($credentials);
 		$this->connection = new mysqli(
 			$credentials['host'],
 			$credentials['username'],
@@ -105,7 +105,7 @@ class DB {
 					}
 				}
 			}
-			//debug($this->credentials);
+			debug($this->credentials);
 		} else {
 
 			throw new Exception('wp-config does not exist PATH: ' . $wp_config . "\n");
