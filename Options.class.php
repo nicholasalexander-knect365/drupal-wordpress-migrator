@@ -219,7 +219,7 @@ class Options {
 							$this->verbose = true;
 							$this->files = true;
 							$this->nodes = true;
-							$this->taxonomy = false;
+							$this->taxonomy = true;
 							$this->fields = true;
 							$this->users = true;
 							$this->initialise = true;

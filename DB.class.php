@@ -76,8 +76,9 @@ class DB {
 		$wp_config = $this->config->wordpressPath . '/wp-config.php';
 
 		$this->credentials['wp'] = [];
-//debug($wp_config);
+
 		if (file_exists($wp_config)) {
+
 			$fd = fopen($wp_config, 'r');
 			if (empty($fd)) {
 				throw new Exception('can not read wp-config: ' . $wp_config);
@@ -99,13 +100,14 @@ class DB {
 						if ($match[1] === 'HOST') {
 							$this->credentials['wp']['host'] = $matched[1];
 						}
-					} else {
-						debug($line);
+					// } else {
+					// 	debug($line);
 					}
 				}
 			}
-			debug($this->credentials);
+			//debug($this->credentials);
 		} else {
+
 			throw new Exception('wp-config does not exist PATH: ' . $wp_config . "\n");
 		}
 	}
@@ -133,6 +135,8 @@ class DB {
 	}
 
 	public function configure($config = null) {
+
+		static $once = 0;
 
 		$this->config = $config;
 		if ($this->config->verbose) {
@@ -188,7 +192,9 @@ class DB {
 				throw new Exception('Not multisite, yet server=local not set.  Please check your configuration!');
 			}
 		} else if ($this->type === 'd7') {
-			print "\nDrupal 7 configured database connection.";
+			if ($once++ === 0) {
+				print "\nDrupal 7 configured database connection.";
+			}
 		} else {
 			throw new Exception($this->type . ' database configuration supported?');
 		}

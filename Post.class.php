@@ -308,9 +308,9 @@ dd('author detected');
 		$this->db->query($sql); 
 		$post_id = $this->db->lastInsertId();
 
-if (!$post_id) {
-	debug($sql);
-}
+// if (!$post_id) {
+// 	debug($sql);
+// }
 
 		return $post_id;
 

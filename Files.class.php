@@ -92,9 +92,9 @@ return;
 
 		$fileType = $this->source($file->uri);
 
-if ($this->verbose) {
-	debug('STOREIMAGEDATA:' . $file->uri . ' '. $fileType);
-}
+// if ($this->verbose) {
+// 	debug('STOREIMAGEDATA:' . $file->uri . ' '. $fileType);
+// }
 
 		switch ($fileType) {
 			case 'public' :

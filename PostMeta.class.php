@@ -3,10 +3,12 @@
 class PostMeta {
 	public $db;
 	public $wp_postmeta;
+	private $debugDetail;
 
 	public function __construct($db, $table) {
 		$this->wp_postmeta = $table;
 		$this->db = $db;
+		$this->debugDetail = true;
 	}
 
 	private function convert_metakey($key) {
@@ -74,10 +76,10 @@ class PostMeta {
 				break;
 
 			default: 
-				debug($key);
+				// debug($key);
 				break;
 		}
-		debug($key);
+		// debug($key);
 		return $key;
 	}
 
@@ -87,7 +89,10 @@ class PostMeta {
 		$wp_postmeta = $this->wp_postmeta;
 		
 		foreach($data as $key => $value) {
-debug(">>> $key = $value");
+
+			if ($this->debugDetail) {
+				debug(">>> $key = $value");
+			}
 			$key = $this->convert_metakey($key);
 
 			if ($key === 'start_date' || $key === 'end_date') {
@@ -104,7 +109,9 @@ debug(">>> $key = $value");
 			if (!strlen($value)) {
 				$value = '-';
 			}
-debug(">> $key = $value");
+			if ($this->debugDetail) {
+				debug(">> $key = $value");
+			}
 
 			$sql = "SELECT meta_id FROM $wp_postmeta WHERE meta_key = '$key' AND post_id=$wpPostId";
 			$record = $this->db->record($sql);

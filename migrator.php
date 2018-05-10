@@ -58,8 +58,12 @@ if ($options->users) {
 	if ($users->doWordpressUsersExist()) {
 		debug('Importing Drupal users to existing Wordpress users');
 	}
-	$users->getDrupalUsers(); 			debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
-	$users->createWordpressUsers(); 	debug($users->wordpressUsers() . '... users created in Wordpress');
+	$users->getDrupalUsers();
+	debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
+
+	$users->createWordpressUsers();
+	debug($users->wordpressUsers() . '... users created in Wordpress');
+	
 	$users->makeAdminUser();
 } else {
 	if (!$users->doWordpressUsersExist()) {
@@ -256,23 +260,23 @@ for ($c = 0; $c < $chunks; $c++) {
 
 						if (isset($data) && count($data)) {
 
-// TODO - look at WHY not generalise this  $data[1]->$data[0]
-$debug = true;
-$verbose1 = false;
-$verbose2 = true;
-if ($debug && $data[1]) {
-print "\n";
-	foreach ($data[1] as $k => $v) {
-		if (strlen($v) && $v !== 'a:0:{}') {
-			print "\n" . "$k => $v";
-		}
-	}
-}
+							// // TODO - look at WHY not generalise this  $data[1]->$data[0]
+							// $debug = true;
+							// $verbose1 = false;
+							// $verbose2 = true;
+							// if ($debug && $data[1]) {
+							// print "\n";
+							// 	foreach ($data[1] as $k => $v) {
+							// 		if (strlen($v) && $v !== 'a:0:{}') {
+							// 			print "\n" . "$k => $v";
+							// 		}
+							// 	}
+							// }
 							$object = new stdClass();
 							foreach ($data[1] as $field => $value) {
 								if (strlen($value) && $value !== 'a:0:{}') {
 									$shorterField = preg_replace('/^field_/', '', $field);
-	if ($debug && $verbose1) {debug('shorterField:' . $shorterField . ' -> ' . $data[1]->$field);}
+									//if ($debug && $verbose1) {debug('shorterField:' . $shorterField . ' -> ' . $data[1]->$field);}
 									if (preg_match('/_date_/', $field)) {
 										$data[1]->$field = date_format(date_create($data[1]->$field), 'U');
 									}
@@ -281,7 +285,7 @@ print "\n";
 									//$object = new stdClass(); //$match[1];
 									$object->$shorterField = $data[1]->$field;
 									if (isset($object->$shorterField) && $object->$shorterField !== 'a:0:{}') {
-	if ($debug && $verbose2) debug('object ' .$shorterField. ' : ' . $object->$shorterField);
+										//if ($debug && $verbose2) debug('object ' .$shorterField. ' : ' . $object->$shorterField);
 										preg_match('/(.*?)_(.*)/', $shorterField, $parts);
 										// this does not trigger - may want to look at why?
 										if ($parts[1]  && $parts[1] === 'primary') {
@@ -294,21 +298,21 @@ print "\n";
 									}
 								}
 							}
-							if ($debug && $verbose1) {
-								if (count((array) $object)) {
-									debug($object);
-								}
-								if (count((array) $event)) {
-									print "\n";
-									print 'event:';
-									debug($event);
-								}
-								if (count((array) $report)) {
-									print "\n";
-									print 'report:';
-									debug($report);
-								}
-							}
+							// if ($debug && $verbose1) {
+							// 	if (count((array) $object)) {
+							// 		debug($object);
+							// 	}
+							// 	if (count((array) $event)) {
+							// 		print "\n";
+							// 		print 'event:';
+							// 		debug($event);
+							// 	}
+							// 	if (count((array) $report)) {
+							// 		print "\n";
+							// 		print 'report:';
+							// 		debug($report);
+							// 	}
+							// }
 							
 							$fieldUpdate = [];
 							foreach($object as $key => $value) {
