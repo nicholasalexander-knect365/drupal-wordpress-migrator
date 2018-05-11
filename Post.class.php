@@ -247,7 +247,8 @@ class Post extends DB {
 
 					case 'author':
 						$values['author'] = $value;
-dd('author detected');
+debug('<<<author detected>>>');
+debug($values);
 						break;
 
 					default: 

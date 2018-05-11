@@ -337,7 +337,8 @@ debug($credentials);
 		$numRows = $this->query($sql);
 
 		if ($numRows > 1) {
-			throw new Exception('record query returned more rows than the expected single row: ' . $sql);
+			debug('WARNING: record query returned more rows than the expected single row: ' . $sql);
+			$numRows = $this->query($sql . ' LIMIT 1');
 		}
 		if ($numRows) {
 			$record = $this->getRecord();
