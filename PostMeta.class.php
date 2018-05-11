@@ -1,6 +1,8 @@
 <?php 
 
-class PostMeta {
+require_once "DB.class.php";
+
+class PostMeta extends DB {
 	public $db;
 	public $wp_postmeta;
 	private $debugDetail;
@@ -85,7 +87,7 @@ class PostMeta {
 
 	// wordpress entities create
 	public function createFields($wpPostId, $data) {
-		
+
 		$wp_postmeta = $this->wp_postmeta;
 		
 		foreach($data as $key => $value) {
@@ -99,6 +101,7 @@ class PostMeta {
 				//$value = date($value, 'U');
 				$start_date = $value;
 			}
+			$value = $this->db->prepare($value);
 
 			if ($key === 'end_date' && !strlen($value) && strlen($start_date)) {
 				$end_date = $start_date;

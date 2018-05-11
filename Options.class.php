@@ -229,7 +229,6 @@ class Options {
 							throw new Exception('Please do not use default mode on this server without --server indication');
 						}
 					}
-
 				}
 
 				if (empty($this->wordpressPath)) {
