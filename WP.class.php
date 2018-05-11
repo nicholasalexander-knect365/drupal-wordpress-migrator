@@ -5,11 +5,13 @@ class WP {
 	public $db;
 	public $wp;
 	private $cmdFile;
+	private $options;
 
 	public function __construct($db, $options) {
 		$this->db = $db;
 		$this->wp = $options->wordpressPath;
-
+		$this->options = $options;
+		
 		$cmdPath = 'importCmds.sh';
 		$this->cmdFile = fopen($cmdPath, 'w+');
 	}
@@ -97,7 +99,9 @@ class WP {
 			}
 			fputs($this->cmdFile, $cmd . "\n");
 		} else {
-			debug("$imageStore/$url did not exist???");
+			if ($this->options->verbose) {
+				debug("$imageStore/$url did not exist???");
+			}
 		}
 	}
 }

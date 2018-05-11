@@ -6,6 +6,7 @@
 
 include_once "DB.class.php";
 define('MAX_USERS', 10000);
+
 class User {
 	
 	public $db;
@@ -80,6 +81,12 @@ class User {
 		return $record;
 	}
 
+	public function user_exists($email) {
+		$sql = "SELECT COUNT(*) AS c FROM wp_users WHERE user_email = '$email'";
+		$record = $this->db->record($sql);
+		return $record->c;
+	}
+
 	public function getWordpressUserByEmail($email) {
 		
 		$sql = "SELECT * from wp_users where user_email = '$email'";
@@ -87,6 +94,7 @@ class User {
 
 		return $record;
 	}
+
 	public function doWordpressUsersExist() {
 
 		$sql = "SELECT COUNT(*) AS c FROM wp_users";
@@ -98,7 +106,7 @@ class User {
 		return false;
 	}
 
-	private function makeWordpressUser($drupalUser) {
+	public function makeWordpressUser($drupalUser) {
 
 		$user_email = $drupalUser->mail;
 		if (strlen($user_email) > 4) {

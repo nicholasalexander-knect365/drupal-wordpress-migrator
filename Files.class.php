@@ -92,9 +92,9 @@ return;
 
 		$fileType = $this->source($file->uri);
 
-if ($this->verbose) {
-	debug('STOREIMAGEDATA:' . $file->uri . ' '. $fileType);
-}
+// if ($this->verbose) {
+// 	debug('STOREIMAGEDATA:' . $file->uri . ' '. $fileType);
+// }
 
 		switch ($fileType) {
 			case 'public' :
@@ -119,6 +119,8 @@ if ($this->verbose) {
 			case 's3':
 				$target = $this->imageStore . '/' . $file->filename;
 				if (!file_exists($target)) {
+					
+					//dd('file does not already exist??  ' . $file->filename);
 					$path = $this->s3Bucket . '/' . $file->filename;
 
 					try {

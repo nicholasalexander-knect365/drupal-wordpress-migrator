@@ -6,10 +6,12 @@ class Node {
 	public $node;
 	public $limit;
 	public $start;
+	public $users;
 
 	public function __construct($db) {
 		$this->db = $db;
 		$this->start = 0;
+		$this->users = [];
 	}
 
 	public function getNode($nid, $vid = NULL) {
@@ -22,7 +24,17 @@ class Node {
 		$this->db->runQuery($sql);
 
 		$node = $this->db->getRecord();
+		$this->users[$node->nid] = $node;
 		return $node;
+	}
+
+
+	public function getAuthor($node) {
+		if (empty($this->users[$node->nid])) {
+			$this->users[$node->nid] = 0;
+		}
+		$this->users[$node->nid]++;
+		return $node->nid;
 	}
 
 	public function getNodeType($node) {

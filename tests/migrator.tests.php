@@ -6,10 +6,11 @@ use PHPUnit\Framework\TestCase;
 require "DB.class.php";
 require "WPTermMeta.class.php";
 require "Taxonomy.class.php";
+require "WPTerms.class.php";
 require "Options.class.php";
 require "common.php";
 
-define('DRUPAL_WP', 'DRUPAL_WP');
+//define('DRUPAL_WP', 'DRUPAL_WP');
 
 class MigratorTest extends TestCase {
 	
@@ -40,11 +41,12 @@ class MigratorTest extends TestCase {
 		
 		// test with mandatory config settings
 		$this->options->project = 'tuauto';
-		if (getenv('server') === 'local') {
-			$this->options->wordpressPath = '../wordpress/' . $this->options->project;
-		} else {
-			$this->options->wordpressPath = '/var/www/public';
-		}
+
+		// if (getenv('server') === 'local') {
+		// 	$this->options->wordpressPath = '../wordpress/' . $this->options->project;
+		// } else {
+		// 	$this->options->wordpressPath = '/var/www/public';
+		// }
 
 
 		$this->wp->configure($this->options);
@@ -68,7 +70,6 @@ class MigratorTest extends TestCase {
 		$record = $this->wp->record("SELECT COUNT(*) as c FROM wp_posts");
 		if (empty($record) || (integer) $record->c === 0) {
 			print "\nNo WP Posts exist yet.\n";
-			die();
 			$this->assertEquals(0, (integer) $record->c);
 		} else {
 			$this->assertGreaterThan(0, (integer) $record->c);
@@ -80,6 +81,33 @@ class MigratorTest extends TestCase {
 		$wp_termmeta = new WPTermMeta($this->wp);
 		$termMetaId = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
 		$this->assertGreaterThan(0, $termMetaId);
+	}
+
+	// public function testTagsHaveSlugs() {
+	// 	$this->connectDB();
+	// 	$taxonomy = new Taxonomy($this->wp, $this->options);
+	// 	print "\n\n* * * test Tags have slugs with content";
+
+	// 	$tags = $taxonomy->getTags();
+	// 	foreach($tags as $tag) {
+	// 		$this->assertGreaterThan(0, strlen($tag->slug));
+	// 	}
+	// }
+
+	public function testTagsValid() {
+		$this->connectDB();
+		
+		print "\n\n* * * test Tags appear valid";
+
+		$terms = new WPTerms($this->wp, $this->options);
+		
+		$blankSlugsNotUsed = $terms->testBlankSlugs();
+
+		$this->assertEquals(true, $blankSlugsNotUsed);
+
+		// if ($blankSlugsNotUsed) {
+		// 	$terms->removeBlankSlugs();
+		// }
 	}
 
 	public function testTagsExist() {
@@ -94,7 +122,7 @@ class MigratorTest extends TestCase {
 				print "\nPost TAG $taxonomy has NOT yet been used.";
 				$this->assertEquals(0, $items);
 			} else {
-				print "\nTerm ".$tag->slug." used $items times.";
+				//print "\nTerm ".$tag->slug." used $items times.";
 				$this->assertGreaterThan(0, $items);
 			}
 		}
