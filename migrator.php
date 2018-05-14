@@ -53,7 +53,7 @@ $wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
 // do not clear users unless it is specified
 // read and transfer all users if -u specified
 //
-$users = new User($wp, $d7);
+
 if ($options->users) {
 	if ($users->doWordpressUsersExist()) {
 		debug('Importing Drupal users to existing Wordpress users');
@@ -63,7 +63,7 @@ if ($options->users) {
 
 	$users->createWordpressUsers();
 	debug($users->wordpressUsers() . '... users created in Wordpress');
-	
+
 	$users->makeAdminUser();
 } else {
 	if (!$users->doWordpressUsersExist()) {
@@ -281,21 +281,21 @@ for ($c = 0; $c < $chunks; $c++) {
 										$data[1]->$field = date_format(date_create($data[1]->$field), 'U');
 									}
 									// e.g. $event->report_url_url
-									preg_match('/^(.*)_/', $shorterField, $match);
-									//$object = new stdClass(); //$match[1];
-									$object->$shorterField = $data[1]->$field;
-									if (isset($object->$shorterField) && $object->$shorterField !== 'a:0:{}') {
-										//if ($debug && $verbose2) debug('object ' .$shorterField. ' : ' . $object->$shorterField);
-										preg_match('/(.*?)_(.*)/', $shorterField, $parts);
-										// this does not trigger - may want to look at why?
-										if ($parts[1]  && $parts[1] === 'primary') {
-											$nid_check = $data[1]->$field;
-											if ((integer) $nid_check === (integer) $node->nid) {
-												debug('nid matched ' . $data);
-												dd('check');
-											}
-										}
-									}
+									// preg_match('/^(.*)_/', $shorterField, $match);
+									// //$object = new stdClass(); //$match[1];
+									// $object->$shorterField = $data[1]->$field;
+									// if (isset($object->$shorterField) && $object->$shorterField !== 'a:0:{}') {
+									// 	//if ($debug && $verbose2) debug('object ' .$shorterField. ' : ' . $object->$shorterField);
+									// 	preg_match('/(.*?)_(.*)/', $shorterField, $parts);
+									// 	// this does not trigger - may want to look at why?
+									// 	if ($parts[1]  && $parts[1] === 'primary') {
+									// 		$nid_check = $data[1]->$field;
+									// 		if ((integer) $nid_check === (integer) $node->nid) {
+									// 			debug('nid matched ' . $data);
+									// 			dd('check');
+									// 		}
+									// 	}
+									// }
 								}
 							}
 							// if ($debug && $verbose1) {

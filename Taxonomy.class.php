@@ -145,20 +145,27 @@ class Taxonomy {
 	}
 
 	static public function slugify($str) {
-		if ($str === 'post_tag') {
-			return $str;
-		}
+
 		$text = $str;
 		// replace non letter or digits by -
 		$text = preg_replace('/[^\pL\d]+/', '-', $text);
+
+		// convert text to utf-8 ?? probably not necessary
 		// $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+
+		// replace anything not a hyphen or word char with nothing
 		$text = preg_replace('/[^-\w]+/', '', $text);
 		$text = trim($text, '-');
+
+		// replace any multiple dashes with a single hyphen
 		$text = preg_replace('/-+/', '-', $text);
+
 		$text = strtolower($text);
+
 		if (empty($text)) {
-			return '';
+			throw new Exception("\n\nERROR: slugify with no string?  string passed = $str, slug = $text\n");
 		}
+
 		return $text;
 	}
 

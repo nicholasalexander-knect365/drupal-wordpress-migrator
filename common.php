@@ -49,6 +49,8 @@ try {
 $wp->configure($options);
 $d7->configure($options);
 
+$users = new User($wp, $d7);
+
 // common
 function dd($v) {
 	var_dump($v);

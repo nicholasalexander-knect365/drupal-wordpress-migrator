@@ -99,7 +99,7 @@ class Post extends DB {
 		return $str;
 	}
 
-	public function replacePostContent($wpPostId, $drupalNode) {
+	public function replacePostContent($wpPostId, $drupalNode, $includeUser = false, $users = null) {
 
 		$wp_posts = DB::wptable('posts');
 		$wp_postmeta = DB::wptable('postmeta');
@@ -110,8 +110,20 @@ class Post extends DB {
 		$post_name = Taxonomy::slugify($drupalNode->title);
 		$post_content = $this->prepare($drupalNode->content);
 
+		$userClause = '';
+		if ($includeUser) {
+			$drupalUser = $users->getDrupalUserByUid($drupalNode->uid);
+
+			// what is the wordpress user for that email address
+			$postAuthor = $users->getWordpressUserByEmail($drupalUser->mail);
+			$postAuthorId = $postAuthor->ID;
+
+			$userClause = ", post_author='$postAuthorId'";
+		}
+
 		$sql = "UPDATE $wp_posts 
 			SET post_name='$post_name', post_content='$post_content' 
+			$userClause
 			WHERE ID=$wpPostId LIMIT 1";
 				print "\n$post_name";
 		try {

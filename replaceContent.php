@@ -22,8 +22,10 @@ require "WPTermMeta.class.php";
 require "User.class.php";
 require "Node.class.php";
 require "Taxonomy.class.php";
+
 // common routines including script init
 require "common.php";
+
 // databases are now available as $wp and $d7
 $wordpress = new WP($wp, $options);
 
@@ -33,6 +35,8 @@ $wp_post = new Post($wp);
 
 $wp_termmeta = new WPTermMeta($wp);
 $wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
+
+$includeUsers = isset($options->users);
 
 // process nodes -> wp posts ONLY //
 
@@ -62,7 +66,7 @@ for ($c = 0; $c < $chunks; $c++) {
 
 			$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
 
-			$wp_post->replacePostContent($wpPostId, $node);
+			$wp_post->replacePostContent($wpPostId, $node, $includeUsers, $users);
 			if ($node->nid % 10 === 0) {
 				print '.';
 			}
