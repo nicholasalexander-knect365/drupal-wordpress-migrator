@@ -25,6 +25,7 @@ class Options {
 	public $imageStore;
 	public $clean;
 	public $clearImages;
+	public $resetUserPassword;
 
 	public $sqlDebug;
 
@@ -55,6 +56,7 @@ class Options {
 
 		$this->initialise 	= false;
 		$this->server 		= 'local';
+		$this->resetUserPassword = false;
 
 		$this->nodes 		= false;
 		$this->taxonomy 	= false;
@@ -122,6 +124,7 @@ class Options {
 		$this->clean 		= false;
 		$this->clearImages 	= false;
 		$this->sqlDebug 	= false;
+		$this->resetUserPassword = false;
 	}
 
 	public function setAll() {
@@ -138,7 +141,7 @@ class Options {
 
 			$shortOpts = 'dvqpfntuh';
 			$longOpts  = ['server:', 'project:', 'wordpressURL:', 'wordpressPath:', 'drupalPath:',
-			 			  'imageStore:', 'initialise', 'clean', 'clearImages', 'acf', 'sql'];
+			 			  'imageStore:', 'initialise', 'clean', 'clearImages', 'acf', 'sql', 'resetUserPassword'];
 			$options = getopt($shortOpts, $longOpts);
 
 			if (empty($options)) {
@@ -146,7 +149,6 @@ class Options {
 			}
 
 			if (in_array('h', array_keys($options))) {
-
 				print "\nFormat:   php " . $argv[0] . " [-v -d -h -q -p -f -n -t -c -u]";
 				print "\n*  mandatory switches";
 				print "\n";
@@ -163,6 +165,7 @@ class Options {
 				print "\n  --imageStore=set temp images directory (default ./images)";
 				print "\n  --includeS3import gets images from S3 (explicitly gets S3 images)";
 				print "\n  --sql show sql statments in verbose mode";
+				print "\n  --resetUserPassword is available in replaceContent.php with -u switch";
 				print "\n";
 
 				print "\nControls:";
@@ -271,6 +274,10 @@ class Options {
 
 						case 'u':
 							$this->users = true;
+							break;
+
+						case 'resetUserPassword':
+							$this->resetUserPassword = true;
 							break;
 
 						case 'server':

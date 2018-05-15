@@ -95,6 +95,45 @@ class User {
 		return $record;
 	}
 
+	public function removeWordpressUser($id) {
+		try {
+			$sql = "DELETE FROM wp_users WHERE ID=$id LIMIT 1";
+			$this->db->query($sql);
+		} catch (Exception $e) {
+			throw new Exception("\nERROR: can not remove a wordpress user with ID ".$id. "\n".$e->getMessage());
+		}
+		$rows = $this->db->affectedRows();
+		return $rows;
+	}
+
+	private function temporaryPassword($email) {
+		$str = sprintf('%s%d%s', $email, date('U'), ' new password ');
+		return md5($str);
+	}
+
+	public function setWordpressUserPassword($email) {
+		$user = $this->getWordpressUserByEmail($email);
+		if ($user) {
+			$user_id = $user->ID;
+			if (!$user_id || $user->user_pass === '*DISABLED*') {
+				return false;
+			}
+		} else {
+			return false;
+		}
+
+		$password = md5($this->temporaryPassword($email));
+
+		try {
+			$sql = "UPDATE wp_users SET user_pass = '$password' WHERE ID=$user_id LIMIT 1";
+			$this->db->query($sql);
+		} catch (Exception $e) {
+			throw new Exception("\nCould not update a user password with \n" . $sql . "\n");
+		}
+		// mail the password setting to the user?
+		return true;
+	}
+
 	public function doWordpressUsersExist() {
 
 		$sql = "SELECT COUNT(*) AS c FROM wp_users";
@@ -112,11 +151,12 @@ class User {
 		if (strlen($user_email) > 4) {
 			$user_login = $drupalUser->name;
 
-			$user_pass = md5( $user_email . '--temp');
+			// set password to a non-deterministic value (it has to be reset)
+			$user_pass = $this->temporaryPassword($drupalUser->mail);
+
 			$user_display_name = $user_nicename = $drupalUser->name;
 			$user_registered = date('Y-m-d H:i:s', $drupalUser->created);
 			$user_status = 0;
-
 
 			$sql = "SELECT ID as id FROM wp_users WHERE user_email='$user_email'";
 			$record = $this->db->record($sql);

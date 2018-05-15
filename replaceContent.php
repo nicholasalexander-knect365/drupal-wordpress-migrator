@@ -31,7 +31,7 @@ $wordpress = new WP($wp, $options);
 
 /* nodes */
 $d7_node = new Node($d7);
-$wp_post = new Post($wp);
+$wp_post = new Post($wp, $options);
 
 $wp_termmeta = new WPTermMeta($wp);
 $wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');

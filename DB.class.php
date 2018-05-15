@@ -40,8 +40,7 @@ class DB {
 				die('Programming error: connection type ' . $type . ' has not been defined.');
 		}
 
-
-debug($credentials);
+		//debug($credentials);
 		$this->connection = new mysqli(
 			$credentials['host'],
 			$credentials['username'],
@@ -142,8 +141,6 @@ debug($credentials);
 		if ($this->config->verbose) {
 			print "\n" . ucfirst($this->config->server) . ' : ' . $this->type . ' connect request... for project '.$this->config->project;
 		}
-
-//dd($this->config);
 
 		switch ($this->config->project) {
 			case 'tuauto':

@@ -42,7 +42,7 @@ $wordpress = new WP($wp, $options);
 
 /* nodes */
 $d7_node = new Node($d7);
-$wp_post = new Post($wp);
+$wp_post = new Post($wp, $options);
 
 // use termmeta to record nodeIds converted to wordpress IDs
 $wp_termmeta = new WPTermMeta($wp);
@@ -243,8 +243,6 @@ for ($c = 0; $c < $chunks; $c++) {
 
 					$object = new stdClass();
 
-					// $events = [];
-					// $reports = [];
 					$event = new stdClass();
 					$report = new stdClass();
 

@@ -65,14 +65,14 @@ class Post extends DB {
 	];
 
 	public static $translation_warning;
+	private $userPasswordChanged = [];
 
-	public function __construct($db) {
+	public function __construct($db, $options) {
 		$this->db = $db;
+		$this->options = $options;
 		$this->timezone_add = 0;
 		static::$translation_warning = 0;
 	}
-
-
 
 	private function findMakes($item) {
 		return strpos('make_', $item);
@@ -111,21 +111,34 @@ class Post extends DB {
 		$post_content = $this->prepare($drupalNode->content);
 
 		$userClause = '';
+
 		if ($includeUser) {
+
 			$drupalUser = $users->getDrupalUserByUid($drupalNode->uid);
 
 			// what is the wordpress user for that email address
 			$postAuthor = $users->getWordpressUserByEmail($drupalUser->mail);
-			$postAuthorId = $postAuthor->ID;
+			if ($postAuthor && $postAuthor->ID) {
+				$postAuthorId = $postAuthor->ID;
 
-			$userClause = ", post_author='$postAuthorId'";
+				if ($postAuthorId) {
+					$userClause = ", post_author='$postAuthorId'";
+				}
+
+				if ($this->options && $this->options->resetUserPassword && empty($this->userPasswordChanged[$postAuthor->user_email])) {
+					$users->setWordpressUserPassword($postAuthor->user_email);
+					$this->userPasswordChanged[$postAuthor->user_email] = 1;
+				}
+			}
 		}
 
 		$sql = "UPDATE $wp_posts 
 			SET post_name='$post_name', post_content='$post_content' 
 			$userClause
 			WHERE ID=$wpPostId LIMIT 1";
-				print "\n$post_name";
+
+		//print "\n$post_name";
+
 		try {
 			$this->db->query($sql);
 		} catch (Exception $e) {
@@ -144,8 +157,6 @@ class Post extends DB {
 
 		$nid = $drupal_data->nid;
 		$fileSet = $files->fileList($nid);
-
-//dd($drupal_data);
 
 		foreach($drupal_data as $key => $value) {
 
