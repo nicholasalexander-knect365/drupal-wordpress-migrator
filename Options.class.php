@@ -236,13 +236,13 @@ class Options {
 				
 				if (empty($this->wordpressPath)) {
 
-					if ($this->server === 'local') {
+					if ($options['server'] === 'local') {
 						$this->wordpressPath = '/home/nicholas/Dev/wordpress/tuauto';
 					}
-					if ($this->server === 'vm') {
+					if ($options['server'] === 'vm') {
 						$this->wordpressPath = '/var/www/public';
 					}
-					if ($this->server === 'staging') {
+					if ($options['server'] === 'staging') {
 						$this->wordpressPath = '/srv/www/test1.telecoms.com';
 					}
 
