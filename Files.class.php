@@ -42,22 +42,22 @@ class Files {
 // initially I was concerned that images are imported freshly each time, but once we have the image, no need to get it again
 // deprecate this 
 	public function dirEmpty($dir) {
-return;
-		if (!is_readable($dir)) {
-			debug("\n\nWARNING: image store directory $dir does not exist or is not writable\n\n");
-		}
-  		return (count(scandir($dir)) == 2);
+		return;
+		// if (!is_readable($dir)) {
+		// 	debug("\n\nWARNING: image store directory $dir does not exist or is not writable\n\n");
+		// }
+  // 		return (count(scandir($dir)) == 2);
 	}
 
 	public function setImageStore($path) {
 	$this->imageStore = $path;
 
-return;
-		if ($this->dirEmpty($path)) {
-			$this->imageStore = $path;
-		} else {
-			die("\nERROR: images directory is not empty\n --images with -f to clear them\n --imageStore=Set to empty directory\n\n");
-		}
+		return;
+		// if ($this->dirEmpty($path)) {
+		// 	$this->imageStore = $path;
+		// } else {
+		// 	die("\nERROR: images directory is not empty\n --images with -f to clear them\n --imageStore=Set to empty directory\n\n");
+		// }
 	}
 
 	public function setImagesDestination($config) {
@@ -163,7 +163,7 @@ return;
 
 	public function fileList($nid) {
 
-		$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename as filename, fm.uri as uri, fm.filesize, fm.status, fm.timestamp 
+		$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename AS filename, fm.uri AS uri, fm.filesize, fm.status, fm.timestamp 
 				FROM file_managed fm
 				JOIN file_usage fu ON fm.fid=fu.fid
 				WHERE fu.id=$nid AND fu.type='node'";
@@ -243,29 +243,29 @@ return;
 	 *
 	 * ... REDUNDANT?  no reason we can not have multiple images or files, but maybe a way to idenfity featured image?
 	 */
-	public function getBestVersion($filename) {
+	// public function getBestVersion($filename) {
 
-		$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename as filename, fm.uri as uri, fm.filesize, fm.status, fm.timestamp 
-				FROM file_managed fm
-				JOIN file_usage fu ON fm.fid=fu.fid
-				WHERE fm.filename like '$filename'";
+	// 	$sql = "SELECT fu.fid, fu.module, fu.type, fu.id, fu.count, fm.uid, fm.filename as filename, fm.uri as uri, fm.filesize, fm.status, fm.timestamp 
+	// 			FROM file_managed fm
+	// 			JOIN file_usage fu ON fm.fid=fu.fid
+	// 			WHERE fm.filename like '$filename'";
 
-		$images = $this->connection->records($sql);
+	// 	$images = $this->connection->records($sql);
 
-		if (count($images) === 1) {
-			return $images[0];
-		}
-		if (count($images) === 0) {
-			print str_replace(["\n", "  ", "\t"],["", " ", ' '], $sql) . "\n";
-			throw new Exception('getBestImage should never find no image?');
-		}
-		$best = null;
-		foreach ($images as $image) {
-			if (!$best || $image->filesize > $best->filesize) {
-				$best = $image;
-			}
-		}
-		return $best;
-	}
+	// 	if (count($images) === 1) {
+	// 		return $images[0];
+	// 	}
+	// 	if (count($images) === 0) {
+	// 		print str_replace(["\n", "  ", "\t"],["", " ", ' '], $sql) . "\n";
+	// 		throw new Exception('getBestImage should never find no image?');
+	// 	}
+	// 	$best = null;
+	// 	foreach ($images as $image) {
+	// 		if (!$best || $image->filesize > $best->filesize) {
+	// 			$best = $image;
+	// 		}
+	// 	}
+	// 	return $best;
+	// }
 
 }

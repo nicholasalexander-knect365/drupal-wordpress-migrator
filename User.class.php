@@ -145,6 +145,54 @@ class User {
 		return false;
 	}
 
+
+	private function getUserImage($drupalUser) {
+		$uid = $drupalUser->uid;
+		$sql = "SELECT * FROM file_managed fm WHERE fm.uid=$uid
+				INNER JOIN file_usage fu ON fu.id=fm.uid
+				WHERE type='user'";
+
+		$this->d7->record($sql);
+
+
+	}
+
+	// wordpress UserMeta table
+	private function makeUserMeta($drupal_user, $user_id, $blog_id) {
+
+			$user = $this->getWordpressUserById($userId);
+			if (empty($wp_user)) {
+				return false;
+			}
+
+			$sourceDomain = 'tuauto.com';
+
+			$sqlfmt = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, %s, %s)";
+
+			$usermeta = [
+						'nickname' 							=> $user->nicename,
+						'first_name' 						=> $drupalUser->first_name,
+						'last_name' 						=> $drupalUser->last_name,
+						'description' 						=> 'imported from drupal',
+						'wp_%d_user_avatar' 				=> 'TBA',
+						'primary_blog' 						=> $blog_id,
+						'source_domain' 					=> $sourceDomain,
+						'wp_%d_capabilities'				=> 'a:1:{s:10:"subscriber";b:1;}',
+						'wp_%d_user_level'					=> 0,
+						'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
+						'googleauthenticator_enabled' 		=> 'disabled',
+						'googleauthenticator_hidefromuser'	=> 'disabled',
+						'aim' 								=> '',
+						'yim' 								=> '', 
+						'jabber' 							=> ''
+			];
+
+			foreach ($usermeta as $key => $value) {
+				$key = preg_replace('/%d/', $blog_id, $key);
+				$this->db->query(sprintf($sqlfmt, $user_id, $key, $value));
+			}
+	}
+
 	public function makeWordpressUser($drupalUser) {
 
 		$user_email = $drupalUser->mail;

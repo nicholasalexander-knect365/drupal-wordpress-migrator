@@ -1,5 +1,4 @@
 <?php
-
 /***
  * replacecContent.php
  * migrator.php script 
@@ -14,6 +13,7 @@
  */
 require "DB.class.php";
 require "WP.class.php";
+print "\nReplace Content: this script replaces post content and populates users (with -u option)\n";
 
 require "Initialise.class.php";
 require "Options.class.php";
@@ -58,7 +58,7 @@ $TESTLIMIT = null;
 for ($c = 0; $c < $chunks; $c++) {
 
 	$drupal_nodes = $d7_node->getNodeChunk($TESTLIMIT);
-	print "\nReplacing " . count($drupal_nodes). " post contents";
+	print "\n\nReplacing " . count($drupal_nodes). " post contents";
 
 	if (isset($drupal_nodes) && count($drupal_nodes)) {
 
@@ -67,6 +67,7 @@ for ($c = 0; $c < $chunks; $c++) {
 			$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
 
 			$wp_post->replacePostContent($wpPostId, $node, $includeUsers, $users);
+
 			if ($node->nid % 10 === 0) {
 				print '.';
 			}

@@ -182,15 +182,17 @@ class DB {
 				if ($this->config->server === 'local') {
 					throw new Exception('CHECK FOR CONFIG ERROR: local server is not usually multisite.  If you are running on another server, please specify it with a --server=[vm,staging,live] directive');
 				}
-				print "\nWordpress MultiSite loading siteId: ".$this->config->siteId;
-			} else if ($this->config->server === 'local' || $this->config->server === 'vm2') {
-				print "\nLocal mode";
+				print "\n: Wordpress MultiSite loading siteId: ".$this->config->siteId;
+			} else if ($this->config->server === 'local') {
+				print "\n: Local mode";
+			} else if ($this->config->server === 'vm2') {
+				print "\n: Alternative VM mode (i.e. Homestead)";
 			} else {
 				throw new Exception('Not multisite, yet server=local not set.  Please check your configuration!');
 			}
 		} else if ($this->type === 'd7') {
 			if ($once++ === 0) {
-				print "\nDrupal 7 configured database connection.";
+				print "\n: Drupal 7 configured database connection.";
 			}
 		} else {
 			throw new Exception($this->type . ' database configuration supported?');

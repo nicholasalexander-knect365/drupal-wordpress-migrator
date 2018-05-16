@@ -42,12 +42,10 @@ class Options {
 		'acf' => 'fields',
 		'project' => 'project',
 		'initialise'=> 'initialise',
-		'clean' 	=> 'clean',
-		//'clearImages' 	=> 'images'
+		'clean' 	=> 'clean'
 	];
 
 	public function __construct() {
-		// these are the defaults, use options to override
 		$this->defaults 	= false;
 		$this->help  		= false;
 		$this->verbose 		= false;
@@ -79,9 +77,11 @@ class Options {
 	}
 
 	public function showAll() {
+
+		print "\n: Options: ";
 		foreach ($this->all as $key => $opt) {
 			if ($this->verbose) {
-				print "\nOption " . $opt . " is ";
+				print "\n: " . sprintf('%-12s ', $opt);
 				print $this->$opt ? 'set' : 'NOT set';
 			} else {
 				if (isset($this->$opt)) {
@@ -232,6 +232,20 @@ class Options {
 							throw new Exception('Please do not use default mode on this server without --server indication');
 						}
 					}
+				}
+				
+				if (empty($this->wordpressPath)) {
+
+					if ($this->server === 'local') {
+						$this->wordpressPath = '/home/nicholas/Dev/wordpress/tuauto';
+					}
+					if ($this->server === 'vm') {
+						$this->wordpressPath = '/var/www/public';
+					}
+					if ($this->server === 'staging') {
+						$this->wordpressPath = '/srv/www/test1.telecoms.com';
+					}
+
 				}
 
 				if (empty($this->wordpressPath)) {

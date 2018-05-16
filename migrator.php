@@ -147,9 +147,7 @@ if ($option['fields']) {
 			$fieldTables[] = $key . '_' . $field;
 		}
 	}
-
 	if ($verbose) debug($fieldTables);
-
 }
 
 // how many nodes to process?

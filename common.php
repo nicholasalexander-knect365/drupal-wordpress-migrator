@@ -1,6 +1,5 @@
 <?php
 
-
 define('DRUPAL_WP', 'DRUPAL_WP');
 
 $maxChunk = 1000000;
