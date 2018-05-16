@@ -82,17 +82,25 @@ class User {
 	}
 
 	public function user_exists($email) {
-		$sql = "SELECT COUNT(*) AS c FROM wp_users WHERE user_email = '$email'";
-		$record = $this->db->record($sql);
-		return $record->c;
+		if (strlen($email)>3) {
+			$sql = "SELECT COUNT(*) AS c FROM wp_users WHERE user_email = '$email'";
+			$record = $this->db->record($sql);
+			return $record->c;
+		} else {
+			throw new Exception("\nuser:user_exists called with empty email address.");
+		}
 	}
 
 	public function getWordpressUserByEmail($email) {
 		
-		$sql = "SELECT * from wp_users where user_email = '$email'";
-		$record = $this->db->record($sql);
+		if (strlen($email)>3) {
+			$sql = "SELECT * from wp_users where user_email = '$email'";
+			$record = $this->db->record($sql);
 
-		return $record;
+			return $record;
+		} else {
+			throw new Exception("\ngetWordpressUserByEmail called with empty email address.");
+		}
 	}
 
 	public function removeWordpressUser($id) {
