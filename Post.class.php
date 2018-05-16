@@ -104,8 +104,13 @@ class Post extends DB {
 		$wp_posts = DB::wptable('posts');
 		$wp_postmeta = DB::wptable('postmeta');
 
-		$sql = "SELECT * FROM $wp_posts WHERE ID=$wpPostId";
+		$sql = "SELECT *, u.user_email AS user_email 
+				FROM $wp_posts p 
+				LEFT JOIN wp_users u ON p.post_author=u.ID
+				WHERE ID=$wpPostId";
+
 		$record = $this->db->record($sql);
+		$user_email = $record['user_email'];
 
 		$post_name = Taxonomy::slugify($drupalNode->title);
 		$post_content = $this->prepare($drupalNode->content);
@@ -117,7 +122,7 @@ class Post extends DB {
 			$drupalUser = $users->getDrupalUserByUid($drupalNode->uid);
 
 			// what is the wordpress user for that email address
-			$postAuthor = $users->getWordpressUserByEmail($drupalUser->mail);
+			$postAuthor = $users->getWordpressUserByEmail($user_email);
 			if ($postAuthor && $postAuthor->ID) {
 				$postAuthorId = $postAuthor->ID;
 
