@@ -117,7 +117,7 @@ class Post extends DB {
 
 		$userClause = '';
 
-		if ($includeUser) {
+		if ($includeUser && $user_email) {
 
 			$drupalUser = $users->getDrupalUserByUid($drupalNode->uid);
 
