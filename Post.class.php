@@ -107,10 +107,10 @@ class Post extends DB {
 		$sql = "SELECT *, u.user_email AS user_email 
 				FROM $wp_posts p 
 				LEFT JOIN wp_users u ON p.post_author=u.ID
-				WHERE ID=$wpPostId";
+				WHERE p.ID=$wpPostId";
 
 		$record = $this->db->record($sql);
-		$user_email = $record['user_email'];
+		$user_email = $record->user_email;
 
 		$post_name = Taxonomy::slugify($drupalNode->title);
 		$post_content = $this->prepare($drupalNode->content);
