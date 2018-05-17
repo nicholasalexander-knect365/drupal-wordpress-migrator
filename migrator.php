@@ -46,7 +46,6 @@ $wp_post = new Post($wp, $options);
 
 // use termmeta to record nodeIds converted to wordpress IDs
 $wp_termmeta = new WPTermMeta($wp);
-$wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
 
 // migrator initialisations //
 
@@ -96,6 +95,9 @@ if ($option['files']) {
 
 $wp_taxonomy = new Taxonomy($wp, $options);
 $d7_taxonomy = new Taxonomy($d7, $options);
+
+$wp_termmeta_term_id = $wp_taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
+
 
 // If the wordpress instance of Taxonomy needs to get drupal data: 
 $wp_taxonomy->setDrupalDb($d7);

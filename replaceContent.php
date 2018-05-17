@@ -34,7 +34,13 @@ $d7_node = new Node($d7);
 $wp_post = new Post($wp, $options);
 
 $wp_termmeta = new WPTermMeta($wp);
-$wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
+
+$wp_taxonomy = new Taxonomy($wp, $options);
+$drupal_wp_term_id = $wp_taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
+
+if (!$drupal_wp_term_id) {
+	throw new Exception("ERROR: \nNo Drupal Node ID record in wp_postmeta\n");
+}
 
 $includeUsers = isset($options->users);
 
@@ -58,15 +64,19 @@ $TESTLIMIT = null;
 for ($c = 0; $c < $chunks; $c++) {
 
 	$drupal_nodes = $d7_node->getNodeChunk($TESTLIMIT);
-	print "\n\nReplacing " . count($drupal_nodes). " post contents";
+	print "\n\nReplacing content using " . count($drupal_nodes). " Drupal Nodes to update Wordpress posts and usermeta (with -u)\n";
 
 	if (isset($drupal_nodes) && count($drupal_nodes)) {
 
 		foreach ($drupal_nodes as $node) {
 
-			$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
+			$wpPostId = $wp_termmeta->getTermMetaValue($drupal_wp_term_id, $node->nid);
 
-			$wp_post->replacePostContent($wpPostId, $node, $includeUsers, $users);
+			if ($wpPostId) {
+				$wp_post->replacePostContent($wpPostId, $node, $includeUsers, $users);
+			} else {
+				throw new Exception("\n\nNo Drupal <--> WP flag record in $wp_termmeta.\n");
+			}
 
 			if ($node->nid % 10 === 0) {
 				print '.';

@@ -85,6 +85,21 @@ class PostMeta extends DB {
 		return $key;
 	}
 
+	public function createGetPostMeta($post_id, $key, $value) {
+
+		$wp_postmeta = DB::wptable('postmeta');
+		$sql = "SELECT meta_id FROM $wp_postmeta WHERE post_id = $post_id AND meta_key = '$key'";
+		$record = $this->db->record($sql);
+		if ($record) {
+			return $record->meta_id;
+		}
+
+		$sql = "INSERT INTO $wp_postmeta (post_id, meta_key, meta_value) VALUES ($post_id, $key, $value)";
+		$this->db->query($sql);
+		$id = $this->db->lastInsertId();
+		return $id;
+	}
+
 	// wordpress entities create
 	public function createFields($wpPostId, $data) {
 

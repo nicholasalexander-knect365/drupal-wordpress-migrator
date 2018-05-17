@@ -10,31 +10,6 @@ class WPTermMeta {
 		$this->db = $db;
 	}
 
-	// set the term and return its ID, OR get the ID of the $term_name
-	public function getSetTerm($term_name, $term_slug) {
-
-		$wp_terms = DB::wptable('terms');
-
-		$sql = "SELECT COUNT(*) as c FROM $wp_terms WHERE slug='$term_slug'";
-		$record = $this->db->record($sql);
-
-		if ($record && $record->c) {
-			$sql = "SELECT term_id FROM $wp_terms WHERE slug='$term_slug'";
-		
-			$record = $this->db->record($sql);
-	//dd($record);	
-			return (integer) $record->term_id;
-
-		} else {			
-			$sql = "INSERT INTO $wp_terms (name, slug, term_group) VALUES ('$term_name', '$term_slug', 0)";
-	//die($sql);	
-			$this->db->query($sql);
-			$term_id = $this->db->lastInsertId();
-
-			return (integer) $term_id;
-		}
-	}
-
 	public function checkTermMeta($term_id, $meta_key) {
 		
 		$wp_termmeta = DB::wptable('termmeta');

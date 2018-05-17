@@ -8,6 +8,7 @@ require "WPTermMeta.class.php";
 require "Taxonomy.class.php";
 require "WPTerms.class.php";
 require "Options.class.php";
+require "User.class.php";
 require "common.php";
 
 //define('DRUPAL_WP', 'DRUPAL_WP');
@@ -78,8 +79,9 @@ class MigratorTest extends TestCase {
 
 	public function testTermId() {
 		$this->connectDB();
-		$wp_termmeta = new WPTermMeta($this->wp);
-		$termMetaId = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
+		//$wp_termmeta = new WPTermMeta($this->wp);
+		$taxonomy = new Taxonomy($this->wp, $this->options);
+		$termMetaId = $taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
 		$this->assertGreaterThan(0, $termMetaId);
 	}
 

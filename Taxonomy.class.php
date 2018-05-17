@@ -58,6 +58,31 @@ class Taxonomy {
 		}
 	}
 
+	// set the term and return its ID, OR get the ID of the $term_name
+	public function getSetTerm($term_name, $term_slug) {
+
+		$wp_terms = DB::wptable('terms');
+
+		$sql = "SELECT COUNT(*) as c FROM $wp_terms WHERE slug='$term_slug'";
+		$record = $this->db->record($sql);
+
+		if ($record && $record->c) {
+			$sql = "SELECT term_id FROM $wp_terms WHERE slug='$term_slug'";
+		
+			$record = $this->db->record($sql);
+
+			return (integer) $record->term_id;
+
+		} else {
+
+			$sql = "INSERT INTO $wp_terms (name, slug, term_group) VALUES ('$term_name', '$term_slug', 0)";
+
+			$this->db->query($sql);
+			$term_id = $this->db->lastInsertId();
+
+			return (integer) $term_id;
+		}
+	}
 
 	// maps taxonomy slug and name
 	// TODO: these should be a little softer!
@@ -318,6 +343,9 @@ class Taxonomy {
 
 		$name = $this->makeWPTermName($taxonomy->name);
 		$slug = $this->slugify($this->makeWPTermName($taxonomy->category));
+		if ($slug === 'post-tag') {
+			$slug = 'post_tag';
+		}
 
 		list($name, $slug) = $this->remapNameCategory($name, $slug);
 

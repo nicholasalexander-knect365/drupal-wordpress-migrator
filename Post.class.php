@@ -78,22 +78,6 @@ class Post extends DB {
 		return strpos('make_', $item);
 	}
 
-	// private function convert_smart_quotes($string) { 
-	//     $search = array(chr(145), 
-	//                     chr(146), 
-	//                     chr(147), 
-	//                     chr(148), 
-	//                     chr(151)); 
-
-	//     $replace = array("'", 
-	//                      "'", 
-	//                      '"', 
-	//                      '"', 
-	//                      '-'); 
-
-	//     return str_replace($search, $replace, $string); 
-	// } 
-
 	protected function prepare($str) {
 		$str = $this->db->prepare($str);
 		return $str;
@@ -110,6 +94,7 @@ class Post extends DB {
 				WHERE p.ID=$wpPostId";
 
 		$record = $this->db->record($sql);
+
 		$user_email = $record->user_email;
 
 		$post_name = Taxonomy::slugify($drupalNode->title);
@@ -119,10 +104,16 @@ class Post extends DB {
 
 		if ($includeUser && $user_email) {
 
-			$drupalUser = $users->getDrupalUserByUid($drupalNode->uid);
-
+			// if the drupal nodes UID is 0 - then it is an admin post.  
+			// in tu-auto the admin user has no email address but user 1 does
+// 			if ($drupalNode->uid === 0) {
+// dd($user_email);
+// 			}
+			// $drupalUser = $users->getDrupalUserByUid($drupalNode->uid);
 			// what is the wordpress user for that email address
+
 			$postAuthor = $users->getWordpressUserByEmail($user_email);
+
 			if ($postAuthor && $postAuthor->ID) {
 				$postAuthorId = $postAuthor->ID;
 

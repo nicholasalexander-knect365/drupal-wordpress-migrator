@@ -10,6 +10,7 @@ class WPTerms {
 	}
 
 
+
 	/*** 
 	 * tests if blank slugs are used 
 	 */
@@ -20,14 +21,15 @@ class WPTerms {
 
 		$sql = "SELECT * FROM $wp_terms WHERE slug IS NULL OR slug = ''";
 		$records = $this->db->records($sql);
-
-		foreach($records as $term) {
-			// is there a term_taxonomy for it?
-			$term_id = $term->term_id;
-			$sql = "SELECT term_taxonomy_id FROM $wp_term_taxonomy WHERE term_id = $term_id";
-			$taxonomies = $this->db->record($sql);
-			if (count ((array)$taxonomies)) {
-				return false;
+		if ($records) {
+			foreach($records as $term) {
+				// is there a term_taxonomy for it?
+				$term_id = $term->term_id;
+				$sql = "SELECT term_taxonomy_id FROM $wp_term_taxonomy WHERE term_id = $term_id";
+				$taxonomies = $this->db->record($sql);
+				if (count ((array)$taxonomies)) {
+					return false;
+				}
 			}
 		}
 		return true;

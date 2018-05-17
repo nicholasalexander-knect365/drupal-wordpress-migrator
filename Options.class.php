@@ -219,7 +219,8 @@ class Options {
 							$this->wordpressURL = 'http://tuauto.local';
 							$this->drupalPath = '/home/nicholas/Dev/drupal7/tu-auto';
 							$this->project = 'tuauto';
-							$this->verbose = true;
+							$this->verbose = false;
+							$this->progress = true;
 							$this->files = true;
 							$this->nodes = true;
 							$this->taxonomy = true;
