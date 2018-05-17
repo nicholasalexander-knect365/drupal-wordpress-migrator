@@ -88,13 +88,12 @@ class Post extends DB {
 		$wp_posts = DB::wptable('posts');
 		$wp_postmeta = DB::wptable('postmeta');
 
-		$sql = "SELECT *, u.user_email AS user_email 
-				FROM $wp_posts p 
-				LEFT JOIN wp_users u ON p.post_author=u.ID
-				WHERE p.ID=$wpPostId";
-
+		$sql = "SELECT *, u.user_email AS user_email FROM $wp_posts p LEFT JOIN wp_users u ON p.post_author=u.ID WHERE p.ID=$wpPostId";
+		
+		//$sql = "SELECT * FROM $wp_posts WHERE ID=$wpPostId";
 		$record = $this->db->record($sql);
 
+//dd(DB::strip($sql));
 		$user_email = $record->user_email;
 
 		$post_name = Taxonomy::slugify($drupalNode->title);
@@ -107,7 +106,7 @@ class Post extends DB {
 			// if the drupal nodes UID is 0 - then it is an admin post.  
 			// in tu-auto the admin user has no email address but user 1 does
 // 			if ($drupalNode->uid === 0) {
-// dd($user_email);
+//dd($user_email);
 // 			}
 			// $drupalUser = $users->getDrupalUserByUid($drupalNode->uid);
 			// what is the wordpress user for that email address

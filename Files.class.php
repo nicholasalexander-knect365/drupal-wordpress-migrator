@@ -107,7 +107,9 @@ class Files {
 					try {
 //debug("copying public: image file ".$path);
 						copy($path, $this->imageStore . '/' . $file->filename);
-						debug('copy from '.$path.' to '.$this->imageStore . '/' .$file->filename);
+						if ($this->verbose) {
+							debug('copy from '.$path.' to '.$this->imageStore . '/' .$file->filename);
+						}
 					} catch(Exception $e) {
 						debug('could not copy ' . $path);
 					}

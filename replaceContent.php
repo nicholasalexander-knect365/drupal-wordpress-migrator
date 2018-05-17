@@ -71,11 +71,11 @@ for ($c = 0; $c < $chunks; $c++) {
 		foreach ($drupal_nodes as $node) {
 
 			$wpPostId = $wp_termmeta->getTermMetaValue($drupal_wp_term_id, $node->nid);
-
+//print "\n$wpPostId, $drupal_wp_term_id, $node->nid";
 			if ($wpPostId) {
 				$wp_post->replacePostContent($wpPostId, $node, $includeUsers, $users);
 			} else {
-				throw new Exception("\n\nNo Drupal <--> WP flag record in $wp_termmeta.\n");
+				throw new Exception("\n\nNo Drupal <--> WP flag record in wp_termmeta.\n");
 			}
 
 			if ($node->nid % 10 === 0) {

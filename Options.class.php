@@ -21,6 +21,7 @@ class Options {
 	public $s3bucket;
 	public $wordpressPath;
 	public $wordpressURL;
+	public $wordpressDomain;
 	public $drupalPath;
 	public $imageStore;
 	public $clean;
@@ -64,6 +65,7 @@ class Options {
 
 		$this->wordpressPath = '';
 		$this->wordpressURL  = 'http://tuauto.telecoms.local';
+		$this->wordpressDomain = 'tuauto.com';
 
 		$this->drupalPath 	= '../drupal7/tu-auto';
 		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
@@ -105,9 +107,8 @@ class Options {
 			$this->siteId = 39;
 		}
 		if ($this->projecct === 'ioti' && $this->server !== 'local') {
-			$this->siteid = 38;
+			$this->siteId = 38;
 		}
-
 	}
 
 	private function setDefaults() {
@@ -115,9 +116,9 @@ class Options {
 		$this->quiet 		= true;
 		$this->verbose 		= false;
 		$this->help 		= false;
+		$this->users 		= false;
 		$this->files 		= true;
 		$this->nodes 		= true;
-		$this->users 		= false;
 		$this->taxonomy 	= true;
 		$this->fields 		= true;
 		$this->initialise 	= true;

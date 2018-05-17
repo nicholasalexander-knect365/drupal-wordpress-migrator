@@ -54,21 +54,28 @@ $wp_termmeta = new WPTermMeta($wp);
 //
 
 if ($options->users) {
+
 	if ($users->doWordpressUsersExist()) {
 		debug('Importing Drupal users to existing Wordpress users');
 	}
-	$users->getDrupalUsers();
-	debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
 
-	$users->createWordpressUsers();
-	debug($users->wordpressUsers() . '... users created in Wordpress');
+	$users->getDrupalUsers();
+
+//debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
+
+	$users->createWordpressUsers($options->siteId);
+
+//debug($users->wordpressUsers() . '... users created in Wordpress');
 
 	$users->makeAdminUser();
+
 } else {
 	if (!$users->doWordpressUsersExist()) {
 		die("\nERROR: wordpress users do not yet exist - you need to run with a -u flag\n");
 	}
 }
+
+
 
 // the files option is required to clear images
 if ($option['files']) {
@@ -96,9 +103,6 @@ if ($option['files']) {
 $wp_taxonomy = new Taxonomy($wp, $options);
 $d7_taxonomy = new Taxonomy($d7, $options);
 
-$wp_termmeta_term_id = $wp_taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
-
-
 // If the wordpress instance of Taxonomy needs to get drupal data: 
 $wp_taxonomy->setDrupalDb($d7);
 
@@ -122,6 +126,9 @@ if ($option['initialise']) {
 	}
 	$initialise->cleanUp($wp);
 }
+
+
+$wp_termmeta_term_id = $wp_taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
 
 $nodeSource = 'drupal';
 if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$option['nodes'] && !$option['initialise'])) {
@@ -190,8 +197,10 @@ for ($c = 0; $c < $chunks; $c++) {
 			if ($option['nodes'] && $nodeSource === 'drupal') {
 				$d7_node->setNode($node);
 				$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
+//debug("\n--->makePost returned $wpPostId");
 				$files->getImagesDestination();
 				if ($wpPostId) {
+//debug("\ncreating termmeta ".$wp_termmeta_term_id .', '. $node->nid . ', '.$wpPostId);
 					$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
 				} else {
 					debug('makePost returned no value for this node??');
@@ -257,7 +266,7 @@ for ($c = 0; $c < $chunks; $c++) {
 						$data = $gather->$func($node->nid);
 
 						if (isset($data) && count($data)) {
-
+debug($data);
 							// // TODO - look at WHY not generalise this  $data[1]->$data[0]
 							// $debug = true;
 							// $verbose1 = false;

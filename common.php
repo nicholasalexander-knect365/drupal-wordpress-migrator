@@ -48,7 +48,7 @@ try {
 $wp->configure($options);
 $d7->configure($options);
 
-$users = new User($wp, $d7);
+$users = new User($wp, $d7, $options);
 
 // common
 function dd($v) {

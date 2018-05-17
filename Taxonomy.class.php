@@ -68,7 +68,7 @@ class Taxonomy {
 
 		if ($record && $record->c) {
 			$sql = "SELECT term_id FROM $wp_terms WHERE slug='$term_slug'";
-		
+//debug($sql);
 			$record = $this->db->record($sql);
 
 			return (integer) $record->term_id;
@@ -76,7 +76,7 @@ class Taxonomy {
 		} else {
 
 			$sql = "INSERT INTO $wp_terms (name, slug, term_group) VALUES ('$term_name', '$term_slug', 0)";
-
+//debug($sql);
 			$this->db->query($sql);
 			$term_id = $this->db->lastInsertId();
 

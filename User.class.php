@@ -11,12 +11,13 @@ class User {
 	
 	public $db;
 	public $drupalUsers;
+	public $config;
 
-	public function __construct($wp, $d7) {
+	public function __construct($wp, $d7, $config) {
 		
 		$this->db = $wp;
 		$this->d7 = $d7;
-
+		$this->config = $config;
 		$this->drupalUsers = [];
 	}
 
@@ -75,7 +76,7 @@ class User {
 
 	public function getWordpressUserById($id) {
 
-		$sql = "SELECT * from wp_users where user_id = $id";
+		$sql = "SELECT * from wp_users where ID = $id";
 		$record = $this->db->record($sql);
 
 		return $record;
@@ -161,87 +162,119 @@ class User {
 				WHERE type='user'";
 
 		$this->d7->record($sql);
-
-
 	}
 
 	// wordpress UserMeta table
-	private function makeUserMeta($drupal_user, $user_id, $blog_id) {
+	private function makeUserMeta($drupal_user, $user_id, $blog_id = NULL) {
 
-			$user = $this->getWordpressUserById($userId);
-			if (empty($wp_user)) {
-				return false;
-			}
+		$wp_user = $this->getWordpressUserById($user_id);
 
-			$sourceDomain = 'tuauto.com';
+		if (strpos(' ', $drupal_user->name)) {
+			list($first_name, $last_name) = explode(' ', $drupal_user->name);
+		} else {
+			$first_name = '';
+			$last_name = $drupal_user->name;
+		}
 
-			$sqlfmt = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, %s, %s)";
+		if (empty($wp_user)) {
+			return false;
+		}
+
+		$sourceDomain = $this->config->wordpressDomain;
+
+		if ($blog_id) {
 
 			$usermeta = [
-						'nickname' 							=> $user->nicename,
-						'first_name' 						=> $drupalUser->first_name,
-						'last_name' 						=> $drupalUser->last_name,
-						'description' 						=> 'imported from drupal',
-						'wp_%d_user_avatar' 				=> 'TBA',
-						'primary_blog' 						=> $blog_id,
-						'source_domain' 					=> $sourceDomain,
-						'wp_%d_capabilities'				=> 'a:1:{s:10:"subscriber";b:1;}',
-						'wp_%d_user_level'					=> 0,
-						'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
-						'googleauthenticator_enabled' 		=> 'disabled',
-						'googleauthenticator_hidefromuser'	=> 'disabled',
-						'aim' 								=> '',
-						'yim' 								=> '', 
-						'jabber' 							=> ''
+					'nickname' 							=> $wp_user->user_nicename,
+					'first_name' 						=> $first_name,
+					'last_name' 						=> $last_name,
+					'description' 						=> 'imported from drupal',
+					'wp_%d_user_avatar' 				=> '',
+					'primary_blog' 						=> $blog_id,
+					'source_domain' 					=> $sourceDomain,
+					'wp_%d_capabilities'				=> 'a:1:{s:10:"subscriber";b:1;}',
+					'wp_%d_user_level'					=> 0,
+					'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
+					'googleauthenticator_enabled' 		=> 'disabled',
+					'googleauthenticator_hidefromuser'	=> 'disabled',
+					'aim' 								=> '',
+					'yim' 								=> '', 
+					'jabber' 							=> ''
 			];
+		} else {
+			$usermeta = [
+					'nickname' 							=> $wp_user->user_nicename,
+					'first_name' 						=> $first_name,
+					'last_name' 						=> $last_name,
+					'description' 						=> 'imported from drupal',
+					'wp_user_avatar' 					=> '',
+					'primary_blog' 						=> $blog_id,
+					'source_domain' 					=> $sourceDomain,
+					'wp_capabilities'					=> 'a:1:{s:10:"subscriber";b:1;}',
+					'wp_user_level'						=> 0,
+					'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
+					'googleauthenticator_enabled' 		=> 'disabled',
+					'googleauthenticator_hidefromuser'	=> 'disabled',
+					'aim' 								=> '',
+					'yim' 								=> '', 
+					'jabber' 							=> ''
+			];
+		}
 
-			foreach ($usermeta as $key => $value) {
+		$sqlfmt = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, '%s', '%s')";
+		
+		foreach ($usermeta as $key => $value) {
+			if ($blog_id) {
 				$key = preg_replace('/%d/', $blog_id, $key);
-				$this->db->query(sprintf($sqlfmt, $user_id, $key, $value));
 			}
+			$q = sprintf($sqlfmt, $user_id, $key, $value);
+			$this->db->query($q);
+		}
 	}
 
-	public function makeWordpressUser($drupalUser) {
+	private function makeWordpressUser($drupalUser) {
 
 		$user_email = $drupalUser->mail;
+
 		if (strlen($user_email) > 4) {
 			$user_login = $drupalUser->name;
+			$user_display_name = $user_nicename = $drupalUser->name;
 
 			// set password to a non-deterministic value (it has to be reset)
 			$user_pass = $this->temporaryPassword($drupalUser->mail);
 
-			$user_display_name = $user_nicename = $drupalUser->name;
 			$user_registered = date('Y-m-d H:i:s', $drupalUser->created);
 			$user_status = 0;
 
 			$sql = "SELECT ID as id FROM wp_users WHERE user_email='$user_email'";
 			$record = $this->db->record($sql);
 
-			if (strlen($user_login) > 0) {
-				if (!$record || !isset($record->id)) {
-					$sql = "INSERT INTO wp_users (user_login, user_pass, user_nicename, user_email, user_registered, user_status)
-							VALUES ('$user_login', '$user_pass', '$user_nicename', '$user_email', '$user_registered', $user_status)";
-					$this->db->query($sql);
-					$user_id = $this->db->lastInsertId();
-				} else {
-					$user_id = $record->id;
-				}
-				return $user_id;
+			if (!$record || !isset($record->id)) {
+				$sql = "INSERT INTO wp_users (user_login, user_pass, user_nicename, user_email, user_registered, user_status)
+						VALUES ('$user_login', '$user_pass', '$user_nicename', '$user_email', '$user_registered', $user_status)";
+				$this->db->query($sql);
+				$user_id = $this->db->lastInsertId();
+			} else {
+				$user_id = $record->id;
 			}
+			return $user_id;
 		}
 		return null;
 	}
 
-	public function createWordpressUsers() {
+	public function createWordpressUsers($blog_id = null) {
+
 		foreach ($this->drupalUsers as $duser) {
-			$user_id = $this->makeWordpressUser($duser);
 
-			// establish wordpress capabilities:: maybe do this in Wordpress Admin?
-			// if ($user_id) {
-			// 	$capabilities = ['']
-			// 	$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, 'wp_39_capabilities', )"
-			// }
+			if ($duser->uid > 0) {
 
+				$user_id = $this->makeWordpressUser($duser);
+
+				if (empty($user_id)) {
+					debug("\nDrupal user " . $duser->uid . " was not imported as there is no email address for that Drupal user.");
+				}
+				$this->makeUserMeta($duser, $user_id, $blog_id);
+			}
 		}
 	}
 
