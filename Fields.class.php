@@ -27,11 +27,13 @@ class Fields {
 		$this->nid = $nid;
 	}
 
-	public function getFieldDataBody() {
+	// appears not used?
+	public function CHECKgetFieldDataBody() {
 		$nid = $this->nid;
 		$sql = "SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, body_value, body_summary, body_format 
 				FROM field_data_body 
 				WHERE entity_id=$nid";
+
 		$records = $this->db->records($sql);
 		if ($records && count($records) === 1) {
 			return $records[0];
@@ -39,13 +41,14 @@ class Fields {
 		return $records;
 	}
 
-	/* related to taxonomy? by field_tags_tid */
-	public function getFieldTags() {
+	/* USED?? related to taxonomy? by field_tags_tid */
+	public function CHECKgetFieldTags() {
 		$nid = $this->nid;
 		$sql = "SELECT fd.entity_type, fd.bundle, fd.deleted, fd.entity_id, fd.revision_id, fd.language, fd.delta, fd.field_tags_tid, td.vid, td.name, td.description, td.format, td.weight 
 			FROM field_data_body fd
 			INNER JOIN taxonomy_term_data td ON td.tid=fd.field_tags_tid 
 			WHERE entity_id=$nid";
+
 		$records = $this->db->records($sql);
 		if ($records && count($records) === 1) {
 			return $records[0];
@@ -55,15 +58,13 @@ class Fields {
 
 	public function getFieldImages() {
 		$nid = $this->nid;
-		$sql = "SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, field_image_fid, field_image_alt, field_image_title 
-			FROM field_data_field_image 
-			WHERE entity_id=$nid";
+		$sql = "SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, field_image_fid, field_image_alt, field_image_title FROM field_data_field_image WHERE entity_id=$nid";
 		$records = $this->db->records($sql);
 		if ($records && count($records) === 1) {
 			return $records[0];
 		}
 		return $records;
-	}	
+	}
 
 	public function getFieldComments() {
 		$nid = $this->nid;

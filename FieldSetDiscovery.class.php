@@ -31,11 +31,9 @@ abstract class FieldSetDiscovery {
 		$tables = $this->db->rows($sql);
 		$pairs = [];
 		$fieldTypes = [];
-
 		foreach ($tables as $table) {
 			if (preg_match('/^field_data_field_([\w]+?)_([\w_]+)/', $table, $matched)) {
-				// pair key => label
-//				var_dump($matched);
+				// pair:   key          => label
 				$pairs[] = [$matched[1], $matched[2]];
 				if (empty($fieldTypes[$matched[1]])) {
 					$fieldTypes[$matched[1]] = 0;
@@ -43,7 +41,6 @@ abstract class FieldSetDiscovery {
 				$fieldTypes[$matched[1]]++;
 			}
 		}
-
 		return [$fieldTypes, $pairs];
 	}
 
@@ -85,6 +82,5 @@ abstract class FieldSetDiscovery {
 		$sql = "SHOW TABLES LIKE 'field_data_field_$bundle_%'";
 		$this->db->query($sql);
 		$tables = $this->db->getRecords();
-	} 
-
+	}
 }

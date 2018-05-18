@@ -38,7 +38,7 @@ class Initialise {
 			$wp_terms = DB::wptable('terms');
 			$wp_postmeta = DB::wptable('postmeta');
 
-      $sql = "DELETE $wp_term_relationships FROM $wp_term_relationships";
+      $sql = "DELETE FROM $wp_term_relationships";
       $db->query($sql);
       $this->resetCounter($db, $wp_term_relationships);
 
@@ -46,17 +46,21 @@ class Initialise {
       $db->query($sql);
       $this->resetCounter($db, $wp_posts);
 
-      $sql = "DELETE $wp_terms FROM $wp_terms";
+      $sql = "DELETE FROM $wp_terms";
       $db->query($sql);
       $this->resetCounter($db, $wp_terms);
 
-      $sql = "DELETE $wp_termmeta FROM $wp_termmeta";
+      $sql = "DELETE FROM $wp_termmeta";
       $db->query($sql);
       $this->resetCounter($db, $wp_termmeta);
 
       $sql = "DELETE FROM $wp_term_taxonomy WHERE taxonomy <> 'nav_menu'";
       $db->query($sql);
       $this->resetCounter($db, $wp_term_taxonomy);
+
+      $sql = "DELETE FROM $wp_postmeta";
+      $db->query($sql);
+      $this->resetCounter($db, $wp_postmeta);
 
 		}
 	}

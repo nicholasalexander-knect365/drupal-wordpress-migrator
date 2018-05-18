@@ -184,16 +184,13 @@ class Post extends DB {
 				switch ($key) {
 
 					case 'uid':
-//debug($wpKey);
 						$drupalUser = $users->getDrupalUserByUid($value);
 						if ($drupalUser && strlen($drupalUser->mail) > 4) {
 							$wordpressUser = $users->getWordpressUserByEmail($drupalUser->mail);
 							if ($wordpressUser) {
-//debug($wordpressUser);
 								$values[$wpKey] = $wordpressUser->ID;
 							} else {
 								$values[$wpKey] = $users->makeWordpressUser($drupalUser);
-//debug('NEW WP User '.$values[$wpKey]);
 							}
 						} else {
 							debug("$value user with this uid can not be found in the Drupal Database, post assgined to default user in Wordpress");
@@ -251,12 +248,10 @@ class Post extends DB {
 						$values[$wpKey] = 1;
 						break;
 
+					// comment activation is ON for this post
+					// to control this may be best to use an option setting that is global
 					case 'comment':
-						if ($value === 1) {
-							$values[$wpKey] = 'open';
-						} else {
-							$values[$wpKey] = 'closed';
-						}
+						$values[$wpKey] = 'open';
 						break;
 
 					case 'type' : 
@@ -285,12 +280,9 @@ debug($values);
 		$this->db->query($sql); 
 		$post_id = $this->db->lastInsertId();
 
-// if (!$post_id) {
-// 	debug($sql);
-// }
-
 		return $post_id;
 
+		// TODO: deprecate this?
 		// if (isset($filename)) {
 		// 	$featured = !$nomatch;
 		// 	$wp->addMediaLibrary($post_id, $filename, $featured);

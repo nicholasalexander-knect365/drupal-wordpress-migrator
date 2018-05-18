@@ -36,8 +36,8 @@ require "Gather.class.php";
 
 // common routines include script initialisation
 require "common.php";
-// databases are now available as $wp and $d7
 
+// databases are now available as $wp and $d7
 $wordpress = new WP($wp, $options);
 
 /* nodes */
@@ -47,25 +47,17 @@ $wp_post = new Post($wp, $options);
 // use termmeta to record nodeIds converted to wordpress IDs
 $wp_termmeta = new WPTermMeta($wp);
 
-// migrator initialisations //
-
 // do not clear users unless it is specified
 // read and transfer all users if -u specified
-//
-
 if ($options->users) {
 
 	if ($users->doWordpressUsersExist()) {
 		debug('Importing Drupal users to existing Wordpress users');
 	}
 
-	$users->getDrupalUsers();
+	$users->getDrupalUsers(); //debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
 
-//debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
-
-	$users->createWordpressUsers($options->siteId);
-
-//debug($users->wordpressUsers() . '... users created in Wordpress');
+	$users->createWordpressUsers($options->siteId);  //debug($users->wordpressUsers() . '... users created in Wordpress');
 
 	$users->makeAdminUser();
 
@@ -74,8 +66,6 @@ if ($options->users) {
 		die("\nERROR: wordpress users do not yet exist - you need to run with a -u flag\n");
 	}
 }
-
-
 
 // the files option is required to clear images
 if ($option['files']) {
@@ -127,7 +117,6 @@ if ($option['initialise']) {
 	$initialise->cleanUp($wp);
 }
 
-
 $wp_termmeta_term_id = $wp_taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
 
 $nodeSource = 'drupal';
@@ -141,6 +130,9 @@ if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$option['nodes'] &&
 }
 
 if ($option['taxonomy']) {
+	if ($verbose) {
+		message("\nGetting Taxonomies...");
+	}
 	$vocabularies = $d7_taxonomy->getVocabulary();
 	$taxonomyNames = [];
 	$taxonomies = $d7_taxonomy->fullTaxonomyList();
@@ -148,6 +140,9 @@ if ($option['taxonomy']) {
 }
 
 if ($option['fields']) {
+	if ($verbose) {
+		message("\nGetting fields...");
+	}
 	$records = $fieldSet->getFieldData();
 	$fieldTables = [];
 	foreach ($records as $key => $numberFound) {
@@ -169,11 +164,12 @@ if ($nodeCount > $maxChunk) {
 }
 
 $d7_node->setNodeChunkSize($nodeCount);
-$chunks = floor($nodeCount / $chunk);
+$chunks = floor($nodeCount / $chunk) + 1;
 
 if ($option['fields']) {
 	$postmeta = new PostMeta($wp, DB::wptable('postmeta'));
 }
+
 if ($verbose) {
 	print "\nConverting $nodeCount Drupal nodes\n";
 }
@@ -187,20 +183,23 @@ for ($c = 0; $c < $chunks; $c++) {
 
 	$drupal_nodes = $d7_node->getNodeChunk($TESTLIMIT);
 
+	// if chunking is not required, read all records
+	//$drupal_nodes = $d7_node->getAllNodes();
+	//debug("\nNodes read: ". count((array)$drupal_nodes));
+
 	if (isset($drupal_nodes) && count($drupal_nodes)) {
 
 		foreach ($drupal_nodes as $node) {
 
 			$wpPostId = null;
 			$fileSet = null;
-//dd($node);
+
 			if ($option['nodes'] && $nodeSource === 'drupal') {
 				$d7_node->setNode($node);
 				$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
-//debug("\n--->makePost returned $wpPostId");
+
 				$files->getImagesDestination();
 				if ($wpPostId) {
-//debug("\ncreating termmeta ".$wp_termmeta_term_id .', '. $node->nid . ', '.$wpPostId);
 					$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
 				} else {
 					debug('makePost returned no value for this node??');
@@ -226,7 +225,6 @@ for ($c = 0; $c < $chunks; $c++) {
 			}
 
 			if ($option['taxonomy']) {
-
 				$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
 				if ($taxonomies && count($taxonomies)) {
 					foreach ($taxonomies as $taxonomy) {
@@ -251,7 +249,6 @@ for ($c = 0; $c < $chunks; $c++) {
 				if ($fieldTables && count($fieldTables)) {
 
 					$object = new stdClass();
-
 					$event = new stdClass();
 					$report = new stdClass();
 
@@ -266,67 +263,31 @@ for ($c = 0; $c < $chunks; $c++) {
 						$data = $gather->$func($node->nid);
 
 						if (isset($data) && count($data)) {
-debug($data);
-							// // TODO - look at WHY not generalise this  $data[1]->$data[0]
-							// $debug = true;
-							// $verbose1 = false;
-							// $verbose2 = true;
-							// if ($debug && $data[1]) {
-							// print "\n";
-							// 	foreach ($data[1] as $k => $v) {
-							// 		if (strlen($v) && $v !== 'a:0:{}') {
-							// 			print "\n" . "$k => $v";
-							// 		}
-							// 	}
-							// }
+
 							$object = new stdClass();
 							foreach ($data[1] as $field => $value) {
+
 								if (strlen($value) && $value !== 'a:0:{}') {
 									$shorterField = preg_replace('/^field_/', '', $field);
-									//if ($debug && $verbose1) {debug('shorterField:' . $shorterField . ' -> ' . $data[1]->$field);}
+									
 									if (preg_match('/_date_/', $field)) {
 										$data[1]->$field = date_format(date_create($data[1]->$field), 'U');
 									}
-									// e.g. $event->report_url_url
-									// preg_match('/^(.*)_/', $shorterField, $match);
-									// //$object = new stdClass(); //$match[1];
-									// $object->$shorterField = $data[1]->$field;
-									// if (isset($object->$shorterField) && $object->$shorterField !== 'a:0:{}') {
-									// 	//if ($debug && $verbose2) debug('object ' .$shorterField. ' : ' . $object->$shorterField);
-									// 	preg_match('/(.*?)_(.*)/', $shorterField, $parts);
-									// 	// this does not trigger - may want to look at why?
-									// 	if ($parts[1]  && $parts[1] === 'primary') {
-									// 		$nid_check = $data[1]->$field;
-									// 		if ((integer) $nid_check === (integer) $node->nid) {
-									// 			debug('nid matched ' . $data);
-									// 			dd('check');
-									// 		}
-									// 	}
-									// }
+									
+									//e.g. $event->report_url_url
+									preg_match('/^(.*)_/', $shorterField, $match);
+
+									//$object = new stdClass(); //$match[1];
+									$object->$shorterField = $data[1]->$field;
+									$fieldUpdate = [];
+									foreach($object as $key => $value) {
+										$fieldUpdate[$key] = isset($value) ? $value : '';
+									}
+									if (count($fieldUpdate)) {
+										$postmeta->createFields($wpPostId, $fieldUpdate);
+									}
 								}
 							}
-							// if ($debug && $verbose1) {
-							// 	if (count((array) $object)) {
-							// 		debug($object);
-							// 	}
-							// 	if (count((array) $event)) {
-							// 		print "\n";
-							// 		print 'event:';
-							// 		debug($event);
-							// 	}
-							// 	if (count((array) $report)) {
-							// 		print "\n";
-							// 		print 'report:';
-							// 		debug($report);
-							// 	}
-							// }
-							
-							$fieldUpdate = [];
-							foreach($object as $key => $value) {
-									$fieldUpdate[$key] = isset($value) ? $value : '';
-							}
-
-							$postmeta->createFields($wpPostId, $fieldUpdate);
 						}
 					}
 				}

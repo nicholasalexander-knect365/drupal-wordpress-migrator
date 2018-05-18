@@ -3,6 +3,7 @@
 require_once "DB.class.php";
 
 class PostMeta extends DB {
+
 	public $db;
 	public $wp_postmeta;
 	private $debugDetail;
@@ -15,8 +16,6 @@ class PostMeta extends DB {
 
 	private function convert_metakey($key) {
 
-// 		$key = preg_replace(['/_url_url$/', '_value$'],['_url',''], $key);
-// debug($key);
 		switch ($key) {
 
 			case 'event_url_url':
@@ -81,7 +80,6 @@ class PostMeta extends DB {
 				// debug($key);
 				break;
 		}
-		// debug($key);
 		return $key;
 	}
 
@@ -104,12 +102,9 @@ class PostMeta extends DB {
 	public function createFields($wpPostId, $data) {
 
 		$wp_postmeta = $this->wp_postmeta;
-		
+
 		foreach($data as $key => $value) {
 
-			if ($this->debugDetail) {
-				debug(">>> $key = $value");
-			}
 			$key = $this->convert_metakey($key);
 
 			if ($key === 'start_date' || $key === 'end_date') {
@@ -127,9 +122,6 @@ class PostMeta extends DB {
 			if (!strlen($value)) {
 				$value = '-';
 			}
-			if ($this->debugDetail) {
-				debug(">> $key = $value");
-			}
 
 			$sql = "SELECT meta_id FROM $wp_postmeta WHERE meta_key = '$key' AND post_id=$wpPostId";
 			$record = $this->db->record($sql);
@@ -146,6 +138,7 @@ class PostMeta extends DB {
 				$this->db->query($sql);
 				$meta_id = $this->db->lastInsertId();
 			}
+
 			assert($meta_id > 0);
 		}
 	}

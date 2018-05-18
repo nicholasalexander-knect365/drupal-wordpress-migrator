@@ -96,11 +96,19 @@ class Node {
 				LIMIT $start, $limit";
 
 		$nodes = $this->db->records($sql);
-		
-// print DB::strip($sql, 1);
-//var_dump($nodes);
 		$this->start = $start + $limit;
 
+		return $nodes;
+	}
+	public function getAllNodes() {
+		$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content,p.field_precis_value as precis
+				FROM node n
+				INNER JOIN node_type t ON n.type=t.type
+				LEFT JOIN node_revision r ON r.nid=n.nid
+				LEFT JOIN field_data_body b on b.entity_id=n.nid
+				LEFT JOIN content_field_precis p on p.nid=n.nid
+				ORDER by nid";
+		$nodes = $this->db->records($sql);
 		return $nodes;
 	}
 }

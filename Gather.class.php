@@ -7,51 +7,54 @@ require_once "FieldSetDiscovery.class.php";
 class Gather extends FieldSetDiscovery {
 	
 	public $nid;
-	private $exclude_migrated = true;
-	private $exclude_taxonomy = true;
+//	private $exclude_migrated = false;
+//	private $exclude_taxonomy = true;
 
 	public function __construct($db, $table) {
 
 		$this->db = $db;
 		$this->discovery($db);
 		$this->table = $table;
-		$this->exclude_migrated = ! $this->migrated_significant();
+//		$this->exclude_migrated = $this->migrated_significant();
 	}
 
 	public function setNid($nid) {
 		$this->nid = $nid;
 	}
 
-	public function migrated_significant() {
-		$sql = "SELECT COUNT(*) AS c 
-				FROM field_data_field_migrated_original_nid 
-				WHERE entity_id <> field_data_field_migrated_original_nid";
-		$record = $this->db->record($sql);
-		return $record['c'] > 2;
-	}
+// 	private function migrated_significant() {
+// 		$sql = "SELECT COUNT(*) AS c 
+// 				FROM field_data_field_migrated_original_nid 
+// 				WHERE entity_id <> field_data_field_migrated_original_nid";
+// 		$record = $this->db->record($sql);
+// dd(DB::strip($sql));
+// 		return $record['c'] > 0;
+// 	}
 
 	public function __call($name, $args) {
 
-		if ($this->exclude_migrated) {
-			if ($this->table === 'migrated_original_nid') {
-				return NULL;
-			}
-		}
-		if ($this->exclude_taxonomy) {
-			if ($this->table === 'article_type') {
-				return NULL;
-			}
-		}
+		// if ($this->exclude_migrated) {
+		// 	if ($this->table === 'migrated_original_nid') {
+		// 		return NULL;
+		// 	}
+		// }
+		// if ($this->exclude_taxonomy) {
+		// 	if ($this->table === 'article_type') {
+		// 		return NULL;
+		// 	}
+		// }
 		
 		$table = 'field_data_field_' . $this->table;
 		$nid = $this->nid;
 
-		$fields =  $this->getFieldNames(__FUNCTION__);
+		$fields =  $this->getFieldNames();
 		$fieldStr = implode(',', $fields);
 
 		$records = [];
 		if (isset($fields) && count($fields)) {
 			$sql = "SELECT $fieldStr from $table WHERE entity_id=$nid";
+// debug($name);
+// debug($sql);
 			$records = $this->db->records($sql);
 		}
 
