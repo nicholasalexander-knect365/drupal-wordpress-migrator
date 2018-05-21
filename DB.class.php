@@ -199,7 +199,14 @@ class DB {
 		}
 	}
 
-	public static function wptable($type) {
+	public static function wptable($type, $siteId = '') {
+		if ($siteId !== '') {
+			$wp_prefix = $siteId;
+		} else {
+			if (!$wp_prefix) {
+				die('SiteID not determined');
+			}
+		}
 		switch($type) {
 			case 'postmeta':
 			case 'posts':
