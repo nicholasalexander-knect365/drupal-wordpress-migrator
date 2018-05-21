@@ -199,13 +199,12 @@ class DB {
 		}
 	}
 
-	public static function wptable($type, $siteId = '') {
-		if ($siteId !== '') {
-			$wp_prefix = $siteId;
+	public static function wptable($type, $siteId = null) {
+
+		if ($siteId === null) {
+			$siteId = static::$wp_prefix;
 		} else {
-			if (!$wp_prefix) {
-				die('SiteID not determined');
-			}
+			$siteId = sprintf('wp_%d_', number_value($siteId));
 		}
 		switch($type) {
 			case 'postmeta':
@@ -216,7 +215,7 @@ class DB {
 			case 'term_taxonomy':
 			case 'users':
 			case 'usermeta':
-				return static::$wp_prefix . $type;
+				return $siteId . $type;
 			default:
 				die('unknown table type for wordpress : '.$type);
 		}
