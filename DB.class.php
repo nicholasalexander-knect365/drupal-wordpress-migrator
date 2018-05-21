@@ -204,7 +204,7 @@ class DB {
 		if ($siteId === null) {
 			$siteId = static::$wp_prefix;
 		} else {
-			$siteId = sprintf('wp_%d_', number_value($siteId));
+			$siteId = sprintf('wp_%d_', (integer)$siteId);
 		}
 		switch($type) {
 			case 'postmeta':
