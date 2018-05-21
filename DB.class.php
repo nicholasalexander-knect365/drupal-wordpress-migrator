@@ -146,16 +146,16 @@ class DB {
 			case 'tuauto':
 				if ($this->config->server === 'staging') {
 					$this->credentials['d7'] = [
-						'database' => 'd7telematics',
+						'database' => 'd7telematic5',
 						'username' => 'd7telematics',
 						'password' => '9FbTCPWWTQi2',
 						'host' => 'mysql'
 					];
 				} else {
 					$this->credentials['d7'] = [
-						'database' => 'd7telematics',
-						'username' => 'd7telematics',
-						'password' => 'zMn5LdPej2pbgqWqEjwmFZ7Y',
+						'database' => 'd7telematic5',
+						'username' => 'root',
+						'password' => 'admin',
 						'host' => 'localhost'
 					];
 				}
@@ -202,7 +202,7 @@ class DB {
 	public static function wptable($type, $siteId = null) {
 
 		if ($siteId === null) {
-			$siteId = 'wp_' . static::$wp_prefix;
+			$siteId = static::$wp_prefix;
 		} else {
 			$siteId = sprintf('wp_%d_', (integer)$siteId);
 		}

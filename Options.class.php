@@ -216,7 +216,7 @@ class Options {
 					} else {
 						// first: check it is NOT staging!
 						if (getcwd() === '/home/nicholas/Dev/migrator') {
-							$this->wordpressPath = '/home/nicholas/Dev/wordpress/tuauto';
+							$this->wordpressPath = '/home/nicholas/Dev/tuwp/single';
 							$this->wordpressURL = 'http://tuauto.local';
 							$this->drupalPath = '/home/nicholas/Dev/drupal7/tu-auto';
 							$this->project = 'tuauto';

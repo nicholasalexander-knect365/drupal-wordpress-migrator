@@ -164,7 +164,7 @@ class Taxonomy {
 		$wp_term_taxonomy = DB::wptable('term_taxonomy');
 
 		$sql = "SELECT COUNT(*) AS c FROM $wp_term_taxonomy";
-		$this->db->query($sql);
+		$this->db->query($sql); 
 		$items = $this->db->getRecord();
 		return ($items->c === 1);
 	}
