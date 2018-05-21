@@ -202,7 +202,7 @@ class DB {
 	public static function wptable($type, $siteId = null) {
 
 		if ($siteId === null) {
-			$siteId = static::$wp_prefix;
+			$siteId = 'wp_' . static::$wp_prefix;
 		} else {
 			$siteId = sprintf('wp_%d_', (integer)$siteId);
 		}

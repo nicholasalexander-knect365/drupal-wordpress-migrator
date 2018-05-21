@@ -4,6 +4,7 @@
 include "DB.class.php";
 
 $siteId = 39;
+
 $wp_postmeta = DB::wptable('postmeta', $siteId);
 $wp_posts = DB::wptable('posts', $siteId);
 $wp_terms = DB::wptable('terms', $siteId);
