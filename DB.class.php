@@ -151,13 +151,22 @@ class DB {
 						'password' => '9FbTCPWWTQi2',
 						'host' => 'mysql'
 					];
-				} else {
+				} else if ($this->config->server === 'vm') {
 					$this->credentials['d7'] = [
 						'database' => 'd7telematic5',
 						'username' => 'root',
 						'password' => 'root',
 						'host' => 'localhost'
 					];
+				} else if ($this->config->server === 'local') {
+					$this->credentials['d7'] = [
+						'database' => 'd7telematic5',
+						'username' => 'root',
+						'password' => 'admin',
+						'host' => 'localhost'
+					];
+				} else {
+					dd('config for server?');
 				}
 				break;
 			default: 
