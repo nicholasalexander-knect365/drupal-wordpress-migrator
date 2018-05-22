@@ -236,8 +236,8 @@ class User {
 			];
 		}
 
-		$clearUserMeta = true;
-		$sqlremove = "DELETE FROM wp_usermeta WHERE user_id=%d"; // AND meta_key='%s'";
+		$clearUserMeta = false;
+		$sqlremove = "DELETE FROM wp_usermeta WHERE user_id=%d AND meta_key='%s'";
 
 		$sqlinsertfmt = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, '%s', '%s')";
 		$sqlupdatefmt = "UPDATE wp_usermeta SET meta_value='%s' WHERE user_id=%d AND meta_key='%s' LIMIT 1";
@@ -263,7 +263,6 @@ class User {
 				$q = sprintf($sqlinsertfmt, $user_id, $key, $value);
 			}
 			$this->db->query($q);
-debug($q);
 		}
 	}
 

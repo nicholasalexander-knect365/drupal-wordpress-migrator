@@ -8,7 +8,7 @@ include_once "DB.class.php";
 class Post extends DB {
 
 	public $db;
-	public $wp_post_fields = ['ID', 'post_author', 'post_date', 'post_date_gmt', 'post_content', 'post_title', 'post_excerpt', 'post_status', 'post_password', 'post_name', 'to_ping', 'pinged', 'post_modified', 'post_modified_gmt', 'post_content_filtered', 'post_parent', 'guid', 'menu_order', 'post_type', 'post_mime_type', 'comment_count'];
+	public $wp_post_fields = ['ID', 'post_author', 'post_date', 'post_date_gmt', 'post_content', 'post_title', 'post_excerpt', 'post_status', 'post_password', 'post_name', 'to_ping', 'pinged', 'post_modified', 'post_modified_gmt', 'post_content_filtered', 'post_parent', 'guid', 'menu_order', 'post_type', 'post_mime_type', 'comment_count', 'comment_status'];
 
 	public static $mapPostType = [
 		'article' 		=> 'post',
@@ -269,6 +269,10 @@ debug($values);
 				}
 			}
 		}
+
+		//TODO: set to an option - probably global for all
+		$values['comment_status'] = true;
+
 		foreach(static::$null_fields as $field) {
 			$values[$field] = '';
 		}
