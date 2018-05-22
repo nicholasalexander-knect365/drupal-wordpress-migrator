@@ -266,12 +266,32 @@ class User {
 		}
 	}
 
+	private function makeUserName($name, $email) {
+		$names = explode(' ', $name);
+
+		if (count($names) > 1) {
+			$newname = strtolower($names[count($names)-1] . substr($names[0],0,1));
+		} else {
+			$newname = $email;
+		}
+
+		return $newname;
+	}
+
 	private function makeWordpressUser($drupalUser) {
 
 		$user_email = $drupalUser->mail;
 
 		if (strlen($user_email) > 4) {
-			$user_login = $drupalUser->name;
+			$user_login = $this->makeUserName($drupalUser->name, $drupalUser->mail);
+
+			$sql = "SELECT COUNT(*) as c FROM wp_users WHERE user_login = '$user_login'";
+			$record = $this->db->record($sql);
+
+			if ($record && $record->c) {
+				$user_login = $user_email;
+			}
+
 			$user_display_name = $user_nicename = $drupalUser->name;
 
 			// set password to a non-deterministic value (it has to be reset)
@@ -280,16 +300,17 @@ class User {
 			$user_registered = date('Y-m-d H:i:s', $drupalUser->created);
 			$user_status = 0;
 
-			$sql = "SELECT ID as id FROM wp_users WHERE user_email='$user_email'";
+			$sql = "SELECT ID as user_id FROM wp_users WHERE user_email='$user_email'";
 			$record = $this->db->record($sql);
 
-			if (!$record || !isset($record->id)) {
+			if (!$record || !isset($record->user_id)) {
 				$sql = "INSERT INTO wp_users (user_login, user_pass, user_nicename, user_email, user_registered, user_status)
 						VALUES ('$user_login', '$user_pass', '$user_nicename', '$user_email', '$user_registered', $user_status)";
 				$this->db->query($sql);
+
 				$user_id = $this->db->lastInsertId();
 			} else {
-				$user_id = $record->id;
+				$user_id = $record->user_id;
 			}
 			return $user_id;
 		}
