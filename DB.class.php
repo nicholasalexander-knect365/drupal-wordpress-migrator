@@ -68,7 +68,7 @@ class DB {
 			$this->config->wordpressPath = '/home/vagrant/Code/client/k365/wp';
 
 		} else if ($this->config->server === 'staging' && empty($this->config->wordpressPath)) {
-			$this->config->wordpressPath = '/srv/www/public';
+			$this->config->wordpressPath = '/srv/www/test2.telecoms.com';
 			//throw new Exception("ERROR: this server requires a --wordpressPath setting!");
 		}
 
@@ -159,7 +159,6 @@ class DB {
 						'password' => 'mu3Ohfei2eemoh8eich8',
 						'host' => 'mysql'
 					];
-
 				} else if ($this->config->server === 'vm') {
 					$this->credentials['d7'] = [
 						'database' => 'd7telematic5',
