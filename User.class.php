@@ -191,23 +191,6 @@ class User {
 					'wp_%d_user_avatar' 				=> '',
 					'primary_blog' 						=> $blog_id,
 					'source_domain' 					=> $sourceDomain,
-					'wp_%d_capabilities'				=> 'a:1:{s:10:"subscriber";b:1;}',
-					'wp_%d_user_level'					=> 0,
-					'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
-					'googleauthenticator_enabled' 		=> 'disabled',
-					'googleauthenticator_hidefromuser'	=> 'disabled',
-					'aim' 								=> '',
-					'yim' 								=> '', 
-					'jabber' 							=> ''
-			];
-			$usermeta = [
-					'nickname' 							=> $wp_user->user_nicename,
-					'first_name' 						=> $first_name,
-					'last_name' 						=> $last_name,
-					'description' 						=> 'imported from drupal',
-					'wp_%d_user_avatar' 				=> '',
-					'primary_blog' 						=> $blog_id,
-					'source_domain' 					=> $sourceDomain,
 					'wp_%d_capabilities'				=> 'a:1:{s:6:"editor";b:1;}',
 					'wp_%d_user_level'					=> 7,
 					'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
@@ -232,8 +215,8 @@ class User {
 					'wp_user_avatar' 					=> '',
 					'primary_blog' 						=> $blog_id,
 					'source_domain' 					=> $sourceDomain,
-					'wp_%d_capabilities'				=> 'a:1:{s:6:"editor";b:1;}',
-					'wp_%d_user_level'					=> 7,
+					'wp_capabilities'					=> 'a:1:{s:6:"editor";b:1;}',
+					'wp_user_level'						=> 7,
 					'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
 					'googleauthenticator_enabled' 		=> 'disabled',
 					'googleauthenticator_hidefromuser'	=> 'disabled',
@@ -249,14 +232,34 @@ class User {
 			];
 		}
 
-		$sqlfmt = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, '%s', '%s')";
+		$clearUserMeta = true;
+		$sqlremove = "DELETE FROM wp_usermeta WHERE user_id=%d AND meta_key='%s'";
+
+		$sqlinsertfmt = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, '%s', '%s')";
+		$sqlupdatefmt = "UPDATE wp_usermeta SET meta_value='%s' WHERE user_id=%d AND meta_key='%s' LIMIT 1";
+
 		
 		foreach ($usermeta as $key => $value) {
+
 			if ($blog_id) {
 				$key = preg_replace('/%d/', $blog_id, $key);
 			}
-			$q = sprintf($sqlfmt, $user_id, $key, $value);
+
+			if ($clearUserMeta) {
+				$q = sprintf($sqlremove, $user_id, $key);
+				$this->db->query($q);
+			}
+
+			// usermeta exists?
+			$sql = "SELECT * FROM wp_usermeta WHERE user_id=$user_id AND meta_key=$key";
+			$usermeta = $this->db->record($sql);
+			if (count((array) $usermeta)) {
+				$q = sprintf($sqlupdatefmt, $user_id, $key, $value);
+			} else {
+				$q = sprintf($sqlinsertfmt, $user_id, $key, $value);
+			}
 			$this->db->query($q);
+debug($q);
 		}
 	}
 
