@@ -144,13 +144,22 @@ class DB {
 
 		switch ($this->config->project) {
 			case 'tuauto':
-				if ($this->config->server === 'staging') {
+				if ($this->config->server === 'staging1') {
 					$this->credentials['d7'] = [
-						'database' => 'd7telematic5',
+						'database' => 'd7telematics',
 						'username' => 'd7telematics',
 						'password' => '9FbTCPWWTQi2',
 						'host' => 'mysql'
 					];
+				} else if ($this->config->server === 'staging') {
+					$this->credentials['d7'] = [
+						// drupal database on test2
+						'database' => 'test_tuauto',
+						'username' => 'test1_tele_com',
+						'password' => 'mu3Ohfei2eemoh8eich8',
+						'host' => 'mysql'
+					];
+
 				} else if ($this->config->server === 'vm') {
 					$this->credentials['d7'] = [
 						'database' => 'd7telematic5',

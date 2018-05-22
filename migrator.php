@@ -49,11 +49,12 @@ $wp_termmeta = new WPTermMeta($wp);
 
 // do not clear users unless it is specified
 // read and transfer all users if -u specified
+
 if ($options->users) {
+
 	if ($users->doWordpressUsersExist()) {
 		debug('Importing Drupal users to existing Wordpress users');
 	}
-
 	$users->getDrupalUsers(); //debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
 
 	$users->createWordpressUsers($options->siteId);  //debug($users->wordpressUsers() . '... users created in Wordpress');
