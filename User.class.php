@@ -259,11 +259,9 @@ $blog_id=39;
 			$usermeta = $this->db->record($sql);
 			if (count((array) $usermeta)) {
 				$q = sprintf($sqlupdatefmt, $user_id, $key, $value);
-die($q);
 			} else {
 				$q = sprintf($sqlinsertfmt, $user_id, $key, $value);
 			}
-debug($q);
 			$this->db->query($q);
 		}
 	}
