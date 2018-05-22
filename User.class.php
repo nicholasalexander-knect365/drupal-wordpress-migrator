@@ -204,7 +204,11 @@ class User {
 					'rich_editing'						=> true,
 					'aim' 								=> '',
 					'yim' 								=> '', 
-					'jabber' 							=> ''
+					'jabber' 							=> '',
+					'locale'							=> '',
+					'dismissed_wp_pointers'				=> '',
+					'googleauthenticator_enabled'		=> false,
+					'googleauthenticator_hidefromuser'	=> false
 			];
 		} else {
 			$usermeta = [
