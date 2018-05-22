@@ -4,6 +4,7 @@
 // must be done before post so post_author can be recognised
 
 
+include_once "Taxonomy.class.php";
 include_once "DB.class.php";
 define('MAX_USERS', 10000);
 
@@ -181,7 +182,7 @@ class User {
 		}
 
 		$sourceDomain = $this->config->wordpressDomain;
-
+$blog_id=39;
 		if ($blog_id) {
 			$usermeta = [
 					'nickname' 							=> $wp_user->user_nicename,
@@ -237,7 +238,7 @@ class User {
 		}
 
 		$clearUserMeta = false;
-		$sqlremove = "DELETE FROM wp_usermeta WHERE user_id=%d AND meta_key='%s'";
+		$sqlremove = "DELETE FROM wp_usermeta WHERE user_id=%d";// AND meta_key='%s'";
 
 		$sqlinsertfmt = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, '%s', '%s')";
 		$sqlupdatefmt = "UPDATE wp_usermeta SET meta_value='%s' WHERE user_id=%d AND meta_key='%s' LIMIT 1";
@@ -259,9 +260,11 @@ class User {
 			$usermeta = $this->db->record($sql);
 			if (count((array) $usermeta)) {
 				$q = sprintf($sqlupdatefmt, $user_id, $key, $value);
+die($q);
 			} else {
 				$q = sprintf($sqlinsertfmt, $user_id, $key, $value);
 			}
+debug($q);
 			$this->db->query($q);
 		}
 	}
@@ -315,6 +318,7 @@ class User {
 			return $user_id;
 		}
 		return null;
+// this is a change
 	}
 
 	public function createWordpressUsers($blog_id = null) {
