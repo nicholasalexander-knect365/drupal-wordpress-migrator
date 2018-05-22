@@ -169,7 +169,7 @@ class User {
 
 		$wp_user = $this->getWordpressUserById($user_id);
 
-		if (strpos(' ', $drupal_user->name)) {
+		if (strpos($drupal_user->name, ' ')) {
 			list($first_name, $last_name) = explode(' ', $drupal_user->name);
 		} else {
 			$first_name = '';
