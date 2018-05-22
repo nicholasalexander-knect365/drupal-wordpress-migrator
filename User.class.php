@@ -273,7 +273,10 @@ class User {
 				if (empty($user_id)) {
 					debug("\nDrupal user " . $duser->uid . " was not imported as there is no email address for that Drupal user.");
 				}
-				$this->makeUserMeta($duser, $user_id, $blog_id);
+			//	$this->makeUserMeta($duser, $user_id, $blog_id);
+				if ($this->makeUserMeta($duser, $user_id, $blog_id)) {
+					debug("usermeta created for $duser");
+				}
 			}
 		}
 	}

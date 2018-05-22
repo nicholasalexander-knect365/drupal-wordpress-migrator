@@ -116,7 +116,7 @@ class Options {
 		$this->quiet 		= true;
 		$this->verbose 		= false;
 		$this->help 		= false;
-		$this->users 		= false;
+		$this->users 		= true;
 		$this->files 		= true;
 		$this->nodes 		= true;
 		$this->taxonomy 	= true;

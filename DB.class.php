@@ -155,7 +155,7 @@ class DB {
 					$this->credentials['d7'] = [
 						'database' => 'd7telematic5',
 						'username' => 'root',
-						'password' => 'admin',
+						'password' => 'root',
 						'host' => 'localhost'
 					];
 				}
