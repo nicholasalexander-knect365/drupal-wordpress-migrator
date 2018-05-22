@@ -60,6 +60,8 @@ if ($options->users) {
 
 	$users->makeAdminUser();
 
+	die("\n\nUsers imported, now run without the -u switch to do imports using these users.\n\n");
+
 } else {
 	if (!$users->doWordpressUsersExist()) {
 		die("\nERROR: wordpress users do not yet exist - you need to run with a -u flag\n");

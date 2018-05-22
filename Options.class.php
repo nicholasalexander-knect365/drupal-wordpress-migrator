@@ -103,10 +103,10 @@ class Options {
 	private function serverOptions() {
 		$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
 		$this->server = isset($options['server']) ? $options['server'] : 'local';
-		if ($this->project === 'tuauto' && $this->server !== 'local') {
+		if ($this->project === 'tuauto') {
 			$this->siteId = 39;
 		}
-		if ($this->projecct === 'ioti' && $this->server !== 'local') {
+		if ($this->projecct === 'ioti') {
 			$this->siteId = 38;
 		}
 	}
@@ -116,7 +116,7 @@ class Options {
 		$this->quiet 		= true;
 		$this->verbose 		= false;
 		$this->help 		= false;
-		$this->users 		= true;
+		$this->users 		= false;
 		$this->files 		= true;
 		$this->nodes 		= true;
 		$this->taxonomy 	= true;
@@ -211,11 +211,17 @@ class Options {
 						$this->wordpressURL = 'http://tuauto.local';
 						$this->drupalPath = '/home/vagrant/Code/client/k365/tu-auto';
 						return;
-					} else if (isset($this->server) && $this->server === 'staging') {
+					} else if (isset($this->server) && $this->server === 'staging1') {
 						$this->defaults();
 						$this->wordpressPath = '/srv/www/test1.telecoms.com';
 						$this->wordpressURL = 'http://beta.tu-auto.com';
 						$this->drupalPath = '/srv/www/test1.telecoms.com/drupal7/tu-auto';
+						return;
+					} else if (isset($this->server) && $this->server === 'staging') {
+						$this->defaults();
+						$this->wordpressPath = '/srv/www/test2.telecoms.com';
+						$this->wordpressURL = 'http://beta.tu-auto.com';
+						$this->drupalPath = '/srv/www/test2.telecoms.com/drupal7/tu-auto';
 						return;
 
 						throw new Exception("\n-d default mode not available on staging:\n\nSuggest command line like:\n\nphp migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f --acf");

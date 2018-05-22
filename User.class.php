@@ -181,8 +181,13 @@ class User {
 		}
 
 		$sourceDomain = $this->config->wordpressDomain;
+
 //todo this->site_id ??
-$blog_id=39;
+$blog_id = $this->config->siteId;
+if (!$blog_id) {
+	$blog_id=39;
+}
+
 		if ($blog_id) {
 			$usermeta = [
 					'nickname' 							=> $wp_user->user_nicename,
