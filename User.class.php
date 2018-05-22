@@ -181,6 +181,7 @@ class User {
 		}
 
 		$sourceDomain = $this->config->wordpressDomain;
+dd($blog_id);
 $blog_id=39;
 		if ($blog_id) {
 			$usermeta = [
@@ -191,7 +192,7 @@ $blog_id=39;
 					'wp_%d_user_avatar' 				=> '',
 					'primary_blog' 						=> $blog_id,
 					'source_domain' 					=> $sourceDomain,
-					'wp_%d_capabilities'				=> 'a:1:{s:6:"author";b:1;}',
+					'wp_%d_capabilities'				=> 'a:1:{s:6:"editor";b:1;}',
 					'wp_%d_user_level'					=> 7,
 					'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
 					'googleauthenticator_enabled' 		=> 'disabled',
