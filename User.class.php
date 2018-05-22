@@ -183,7 +183,6 @@ class User {
 		$sourceDomain = $this->config->wordpressDomain;
 
 		if ($blog_id) {
-
 			$usermeta = [
 					'nickname' 							=> $wp_user->user_nicename,
 					'first_name' 						=> $first_name,
@@ -201,6 +200,29 @@ class User {
 					'yim' 								=> '', 
 					'jabber' 							=> ''
 			];
+			$usermeta = [
+					'nickname' 							=> $wp_user->user_nicename,
+					'first_name' 						=> $first_name,
+					'last_name' 						=> $last_name,
+					'description' 						=> 'imported from drupal',
+					'wp_%d_user_avatar' 				=> '',
+					'primary_blog' 						=> $blog_id,
+					'source_domain' 					=> $sourceDomain,
+					'wp_%d_capabilities'				=> 'a:1:{s:6:"editor";b:1;}',
+					'wp_%d_user_level'					=> 7,
+					'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
+					'googleauthenticator_enabled' 		=> 'disabled',
+					'googleauthenticator_hidefromuser'	=> 'disabled',
+					'show_admin_bar_front'				=> true,
+					'use_ssl'							=> 0,
+					'admin_color'						=> 'fresh',
+					'comment_shortcuts'					=> false,
+					'syntax_highlighting'				=> true,
+					'rich_editing'						=> true,
+					'aim' 								=> '',
+					'yim' 								=> '', 
+					'jabber' 							=> ''
+			];
 		} else {
 			$usermeta = [
 					'nickname' 							=> $wp_user->user_nicename,
@@ -210,11 +232,17 @@ class User {
 					'wp_user_avatar' 					=> '',
 					'primary_blog' 						=> $blog_id,
 					'source_domain' 					=> $sourceDomain,
-					'wp_capabilities'					=> 'a:1:{s:10:"subscriber";b:1;}',
-					'wp_user_level'						=> 0,
+					'wp_%d_capabilities'				=> 'a:1:{s:6:"editor";b:1;}',
+					'wp_%d_user_level'					=> 7,
 					'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
 					'googleauthenticator_enabled' 		=> 'disabled',
 					'googleauthenticator_hidefromuser'	=> 'disabled',
+					'show_admin_bar_front'				=> true,
+					'use_ssl'							=> 0,
+					'admin_color'						=> 'fresh',
+					'comment_shortcuts'					=> false,
+					'syntax_highlighting'				=> true,
+					'rich_editing'						=> true,
 					'aim' 								=> '',
 					'yim' 								=> '', 
 					'jabber' 							=> ''
@@ -273,7 +301,9 @@ class User {
 				if (empty($user_id)) {
 					debug("\nDrupal user " . $duser->uid . " was not imported as there is no email address for that Drupal user.");
 				}
-				$this->makeUserMeta($duser, $user_id, $blog_id);
+				if ($this->makeUserMeta($duser, $user_id, $blog_id)) {
+					debug("usermeta created for $duser");
+				}
 			}
 		}
 	}
