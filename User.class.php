@@ -4,7 +4,6 @@
 // must be done before post so post_author can be recognised
 
 
-include_once "Taxonomy.class.php";
 include_once "DB.class.php";
 define('MAX_USERS', 10000);
 
@@ -238,7 +237,7 @@ $blog_id=39;
 		}
 
 		$clearUserMeta = false;
-		$sqlremove = "DELETE FROM wp_usermeta WHERE user_id=%d";// AND meta_key='%s'";
+		$sqlremove = "DELETE FROM wp_usermeta WHERE user_id=%d AND meta_key='%s'";
 
 		$sqlinsertfmt = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, '%s', '%s')";
 		$sqlupdatefmt = "UPDATE wp_usermeta SET meta_value='%s' WHERE user_id=%d AND meta_key='%s' LIMIT 1";
