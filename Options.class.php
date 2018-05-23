@@ -263,7 +263,7 @@ class Options {
 						$this->wordpressPath = '/var/www/public';
 					}
 					if ($options['server'] === 'staging') {
-						$this->wordpressPath = '/srv/www/test1.telecoms.com';
+						$this->wordpressPath = '/srv/www/test2.telecoms.com';
 					}
 
 				}
