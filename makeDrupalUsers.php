@@ -1,6 +1,8 @@
 <?php
 /***
- * php makeDrupalUsers
+ * php makeDrupalUsers: run on any server 
+ * to create an SQL table of drupal users 
+ * for import on a LIVE server using createWPusers.php
  */
 require "DB.class.php";
 require "WP.class.php";

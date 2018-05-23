@@ -1,38 +1,26 @@
 <?php
 /***
- * php migrator.php Version 1.08
- *
- * by Nicholas Alexander for Informa Knect365
- *
- *purpose: migrate a drupal instance into a wordpress instance
- *
- * options -d default mode 
- * location settings:
- * --wordpressPath= --drupalPath= --wordpressURL= --imageStore=
- * conversions included settings:
- * -f files (images)
- * -c ACF fields
- * -t taxonomy
- * -n nodes
- * -d default modes (with --server)
+ * createWPusers.php
+ * one off script to run on LIVE server to build the Wordpress 
+ * Users from the dusers temporary table (created by makeDruapalUsers.php)
  */
 require "DB.class.php";
 require "WP.class.php";
 
 require "Initialise.class.php";
 require "Options.class.php";
-require "Post.class.php";
-require "PostMeta.class.php";
-require "WPTermMeta.class.php";
+// require "Post.class.php";
+// require "PostMeta.class.php";
+// require "WPTermMeta.class.php";
 require "User.class.php";
 
-require "Node.class.php";
-require "Files.class.php";
-require "Taxonomy.class.php";
+// require "Node.class.php";
+// require "Files.class.php";
+// require "Taxonomy.class.php";
 
-require "Fields.class.php";
-require "FieldSet.class.php";
-require "Gather.class.php";
+// require "Fields.class.php";
+// require "FieldSet.class.php";
+// require "Gather.class.php";
 
 // common routines include script initialisation
 require "common.php";
