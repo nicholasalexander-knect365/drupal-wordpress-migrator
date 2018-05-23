@@ -22,7 +22,7 @@ LIVE:  For a live install:
 
 	b. to import users on live use 
 
-		php migrator.php --dusers -u --server=live --wordpressPath=/srv/www/telecoms.com
+		php migrator.php --dusers -u --server=live --wordpressPath=/srv/www/telecoms.com --project='tu-auto'
 
 	c. backup live database and restore on staging, run php migrator.php -d --server=staging to build the full database on staging
 
