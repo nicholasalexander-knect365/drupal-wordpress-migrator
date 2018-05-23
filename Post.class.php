@@ -186,10 +186,17 @@ class Post extends DB {
 					case 'uid':
 						$drupalUser = $users->getDrupalUserByUid($value);
 						if ($drupalUser && strlen($drupalUser->mail) > 4) {
-							$wordpressUser = $users->getWordpressUserByEmail($drupalUser->mail);
+							if($value === 0 || $drupalUser->mail ==='steve@adaptive.co.uk') {
+								$wordpressUser = $users->getWordpressUserById(185333);
+								print "Wordpress admin user recognised:";
+								debug($wordpressUser);
+							} else {
+								$wordpressUser = $users->getWordpressUserByEmail($drupalUser->mail);
+							}
 							if ($wordpressUser) {
 								$values[$wpKey] = $wordpressUser->ID;
 							} else {
+								/// makeWordpressUser is private .... we only want to now make them
 								$values[$wpKey] = $users->makeWordpressUser($drupalUser);
 							}
 						} else {

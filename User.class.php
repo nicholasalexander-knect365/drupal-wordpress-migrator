@@ -350,7 +350,7 @@ if (!$blog_id) {
 		return $newname;
 	}
 
-	private function makeWordpressUser($drupalUser) {
+	public function makeWordpressUser($drupalUser) {
 
 		$user_email = $drupalUser->mail;
 
