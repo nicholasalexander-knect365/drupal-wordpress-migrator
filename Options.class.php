@@ -18,6 +18,8 @@ class Options {
 	public $files;
 	public $fields;
 
+	public $dusers;
+
 	public $s3bucket;
 	public $wordpressPath;
 	public $wordpressURL;
@@ -62,6 +64,7 @@ class Options {
 		$this->files 		= false;
 		$this->fields 		= false;
 		$this->users 		= false;
+		$this->dusers 		= false;
 
 		$this->wordpressPath = '';
 		$this->wordpressURL  = 'http://tuauto.telecoms.local';
@@ -142,7 +145,7 @@ class Options {
 
 			$shortOpts = 'dvqpfntuh';
 			$longOpts  = ['server:', 'project:', 'wordpressURL:', 'wordpressPath:', 'drupalPath:',
-			 			  'imageStore:', 'initialise', 'clean', 'clearImages', 'acf', 'sql', 'resetUserPassword'];
+			 			  'imageStore:', 'initialise', 'clean', 'clearImages', 'acf', 'sql', 'resetUserPassword', 'dusers'];
 			$options = getopt($shortOpts, $longOpts);
 
 			if (empty($options)) {
@@ -231,22 +234,12 @@ class Options {
 
 					} else {
 
-						// first: check it is NOT staging!
+						// first: check it is NOT staging!  - this is local (developer)
 						if (getcwd() === '/home/nicholas/Dev/migrator') {
 							$this->setDefaults();
 							$this->wordpressPath = '/home/nicholas/Dev/wordpress/tuauto';
 							$this->wordpressURL = 'http://tuauto.local';
 							$this->drupalPath = '/home/nicholas/Dev/drupal7/tu-auto';
-							// $this->project = 'tuauto';
-							// $this->verbose = false;
-							// $this->progress = true;
-							// $this->files = true;
-							// $this->nodes = true;
-							// $this->taxonomy = true;
-							// $this->fields = true;
-							// $this->users = true;
-							// $this->initialise = true;
-							// $this->clean = true;
 							return;
 						} else {
 							throw new Exception('Please do not use default mode on this server without --server indication');
@@ -308,6 +301,10 @@ class Options {
 
 						case 'u':
 							$this->users = true;
+							break;
+
+						case 'dusers':
+							$this->dusers = true;
 							break;
 
 						case 'resetUserPassword':

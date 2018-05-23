@@ -33,8 +33,20 @@ class User {
 		}
 	}
 
+	public function getTempDrupalUsers() {
+		$sql = "SELECT uid, name, mail, signature, timezone, language, created, role from dusers";
+		$this->drupalUsers = $this->db->records($sql);
+	}
+
+	public function countDrupalUsers() {
+		return count((array) $this->drupalUsers);
+	}
+
 	public function makeDrupalUsers() {
 	
+		$sql = "DROP TABLE dusers";
+		$this->db->query($sql);
+
 		$sql = "CREATE TABLE `dusers` (
 			`uid` int(10) unsigned NOT NULL DEFAULT '0',
 			`name` varchar(60) NOT NULL DEFAULT '',
@@ -52,6 +64,7 @@ class User {
 			`init` varchar(254) DEFAULT '',
 			`data` longblob,
 			`picture` int(11) NOT NULL DEFAULT '0',
+			`role` varchar(254) NOT NULL DEFAULT '',
 			PRIMARY KEY (`uid`),
 			UNIQUE KEY `name` (`name`),
 			KEY `access` (`access`),
@@ -74,8 +87,9 @@ class User {
 			$timezone = $u->timezone;
 			$language = $u->language;
 			$created = $u->created;
+			$role = $u->role;
 
-			$sql = "INSERT INTO dusers (uid, name, mail, signature, timezone, language, created) VALUES ($uid, '$name', '$mail', '$signature', '$timezone', '$language', '$created')";
+			$sql = "INSERT INTO dusers (uid, name, mail, signature, timezone, language, created, role) VALUES ($uid, '$name', '$mail', '$signature', '$timezone', '$language', '$created', '$role')";
 
 			try {
 				$this->db->query($sql);
@@ -313,7 +327,7 @@ if (!$blog_id) {
 			}
 
 			// usermeta exists?
-			$sql = "SELECT * FROM wp_usermeta WHERE user_id=$user_id AND meta_key=$key";
+			$sql = "SELECT * FROM wp_usermeta WHERE user_id=$user_id AND meta_key='$key'";
 			$usermeta = $this->db->record($sql);
 			if (count((array) $usermeta)) {
 				$q = sprintf($sqlupdatefmt, $user_id, $key, $value);
