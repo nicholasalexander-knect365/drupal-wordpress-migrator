@@ -143,7 +143,7 @@ class DB {
 		}
 
 		switch ($this->config->project) {
-			case 'tuauto':
+			case 'tu-auto':
 				if ($this->config->server === 'staging1') {
 					$this->credentials['d7'] = [
 						'database' => 'd7telematics',

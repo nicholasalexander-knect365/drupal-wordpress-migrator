@@ -73,7 +73,7 @@ class Options {
 		$this->drupalPath 	= '../drupal7/tu-auto';
 		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
 		$this->imageStore 	= getcwd() . '/images';
-		$this->project 		= 'tuauto';
+		$this->project 		= 'tu-auto';
 
 		$this->clean  		= false;
 		$this->clearImages 	= false;
@@ -104,9 +104,9 @@ class Options {
 	}
 
 	private function serverOptions() {
-		$this->project = isset($options['project']) ? $options['project'] : 'tuauto';
+		$this->project = isset($options['project']) ? $options['project'] : 'tu-auto';
 		$this->server = isset($options['server']) ? $options['server'] : 'local';
-		if ($this->project === 'tuauto') {
+		if ($this->project === 'tu-auto') {
 			$this->siteId = 39;
 		}
 		if ($this->projecct === 'ioti') {
@@ -159,7 +159,7 @@ class Options {
 
 				print "\nServer:";
 				print "\n*  --server=[local,vm,staging,live]";
-				print "\n*  --project=[name of project, e.g. tuauto, ioti]";
+				print "\n*  --project=[name of project, e.g. tu-auto, ioti]";
 				print "\n";
 
 				print "\nSettings:";
@@ -189,7 +189,7 @@ class Options {
 				print "\n  -f Files (Images)";
 				print "\n  --acf ACF Fields";
 				print "\n";
-				print "\n  -d --server=local - sets wordpressPath=~/Dev/wordpress/tuauto --project=tuauto --drupalPath=~/Dev/drupal7/tu-auto/ +verbose +files +nodes -taxonomy +fields +users +initialise +clean";
+				print "\n  -d --server=local - sets wordpressPath=~/Dev/wordpress/tuauto --project='tu-auto' --drupalPath=~/Dev/drupal7/tu-auto/ +verbose +files +nodes -taxonomy +fields +users +initialise +clean";
 				print "\n --d --server=vm sets defaults +progress +quiet -verbose -help +files +nodes -users +taxonomy +fields +initialise -clean +clearImages -sqlDebug --wordpressPath=/var/www/public --wordpressURL=http://tuauto.telecoms.local --drupalPath=/vagrant/drupal7/tu-auto";
 				print "\n --d --server=staging - use explicit args";
 				print "\n";
