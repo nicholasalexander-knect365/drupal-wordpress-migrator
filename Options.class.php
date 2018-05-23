@@ -226,7 +226,7 @@ class Options {
 					} else if (isset($this->server) && $this->server === 'staging') {
 						$this->setDefaults();
 						$this->wordpressPath = '/srv/www/test2.telecoms.com';
-						$this->wordpressURL = 'http://www.tu-auto.com';
+						$this->wordpressURL = 'www.tu-auto.com';
 						$this->drupalPath = '/srv/www/test2.telecoms.com/migrator/drupal7/tu-auto';
 						return;
 
