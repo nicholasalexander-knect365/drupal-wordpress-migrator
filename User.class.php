@@ -33,6 +33,58 @@ class User {
 		}
 	}
 
+	public function makeDrupalUsers() {
+	
+		$sql = "CREATE TABLE `dusers` (
+			`uid` int(10) unsigned NOT NULL DEFAULT '0',
+			`name` varchar(60) NOT NULL DEFAULT '',
+			`pass` varchar(128) NOT NULL DEFAULT '',
+			`mail` varchar(254) DEFAULT '',
+			`theme` varchar(255) NOT NULL DEFAULT '',
+			`signature` varchar(255) NOT NULL DEFAULT '',
+			`signature_format` varchar(255) DEFAULT NULL,
+			`created` int(11) NOT NULL DEFAULT '0',
+			`access` int(11) NOT NULL DEFAULT '0',
+			`login` int(11) NOT NULL DEFAULT '0',
+			`status` tinyint(4) NOT NULL DEFAULT '0',
+			`timezone` varchar(32) DEFAULT NULL,
+			`language` varchar(12) NOT NULL DEFAULT '',
+			`init` varchar(254) DEFAULT '',
+			`data` longblob,
+			`picture` int(11) NOT NULL DEFAULT '0',
+			PRIMARY KEY (`uid`),
+			UNIQUE KEY `name` (`name`),
+			KEY `access` (`access`),
+			KEY `created` (`created`),
+			KEY `mail` (`mail`),
+			KEY `picture` (`picture`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+		try {
+			$this->db->query($sql);
+
+		} catch (Exception $e) {
+			throw new Exception("\nCould not create duser table\n".$e->getMessage());
+		}
+
+		foreach ($this->drupalUsers as $u) {
+			$uid = $u->uid;
+			$name = $u->name;
+			$mail = $u->mail;
+			$signature = $u->signature;
+			$timezone = $u->timezone;
+			$language = $u->language;
+			$created = $u->created;
+
+			$sql = "INSERT INTO dusers (uid, name, mail, signature, timezone, language, created) VALUES ($uid, '$name', '$mail', '$signature', '$timezone', '$language', '$created')";
+
+			try {
+				$this->db->query($sql);
+			} catch (Exception $e) {
+				throw new Exception("\nCould not insert into duser table\n" . $e->getMessage());
+			}
+		}
+	}
+
 	public function drupalUsersLoaded() {
 		return count($this->drupalUsers);
 	}
