@@ -39,7 +39,7 @@ try {
 /* connect databases */
 try {
 	$wp = new DB($server, 'wp', $options);
-	if ($options->duser) {
+	if ($options->dusers) {
 		debug("INFO: Drupal database NOT opened in createWPusers mode");
 		$d7 = null;
 	} else {
