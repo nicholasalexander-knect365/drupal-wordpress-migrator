@@ -205,7 +205,7 @@ class DB {
 			$sql = "SHOW TABLES like 'wp_blogs'";
 			$record = $this->record($sql);
 
-			if ($record && count($record) && ($this->config->wordpressPath === '/var/www/public' || $this->config->wordpressPath === '/srv/www/test1.telecoms.com')) {
+			if ($record && count($record) && ($this->config->wordpressPath === '/var/www/public' || $this->config->wordpressPath === '/srv/www/test2.telecoms.com')) {
 				if ($this->config->server === 'local') {
 					throw new Exception('CHECK FOR CONFIG ERROR: local server is not usually multisite.  If you are running on another server, please specify it with a --server=[vm,staging,live] directive');
 				}
