@@ -193,8 +193,8 @@ class Post extends DB {
 								$values[$wpKey] = $users->makeWordpressUser($drupalUser);
 							}
 						} else {
-							debug("$value user with this uid can not be found in the Drupal Database, post assgined to default user in Wordpress");
-							$wordpressUser = $users->getWordpressUserById(1);
+							debug("$value user with this uid can not be found in the Drupal Database, post assigned to default user in Wordpress");
+							$wordpressUser = $users->getWordpressUserById(185333);
 						}
 						break;
 

@@ -39,14 +39,21 @@ try {
 /* connect databases */
 try {
 	$wp = new DB($server, 'wp', $options);
-	$d7 = new DB($server, 'd7', $options);
+	if ($options->dusers) {
+		debug("INFO: Drupal database NOT opened in createWPusers mode");
+		$d7 = null;
+	} else {
+		$d7 = new DB($server, 'd7', $options);
+	}
 } catch (Exception $e) {
 	die( 'DB connection error: ' . $e->getMessage());
 }
 
 // configure the wordpress environment
 $wp->configure($options);
-$d7->configure($options);
+if ($d7) {
+	$d7->configure($options);
+}
 
 $users = new User($wp, $d7, $options);
 

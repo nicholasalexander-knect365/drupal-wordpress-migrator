@@ -143,7 +143,7 @@ class DB {
 		}
 
 		switch ($this->config->project) {
-			case 'tuauto':
+			case 'tu-auto':
 				if ($this->config->server === 'staging1') {
 					$this->credentials['d7'] = [
 						'database' => 'd7telematics',
@@ -159,6 +159,15 @@ class DB {
 						'password' => 'mu3Ohfei2eemoh8eich8',
 						'host' => 'mysql'
 					];
+				} else if ($this->config->server === 'live') {
+					$this->credentials['d7'] = [
+						// drupal database on test2
+						'database' => '',
+						'username' => '',
+						'password' => '',
+						'host' => 'mysql'
+					];
+
 				} else if ($this->config->server === 'vm') {
 					$this->credentials['d7'] = [
 						'database' => 'd7telematic5',
@@ -174,7 +183,8 @@ class DB {
 						'host' => 'localhost'
 					];
 				} else {
-					dd('config for server?');
+					debug("\n\nERROR: Please use --server=[local,vm,staging] to configure DB connection\n\n");
+					die;
 				}
 				break;
 			default: 

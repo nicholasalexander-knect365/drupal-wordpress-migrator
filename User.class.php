@@ -33,6 +33,72 @@ class User {
 		}
 	}
 
+	public function getTempDrupalUsers() {
+		$sql = "SELECT uid, name, mail, signature, timezone, language, created, role from dusers";
+		$this->drupalUsers = $this->db->records($sql);
+	}
+
+	public function countDrupalUsers() {
+		return count((array) $this->drupalUsers);
+	}
+
+	public function makeDrupalUsers() {
+	
+		$sql = "DROP TABLE dusers";
+		$this->db->query($sql);
+
+		$sql = "CREATE TABLE `dusers` (
+			`uid` int(10) unsigned NOT NULL DEFAULT '0',
+			`name` varchar(60) NOT NULL DEFAULT '',
+			`pass` varchar(128) NOT NULL DEFAULT '',
+			`mail` varchar(254) DEFAULT '',
+			`theme` varchar(255) NOT NULL DEFAULT '',
+			`signature` varchar(255) NOT NULL DEFAULT '',
+			`signature_format` varchar(255) DEFAULT NULL,
+			`created` int(11) NOT NULL DEFAULT '0',
+			`access` int(11) NOT NULL DEFAULT '0',
+			`login` int(11) NOT NULL DEFAULT '0',
+			`status` tinyint(4) NOT NULL DEFAULT '0',
+			`timezone` varchar(32) DEFAULT NULL,
+			`language` varchar(12) NOT NULL DEFAULT '',
+			`init` varchar(254) DEFAULT '',
+			`data` longblob,
+			`picture` int(11) NOT NULL DEFAULT '0',
+			`role` varchar(254) NOT NULL DEFAULT '',
+			PRIMARY KEY (`uid`),
+			UNIQUE KEY `name` (`name`),
+			KEY `access` (`access`),
+			KEY `created` (`created`),
+			KEY `mail` (`mail`),
+			KEY `picture` (`picture`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8";
+		try {
+			$this->db->query($sql);
+
+		} catch (Exception $e) {
+			throw new Exception("\nCould not create duser table\n".$e->getMessage());
+		}
+
+		foreach ($this->drupalUsers as $u) {
+			$uid = $u->uid;
+			$name = $u->name;
+			$mail = $u->mail;
+			$signature = $u->signature;
+			$timezone = $u->timezone;
+			$language = $u->language;
+			$created = $u->created;
+			$role = $u->role;
+
+			$sql = "INSERT INTO dusers (uid, name, mail, signature, timezone, language, created, role) VALUES ($uid, '$name', '$mail', '$signature', '$timezone', '$language', '$created', '$role')";
+
+			try {
+				$this->db->query($sql);
+			} catch (Exception $e) {
+				throw new Exception("\nCould not insert into duser table\n" . $e->getMessage());
+			}
+		}
+	}
+
 	public function drupalUsersLoaded() {
 		return count($this->drupalUsers);
 	}
@@ -261,7 +327,7 @@ if (!$blog_id) {
 			}
 
 			// usermeta exists?
-			$sql = "SELECT * FROM wp_usermeta WHERE user_id=$user_id AND meta_key=$key";
+			$sql = "SELECT * FROM wp_usermeta WHERE user_id=$user_id AND meta_key='$key'";
 			$usermeta = $this->db->record($sql);
 			if (count((array) $usermeta)) {
 				$q = sprintf($sqlupdatefmt, $user_id, $key, $value);

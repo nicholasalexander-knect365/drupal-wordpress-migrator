@@ -16,6 +16,18 @@ You need:
 
 ## Do the following
 
+LIVE:  For a live install:
+
+	a. run php makeDrupalUsers.php to create dusers table in the Wordpress database, this is then used instead of Drupal to create live users and usermeta in Wordpress.
+
+	b. to import users on live use 
+
+		php migrator.php --dusers -u --server=live --wordpressPath=/srv/www/telecoms.com --project='tu-auto'
+
+	c. backup live database and restore on staging, run php migrator.php -d --server=staging to build the full database on staging
+
+	d. migrate the wp_nn_ tables from staging to live via SQL dump
+
 0. Install the migrator in your HOME directory
 	* cd 
 	* mkdir migrator

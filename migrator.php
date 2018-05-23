@@ -47,15 +47,24 @@ $wp_post = new Post($wp, $options);
 // use termmeta to record nodeIds converted to wordpress IDs
 $wp_termmeta = new WPTermMeta($wp);
 
-// do not clear users unless it is specified
-// read and transfer all users if -u specified
-
 if ($options->users) {
+	// do not clear users unless it is specified
+	// read and transfer all users if -u specified
 
 	if ($users->doWordpressUsersExist()) {
 		debug('Importing Drupal users to existing Wordpress users');
+	} 
+
+	// if dusers flag is set, read the users from the dusers temporary table
+	if ($options->dusers) {
+
+		$users->getTempDrupalUsers();
+		debug($users->countDrupalUsers() . ' users from temporary table (dusers)');
+
+	} else {
+		$users->getDrupalUsers(); //debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
 	}
-	$users->getDrupalUsers(); //debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
+	debug("\nDrupal users loaded: " . $users->countDrupalUsers() . "\n\n");
 
 	$users->createWordpressUsers($options->siteId);  //debug($users->wordpressUsers() . '... users created in Wordpress');
 
