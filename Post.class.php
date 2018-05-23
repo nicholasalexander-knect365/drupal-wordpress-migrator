@@ -194,6 +194,9 @@ class Post extends DB {
 							}
 						} else {
 							debug("$value user with this uid can not be found in the Drupal Database, post assigned to default user in Wordpress");
+							//
+							//TODO: replace with getWordpressUserById($adminEmail);
+							// where $adminEmail = 'administrator@domain' (it would have to be added)
 							$wordpressUser = $users->getWordpressUserById(185333);
 						}
 						break;
