@@ -215,6 +215,7 @@ class Taxonomy {
 	public function createTerms($taxonomies) {
 
 		$wp_terms = DB::wptable('terms');
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
 
 		if ($this->options->verbose === true) {
 			print "\nCreating " . count($taxonomies) . " taxonomy terms";
@@ -236,7 +237,18 @@ class Taxonomy {
 					VALUES ('$name', '$slug', $term_group)";
 
 			$this->db->query($sql);
-			$this->terms[$slug] = $this->db->lastInsertId();
+			$term_id = $this->terms[$slug] = $this->db->lastInsertId();
+
+			if (strtolower($taxonomy->type) !== 'tags') {
+				$sql = "SELECT term_taxonomy_id FROM $wp_term_taxonomy WHERE slug='$slug'";
+				$record = $this->db->record($sql);
+				if (!$record) {
+					$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$slug', '$name', 0, 0)";
+				} else {
+					$sql = "UPDATE $wp_term_taxonomy SET count = count+1 WHERE term_taxonomy_id = $term_taxonomy_id";
+				}
+				$this->db->query($sql);
+			}
 		}
 
 	}
@@ -341,8 +353,9 @@ class Taxonomy {
 	private function makeTermTaxonomy($taxonomy) {
 
 		$wp_term_taxonomy = DB::wptable('term_taxonomy');
+		$wp_terms = DB::wptable('terms');
 
-		$name = $this->makeWPTermName($taxonomy->name);
+		$name = static::slugify($this->makeWPTermName($taxonomy->name));
 		$slug = $this->slugify($this->makeWPTermName($taxonomy->category));
 		if ($slug === 'post-tag') {
 			$slug = 'post_tag';
@@ -366,15 +379,16 @@ class Taxonomy {
 
 
 		// find if the term has been used in this taxonomy
-		$sql = "SELECT t.term_id FROM wp_terms t
-				INNER JOIN wp_term_taxonomy tx ON tx.term_id = t.term_id
+		$sql = "SELECT t.term_id FROM $wp_terms t
+				INNER JOIN $wp_term_taxonomy tx ON tx.term_id = t.term_id
 				WHERE t.slug='$slug'"; 
 		$record = $this->db->record($sql);
+
 		if ($record) {
 			$term_id = $record->term_id;
 		} else {
 			// we need a new term
-			$sql = "INSERT INTO wp_terms (name, slug, term_group) VALUES ('$name', '$slug', 0)";
+			$sql = "INSERT INTO $wp_terms (name, slug, term_group) VALUES ('$name', '$slug', 0)";
 			$this->db->query($sql);
 			$term_id = $this->db->lastInsertId();
 		}
@@ -384,17 +398,16 @@ class Taxonomy {
 		$parent = $taxonomy->hierarchy;
 
 		$record = null;
-		if ($term_id) {
+		//if ($term_id) {
 
 			// does the taxonomy exist, if so increase count
 			$sql = "SELECT term_taxonomy_id 
 					FROM   $wp_term_taxonomy 
-					WHERE  term_id = $term_id 
-					  AND taxonomy = '$slug'";
+					WHERE  taxonomy = '$name'";
 			$this->db->query($sql);
 
 			$record = $this->db->getRecord();
-		}
+		//}
 
 		if (!$record) {
 			$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$slug', '$description', $parent, 0)";
