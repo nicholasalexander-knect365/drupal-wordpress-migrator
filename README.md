@@ -81,45 +81,43 @@ DBUG: --init did not seem to work (wordpress has data in it error)
 
 # Versions 
 ## History
-* TAG prerelease01
-* v105 field_data into ACF, additional phpunit, better options
-* MASTER & TAG prerelease02
-* v106 ACF import from ACF data, unit tests with taxonomy usage reports
-* v107 addresses images and featured images, replace content script, strip content by removing style tags
-* v108 revisit ACF - check the field descriptions match properly, revisit images - audit if all images are being located, why there are many images NOT imported
+** TAGs
+* Apr - May 2018 prerelease1 - 3
 
-## Release versions
-* STAGING RELEASE 17 April 2018
-* STAGING RELEASE 01 May 2018 
+* 24 May 2018  liverun-tuauto - version used to create tu-auto on staging, requiring separation of user build from wp_xx_ files build
 
-Improvements
+* branch v110 - technical debt issues including greater clarity on release names, separation of user build from remaining build
 
-local tests:
-php migrator.php -d --server=local
+## Definitions
 
-assumes --wordpressPath --drupalPath and other settings 
+* imagestore - a directory (usually it is ./images under the migrator directory) where images from Drupal file system or S3 are imported to, so that they are available during to the importCmds.sh wp-cli script
 
-vagrant tests:
-php migrator.php -d --server=vm
+* wordpresPath - full pathname on the server where the wp-config.php file can be located
 
-staging cli command: 
+* drupalPath - full pathname on the server where the Drupal is installed drupalPath/sites/default/files normally contains the Drupal media files
 
-php migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f -c --initialise
+## Improvements
 
-php replaceContent.php --project=tuauto --wordpressPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --clean
+* Simpler default settings for standard run
+* php migrator.php -d --server=[local,vm,staging] ...assumes --wordpressPath --drupalPath and default settings 
 
+* Idempotent script to replace content 
+* php replaceContent.php --project=tuauto --wordpressPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --clean
 
+* makeDrupalUsers.php -- reads the users from Drupal and creates a table in the Wordpress database called dusers that contain sufficient data fields to create Wordpress users.
 
-Tim's comment regarding images: 
+* createWPusers.php --wordpressPath=/path/to/wp-content 
+* reads dusers table and creates Wordpress users only - for running on live server to create user IDs
+* after this is run, the dusers table can be dropped
 
-* maybe run a quick scan for all full size images and dump out the image dimensions to see if they're all something crappily small?
+* importCmds.sh created during full run to import the images from imagestore directory into Wordpress media library.  To import, change directory to the wordpressPath and run it in the bash shell:
 
-* if so we can raise it as an issue but they might just have to live with it for migrated content
-might also be worth finding the relevant article on the existing site and confirming that the images aren't any larger over there - maybe they only upload smaller images to staging for some reason
+`$ . ./MIGRATOR_PATH/importCmds.sh`
 
 
+!!! MIGRATING TO LIVE !!!
 
-!!! MIGRATING TO LIVE - WIP !!!
+* Run makeDrupalUsers.php on staging or vm server, this will create a table called dusers in the Wordpress database.  This table can be 
 
 The live code environment and sites must be established first.
 
@@ -132,3 +130,4 @@ Users have to be imported in a safe way.
 * Import Users from the SQL file on STAGING to get the USER IDS
 * Extract USER ID + EMAIL address 
 * update the extract users OR REFERENCES TO THEM with the LIVE USER IDs
+
