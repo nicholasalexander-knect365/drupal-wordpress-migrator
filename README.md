@@ -117,17 +117,15 @@ DBUG: --init did not seem to work (wordpress has data in it error)
 
 !!! MIGRATING TO LIVE !!!
 
-* Run makeDrupalUsers.php on staging or vm server, this will create a table called dusers in the Wordpress database.  This table can be 
+* Run makeDrupalUsers.php on staging or vm server, this will create a table called dusers in the Wordpress database.  This table can be dropped after createWPusers.php is run on live.
 
-The live code environment and sites must be established first.
+Then, to build the live instance:
 
-Users have to be imported in a safe way.  
+* Export database from LIVE to Staging
+* run migrator on Staging (in a multisite environment) to build the remaining wp_NN_ tables 
+* importCmds.sh to create the media library
+* export wp_NN_ tables to LIVE (these will not yet exist)
+* rsynch the images
 
-* Server: LIVE STAGING (UAT server) TEST1 (staging)
-
-* Export database from LIVE to STAGING
-* Export Users from Drupal into an SQL file 
-* Import Users from the SQL file on STAGING to get the USER IDS
-* Extract USER ID + EMAIL address 
-* update the extract users OR REFERENCES TO THEM with the LIVE USER IDs
+Now you can test the LIVE server.
 
