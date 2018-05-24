@@ -75,13 +75,14 @@ DBUG: --init did not seem to work (wordpress has data in it error)
 	* import the images into the media library (you may have to copy /images to a local machine to drag and drop them into the media library)
 	* images that occur in a post internally
 
-8. output shows progress
+10. output shows progress
 	* when it finishes, rerun the unit test
 	* phpunit tests/migrator.tests.php > unittest-postrun.txt
 
 # Versions 
 ## History
-** TAGs
+### TAGs
+
 * Apr - May 2018 prerelease1 - 3
 
 * 24 May 2018  liverun-tuauto - version used to create tu-auto on staging, requiring separation of user build from wp_xx_ files build
@@ -99,23 +100,22 @@ DBUG: --init did not seem to work (wordpress has data in it error)
 ## Improvements
 
 * Simpler default settings for standard run
-* php migrator.php -d --server=[local,vm,staging] ...assumes --wordpressPath --drupalPath and default settings 
+`$ php migrator.php -d --server=[local,vm,staging] ...assumes --wordpressPath --drupalPath and default settings`
 
-* Idempotent script to replace content 
-* php replaceContent.php --project=tuauto --wordpressPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --clean
+* Idempotent script to replace content: 
+`$ php replaceContent.php --project=tuauto --wordpressPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --clean`
 
-* makeDrupalUsers.php -- reads the users from Drupal and creates a table in the Wordpress database called dusers that contain sufficient data fields to create Wordpress users.
+* Export Drupal users into table in the Wordpress database called dusers that contain sufficient data fields to create Wordpress users.
+`$ php makeDrupalUsers.php`
 
-* createWPusers.php --wordpressPath=/path/to/wp-content 
-* reads dusers table and creates Wordpress users only - for running on live server to create user IDs
-* after this is run, the dusers table can be dropped
+* Create Wordpress users - reads dusers table and creates Wordpress users only - for running on live server to create user IDs - after this is run, the dusers table can be dropped
+`$ php createWPusers.php --wordpressPath=/path/to/wp-content`
 
 * importCmds.sh created during full run to import the images from imagestore directory into Wordpress media library.  To import, change directory to the wordpressPath and run it in the bash shell:
-
 `$ . ./MIGRATOR_PATH/importCmds.sh`
 
 
-!!! MIGRATING TO LIVE !!!
+## MIGRATING TO LIVE 
 
 * Run makeDrupalUsers.php on staging or vm server, this will create a table called dusers in the Wordpress database.  This table can be dropped after createWPusers.php is run on live.
 
