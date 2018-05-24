@@ -337,6 +337,7 @@ class Taxonomy {
 		$this->db->query($sql);
 	}
 
+	// NB: taxonomy is a DRUPAL record nid/tid/vid/name/description
 	private function makeTermTaxonomy($taxonomy) {
 
 		$wp_term_taxonomy = DB::wptable('term_taxonomy');
@@ -355,10 +356,27 @@ class Taxonomy {
 			$description = $taxonomy->name;
 		}
 
-		if (isset($this->terms[$this->slugify($name)])) {
-			$term_id = $this->terms[$this->slugify($name)];
+// old version: always returned a term id as it would find a slug that has been added
+// but it may be the wrong taxonomy : hence the term_taxonomy table has dup term_ids
+// if (isset($this->terms[$this->slugify($name)])) {
+// 	$term_id = $this->terms[$this->slugify($name)];
+// } else {
+// 	$term_id = null;
+// }
+
+
+		// find if the term has been used in this taxonomy
+		$sql = "SELECT t.term_id FROM wp_terms t
+				INNER JOIN wp_term_taxonomy tx ON tx.term_id = t.term_id
+				WHERE t.slug='$slug'"; 
+		$record = $this->db->record($sql);
+		if ($record) {
+			$term_id = $record->term_id;
 		} else {
-			$term_id = null;
+			// we need a new term
+			$sql = "INSERT INTO wp_terms (name, slug, term_group) VALUES ('$name', '$slug', 0)";
+			$this->db->query($sql);
+			$term_id = $this->db->lastInsertId();
 		}
 
 		$format = $taxonomy->format;

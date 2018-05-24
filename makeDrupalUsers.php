@@ -1,7 +1,7 @@
 <?php
 /***
  * php makeDrupalUsers: run on any server 
- * to create an SQL table of drupal users 
+ * to create an SQL table of drupal users (dusers) under Wordpress
  * for import on a LIVE server using createWPusers.php
  */
 require "DB.class.php";

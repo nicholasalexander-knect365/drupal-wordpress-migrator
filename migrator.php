@@ -14,6 +14,8 @@
  * -c ACF fields
  * -t taxonomy
  * -n nodes
+ * exclusive flag:
+ * -u users - ONLY creates users reading the dusers table (run on live)
  * -d default modes (with --server)
  */
 require "DB.class.php";
@@ -57,17 +59,15 @@ if ($options->users) {
 
 	// if dusers flag is set, read the users from the dusers temporary table
 	if ($options->dusers) {
-
 		$users->getTempDrupalUsers();
 		debug($users->countDrupalUsers() . ' users from temporary table (dusers)');
-
 	} else {
 		$users->getDrupalUsers(); //debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
 	}
 	debug("\nDrupal users loaded: " . $users->countDrupalUsers() . "\n\n");
 
-	$users->createWordpressUsers($options->siteId);  //debug($users->wordpressUsers() . '... users created in Wordpress');
-
+	$users->createWordpressUsers($options->siteId);  
+	//debug($users->wordpressUsers() . '... users created in Wordpress');
 	$users->makeAdminUser();
 
 	die("\n\nUsers imported, now run without the -u switch to do imports using these users.\n\n");

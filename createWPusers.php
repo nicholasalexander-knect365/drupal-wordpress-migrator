@@ -3,6 +3,8 @@
  * createWPusers.php
  * one off script to run on LIVE server to build the Wordpress 
  * Users from the dusers temporary table (created by makeDruapalUsers.php)
+ * duplicates and REPLACES php migrator.php -u 
+ * RUN ON A LIVE SERVER: creates Wordpress users 
  */
 require "DB.class.php";
 require "WP.class.php";
