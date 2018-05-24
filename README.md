@@ -99,9 +99,9 @@ DBUG: --init did not seem to work (wordpress has data in it error)
 
 ## Improvements
 
-* Simpler default settings for standard run
+* Simpler default settings for standard run, --server setting assumes --wordpressPath --drupalPath and default settings, import nodes, images, taxonomy, fields but not users
 
-`$ php migrator.php -d --server=[local,vm,staging] ...assumes --wordpressPath --drupalPath and default settings`
+`$ php migrator.php -d --server=[local,vm,staging]`
 
 * Idempotent script to replace content: 
 
