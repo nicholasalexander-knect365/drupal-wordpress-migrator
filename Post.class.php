@@ -187,9 +187,12 @@ class Post extends DB {
 						$drupalUser = $users->getDrupalUserByUid($value);
 						if ($drupalUser && strlen($drupalUser->mail) > 4) {
 							if($value === 0 || $drupalUser->mail ==='steve@adaptive.co.uk') {
+
 								$wordpressUser = $users->getWordpressUserById(185333);
-								print "Wordpress admin user recognised:";
-								debug($wordpressUser);
+								if ($this->options->verbose) {
+									debug($wordpressUser);
+								}
+
 							} else {
 								$wordpressUser = $users->getWordpressUserByEmail($drupalUser->mail);
 							}

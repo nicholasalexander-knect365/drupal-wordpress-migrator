@@ -131,14 +131,16 @@ class Files {
 							// if (is_string($this->verbose)) {
 							// 	print $this->verbose;
 							// } else 
-							if ($this->verbose === true) {
+							if ($this->verbose) {
 								print "\nImage data size: " . strlen($fileData);
 							}
 
 							$fd = fopen($target, 'w+');
 							fputs($fd, $fileData);
 							fclose($fd);
-							debug('stored s3 image in ' .$this->imageStore . '/' . $file->filename );
+							if ($this->verbose) {
+								debug('stored s3 image in ' .$this->imageStore . '/' . $file->filename );
+							}
 
 						}
 						else {
