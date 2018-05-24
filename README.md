@@ -66,7 +66,7 @@ NB: The image importer script associates images to posts in this import.  If Nod
 
 9. Content only can be replaced with replaceContent.php.  NB: this rereads the Drupal source and replaces all posts in Wordpress.  ANY CHANGES made in Wordpress since the migration WILL BE OVERWRITTEN.
 
->	php replaceContent.php --project=tuauto --wordpressPath=/home/nicholas/Dev/wordpress/tuauto --clean
+`$ php replaceContent.php --project=tuauto --wordpressPath=/home/nicholas/Dev/wordpress/tuauto --clean`
 
 
 DBUG: --init did not seem to work (wordpress has data in it error)
@@ -100,18 +100,23 @@ DBUG: --init did not seem to work (wordpress has data in it error)
 ## Improvements
 
 * Simpler default settings for standard run
+
 `$ php migrator.php -d --server=[local,vm,staging] ...assumes --wordpressPath --drupalPath and default settings`
 
 * Idempotent script to replace content: 
+
 `$ php replaceContent.php --project=tuauto --wordpressPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --clean`
 
 * Export Drupal users into table in the Wordpress database called dusers that contain sufficient data fields to create Wordpress users.
+
 `$ php makeDrupalUsers.php`
 
 * Create Wordpress users - reads dusers table and creates Wordpress users only - for running on live server to create user IDs - after this is run, the dusers table can be dropped
+
 `$ php createWPusers.php --wordpressPath=/path/to/wp-content`
 
 * importCmds.sh created during full run to import the images from imagestore directory into Wordpress media library.  To import, change directory to the wordpressPath and run it in the bash shell:
+
 `$ . ./MIGRATOR_PATH/importCmds.sh`
 
 
