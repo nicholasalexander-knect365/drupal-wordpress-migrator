@@ -190,6 +190,8 @@ $unassigned = [];
 // set a value ONLY for a test version that only does a few posts
 $TESTLIMIT = null;
 
+//debug($option);
+
 for ($c = 0; $c < $chunks; $c++) {
 
 	$drupal_nodes = $d7_node->getNodeChunk($TESTLIMIT);

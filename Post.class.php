@@ -190,6 +190,7 @@ class Post extends DB {
 
 								$wordpressUser = $users->getWordpressUserById(185333);
 								if ($this->options->verbose) {
+									print "\nWP user:";
 									debug($wordpressUser);
 								}
 
