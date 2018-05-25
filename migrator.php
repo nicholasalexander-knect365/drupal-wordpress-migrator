@@ -145,8 +145,11 @@ if ($option['taxonomy']) {
 		message("\nGetting Taxonomies...");
 	}
 	$vocabularies = $d7_taxonomy->getVocabulary();
-	$taxonomyNames = [];
+	
+	//$taxonomyNames = [];
+	
 	$taxonomies = $d7_taxonomy->fullTaxonomyList();
+
 	$wp_taxonomy->createTerms($taxonomies);
 }
 
@@ -190,7 +193,6 @@ $unassigned = [];
 // set a value ONLY for a test version that only does a few posts
 $TESTLIMIT = null;
 
-//debug($option);
 
 for ($c = 0; $c < $chunks; $c++) {
 

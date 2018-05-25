@@ -12,26 +12,6 @@ class Taxonomy {
 	public $db;
 	public $drupalDB;
 
-	// private $mapped = [
-	// 	'category' 					=> 'Category',
-	// 	'channel'					=> 'Category',
-	// 	'channels'					=> 'Category',
-	// 	'article type' 				=> 'Type',
-	// 	'tags' 						=> 'post_tag',
-	// 	'itunes category' 			=> 'Podcast',
-	// 	'weekly brief'				=> 'Brief',
-	// 	'upload type'				=> 'Upload',
-	// 	'auto mobility'				=> 'Mobility',
-	// 	'autonomous car'			=> 'Autonomous',
-	// 	'fleet and asset management' => 'Fleet',
-	// 	'user experience & hmi' 	=> 'User Experience',
-	// 	'insurance & legal'			=> 'Insurance',
-	// 	'insurance telematics' 		=> 'Insurance',
-	// 	'safety, adas & autonomous'	=> 'ADAS',
-	// 	'telematics for evs'		=> 'Electric Vehicles',
-	// 	'navigation and lbs'		=> 'Connected Car'
-	// ];
-
 	private $termMeta = [
 		'category' 	=> 'Category',
 		'subject' 	=> 'Subject',
@@ -84,41 +64,61 @@ class Taxonomy {
 		}
 	}
 
+
+	// private $mapped = [
+	// 	'category' 					=> 'Category',
+	// 	'channel'					=> 'Category',
+	// 	'channels'					=> 'Category',
+	// 	'article type' 				=> 'Type',
+	// 	'tags' 						=> 'post_tag',
+	// 	'itunes category' 			=> 'Podcast',
+	// 	'weekly brief'				=> 'Brief',
+	// 	'upload type'				=> 'Upload',
+	// 	'auto mobility'				=> 'Mobility',
+	// 	'autonomous car'			=> 'Autonomous',
+	// 	'fleet and asset management' => 'Fleet',
+	// 	'user experience & hmi' 	=> 'User Experience',
+	// 	'insurance & legal'			=> 'Insurance',
+	// 	'insurance telematics' 		=> 'Insurance',
+	// 	'safety, adas & autonomous'	=> 'ADAS',
+	// 	'telematics for evs'		=> 'Electric Vehicles',
+	// 	'navigation and lbs'		=> 'Connected Car'
+	// ];
+
+
 	// maps taxonomy slug and name
 	// TODO: these should be a little softer!
 	private function remapNameCategory($name, $slug) {
+		
 		switch(trim(strtolower($name))) {
-			case 'mobility':
-			case 'auto mobility':
-				$name = 'Mobility';
-				$slug = 'channels';
-				break;
-			case 'telematics':
-				$name = 'Telematics';
-				$slug = 'subject';
-				break;
+
 			case 'adas':
 				$name = 'ADAS';
 				$slug = 'category';
 				break;
-			case 'electric vehicles':
-				$name = 'Electric Vehicles';
-				$slug = 'category';
-				break;
+
 			case 'autonomous':
 			case 'autonomous car':
 				$name = 'Autonomous';
 				$slug = 'channels';
 				break;
-			case 'infotainment':
-				$name = 'Infotainment';
+
+			case 'electric vehicles':
+				$name = 'Electric Vehicles';
 				$slug = 'category';
 				break;
+
 			case 'fleet and asset management':
 			case 'fleet':
 				$name = 'Fleet';
 				$slug = 'category';
 				break;
+
+			case 'infotainment':
+				$name = 'Infotainment';
+				$slug = 'category';
+				break;
+
 			case 'insurance':
 			case 'insurance & legal':
 			case 'insurance and legal':
@@ -126,26 +126,69 @@ class Taxonomy {
 				$name = 'Insurance';
 				$slug = 'channels';
 				break;
-			case 'safety, adas & autonomous':
-			case 'safety, adas and autonomous':
-				$name = 'ADAS';
-				$slug = 'category';
+
+			case 'mobility':
+			case 'auto mobility':
+				$name = 'Mobility';
+				$slug = 'channels';
 				break;
-			case 'telematics for evs':
-				$name = 'Electric Vehicles';
-				$slug = 'category';
-				break;
+
 			case 'navigation & lbs':
 			case 'navigation and lbs':
 			case 'connected car':
 				$name = 'Connected Car';
 				$slug = 'channels';
 				break;
+
+			case 'other':
+				$name = 'Other';
+				$slug = 'category';
+
+			case 'safety, adas & autonomous':
+			case 'safety, adas and autonomous':
+				$name = 'ADAS';
+				$slug = 'category';
+				break;
+
 			case 'security':
 				$name = 'Security';
 				$slug = 'channels';
 				break;
+
+			case 'telematics':
+				$name = 'Telematics';
+				$slug = 'subject';
+				break;
+
+			case 'telematics for evs':
+				$name = 'Electric Vehicles';
+				$slug = 'category';
+				break;
+
+			// case 'tags':
+			// 	//$name = $name;
+			// 	$slug = 'post_tag';
+			// 	break;
+
+			default: 
+				if ($slug === 'article-type') {
+					$slug = 'type';
+					$name = 'Article Type';
+				}
+				if ($slug === 'weekly-brief') {
+					$name = 'Weekly Brief';
+					$slug = 'brief';
+				}
+				if ($slug === 'tags') {
+					$slug = 'post_tag';
+				}
+				if ($slug === 'itunes-category') {
+					$name = 'Podcast';
+					$slug = 'podcast';
+				}
+				break;
 		}
+
 		return [$name, $slug];
 	}
 
@@ -220,13 +263,36 @@ class Taxonomy {
 	}
 
 	private function makeWPTermName($name) {
-		return $name;
+		return addslashes($name);
 
 		$old = $name;
 		if (isset($this->mapped[strtolower($name)])) {
 			$name = $this->mapped[strtolower($name)];
 		}
 		return $name;
+	}
+
+	private function createTerm($name, $slug) {
+		
+		$wp_terms = DB::wptable('terms');
+		$term_group = 0;
+
+		$sql = "INSERT INTO $wp_terms (name, slug, term_group)
+				VALUES ('$name', '$slug', $term_group)";
+		$this->db->query($sql);
+		$term_id = $this->db->lastInsertId();
+		return $term_id;
+	}
+
+	private function getTaxonomyRecord($term_id, $slug) {
+		
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
+
+		$sql = "SELECT term_taxonomy_id 
+				FROM $wp_term_taxonomy 
+				WHERE taxonomy='$slug' AND term_id=$term_id";
+		$record = $this->db->record($sql);
+		return $record;
 	}
 
 	public function createTerms($taxonomies) {
@@ -241,48 +307,46 @@ class Taxonomy {
 		}
 
 		foreach ($taxonomies as $taxonomy) {
-
+			
 			$name = $this->makeWPTermName($taxonomy->name);
-			$slug = $this->slugify($name);
+			$slug = $this->slugify($taxonomy->type);
 
-			$term_group = 0;
+// if (strtolower($slug) !== 'tags' && strtolower($slug) !== 'itunes-category') {
+// 	debug([$name, $slug]);
+// }
+			if (strlen($name)) {
+				$term_group = 0;
 
-			list($lcname, $slug) = $this->remapNameCategory($name, $slug);
+				list($name, $slug) = $this->remapNameCategory($name, $slug);
 
-			// is there a term for this name?
-			$sql = "SELECT term_id FROM $wp_terms WHERE name='$name' AND slug='$slug'";
-			$record = $this->db->record($sql);
-			if (!$record || !$record->term_id) {
-
-				$sql = "INSERT INTO $wp_terms (name, slug, term_group)
-					VALUES ('$name', '$slug', $term_group)";
-
-				$this->db->query($sql);
-				$term_id = $this->db->lastInsertId();
-			} else {
-				$term_id = $record->term_id;
-			}
-
-			$this->terms[$taxonomy->type][$this->slugify($lcname)] = $term_id;
-
-			if (strtolower($taxonomy->type) !== 'tags') {
-				$sql = "SELECT term_taxonomy_id 
-						FROM $wp_term_taxonomy 
-						WHERE taxonomy='$slug' AND term_id=$term_id";
+				// is there a term for this name?
+				$sql = "SELECT term_id FROM $wp_terms WHERE name='$name' AND slug='$slug'";
 				$record = $this->db->record($sql);
 
 				if (!$record) {
+					if ($slug === 'post_tag') {
+						$slug_term = $this->slugify($name);
+					} else {
+						$slug_term = $slug;
+					}
+					$term_id = $this->createTerm($name, $slug);
+				} else {
+					$term_id = $record->term_id;
+				}
+
+				$this->terms[$slug][$this->slugify($name)] = $term_id;
+
+				$record = $this->getTaxonomyRecord($term_id, $slug);
+
+				if ($record === NULL) {
 					$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$slug', '$name', 0, 0)";
+				    $this->db->query($sql);
 				} else {
 					$term_taxonomy_id = $record->term_taxonomy_id;
 					$sql = "UPDATE $wp_term_taxonomy SET count = count+1 WHERE term_taxonomy_id = $term_taxonomy_id";
 				}
-
-//debug($sql);
-				$this->db->query($sql);
 			}
 		}
-
 	}
 
 	/*
@@ -389,6 +453,12 @@ class Taxonomy {
 
 		$name = $this->makeWPTermName($taxonomy->name);
 		$slug = $this->slugify($this->makeWPTermName($taxonomy->category));
+
+		$name = $this->makeWPTermName($taxonomy->name);
+		$slug = $this->slugify($taxonomy->category);
+
+		list($name, $slug) = $this->remapNameCategory($name, $slug);
+
 		if ($slug === 'post-tag') {
 			$slug = 'post_tag';
 		}
@@ -404,58 +474,51 @@ class Taxonomy {
 			$description = $taxonomy->name;
 		}
 
-		if (isset($this->terms[$taxonomy->category][$this->slugify($name)])) {
-			$term_id = $this->terms[$taxonomy->category][$this->slugify($name)];
+		if (isset($this->terms[$slug][$this->slugify($name)])) {
+			$term_id = (integer) $this->terms[$slug][$this->slugify($name)];
 		} else {
-			$term_id = null;
+			$term_id = $this->createTerm($name, $slug);
 		}
-
-// if (!$term_id) {
-// 	debug($taxonomy);
-// 	debug($name);
-// 	debug('term ID not found in array:');
-// 	debug($this->terms);
-// 	dd($this->terms[$taxonomy->category][$this->slugify($name)]);
-// }
 
 		$format = $taxonomy->format;
 		$weight = $taxonomy->weight;
 		$parent = $taxonomy->hierarchy;
 
-		$record = null;
-		// does the taxonomy exist, if so increase count
-		$sql = "SELECT term_taxonomy_id 
-				FROM   $wp_term_taxonomy 
-				WHERE  term_id = $term_id 
-				  AND  taxonomy = '$slug'";
-		$record = $this->db->record($sql);
+// 		$record = null;
+// 		// does the taxonomy exist, if so increase count
+// 		$sql = "SELECT term_taxonomy_id 
+// 				FROM   $wp_term_taxonomy 
+// 				WHERE  term_id = $term_id 
+// 				  AND  taxonomy = '$slug'";
+// debug($sql);
+// 		$record = $this->db->record($sql);
 
-		if (empty($record)) {
-			$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$slug', '$description', $parent, 0)";
-			$this->db->query($sql);
-			$term_taxonomy_id = $this->db->lastInsertId();
+		$record = $this->getTaxonomyRecord($term_id, $slug);
 
-		} else {
-
+		if ($record) {
 			$term_taxonomy_id = $record->term_taxonomy_id;
 			$sql = "UPDATE $wp_term_taxonomy 
 					SET count=count+1 
 					WHERE term_taxonomy_id=$term_taxonomy_id";
 			$this->db->query($sql);
+			return $term_taxonomy_id;
+		} else {
+			$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$slug', '$description', $parent, 1)";
+			$this->db->query($sql);
+			$term_taxonomy_id = $this->db->lastInsertId();
 		}
-//debug($sql);
 		return $term_taxonomy_id;
 	}
 
 	// wp only
 	public function makeWPTermData($taxonomy, $postId) {
-//debug('makeWPTermData');debug($taxonomy);
-		$termData = $this->getTermData($taxonomy);
-		$term_id = $taxonomy->tid;
-
-		if ($this->options->verbose > 1) {
-			print "\nMaking Wordpress Term Data for $term_id";
-		}
+// debug('makeWPTermData');debug($taxonomy);
+// 		$termData = $this->getTermData($taxonomy);
+// 		$term_id = $taxonomy->tid;
+// dd($termData);
+// 		if ($this->options->verbose > 1) {
+// 			print "\nMaking Wordpress Term Data for $term_id";
+// 		}
 
 		// if (strtolower($taxonomy->category) === 'tags') {
 		// 	$taxonomy->slug = 'tag';
@@ -468,6 +531,9 @@ class Taxonomy {
 
 	// testing
 	public function getTaxonomyList($type) {
+
+throw new Exception('getTaxonomyList DEPRECATED');
+
 		switch ($type) {
 			case 'channels':
 				$taxonomies = ['connected-car',  'insurance', 'autoonmous', 'mobility', 'security',];
