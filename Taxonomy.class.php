@@ -364,7 +364,7 @@ class Taxonomy {
 
 		list($name, $slug) = $this->remapNameCategory($name, $slug);
 
-debug($name, $slug);
+//debug($name, $slug);
 
 		if (strlen($taxonomy->description)) {
 			$description = $taxonomy->name . ' ' . $taxonomy->description;
