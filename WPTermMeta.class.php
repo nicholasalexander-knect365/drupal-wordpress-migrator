@@ -30,7 +30,7 @@ class WPTermMeta {
 	}
 
 	public function createTermMeta($term_id, $meta_key, $meta_value) {
-//debug('createTermMeta call');
+
 		$wp_termmeta = DB::wptable('termmeta');
 
 		if ($this->checkTermMeta($term_id, $meta_key)) {
@@ -42,7 +42,7 @@ class WPTermMeta {
 		}
 
 		$sql = "INSERT INTO $wp_termmeta (term_id, meta_key, meta_value) VALUES ($term_id, '$meta_key', '$meta_value')";
-//debug($sql);
+
 		$this->db->query($sql);
 		$meta_id = $this->db->lastInsertId();
 		return $meta_id;

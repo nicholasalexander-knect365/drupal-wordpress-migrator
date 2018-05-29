@@ -88,35 +88,35 @@ class Taxonomy {
 
 	// maps taxonomy slug and name
 	// TODO: these should be a little softer!
-	private function remapNameCategory($name, $slug) {
+	private function remapNameCategory($name) {
 		
 		switch(trim(strtolower($name))) {
 
 			case 'adas':
 				$name = 'ADAS';
-				$slug = 'category';
+				$taxonomy = 'category';
 				break;
 
 			case 'autonomous':
 			case 'autonomous car':
 				$name = 'Autonomous';
-				$slug = 'channels';
+				$taxonomy = 'channels';
 				break;
 
 			case 'electric vehicles':
 				$name = 'Electric Vehicles';
-				$slug = 'category';
+				$taxonomy = 'category';
 				break;
 
 			case 'fleet and asset management':
 			case 'fleet':
 				$name = 'Fleet';
-				$slug = 'category';
+				$taxonomy = 'category';
 				break;
 
 			case 'infotainment':
 				$name = 'Infotainment';
-				$slug = 'category';
+				$taxonomy = 'category';
 				break;
 
 			case 'insurance':
@@ -124,72 +124,74 @@ class Taxonomy {
 			case 'insurance and legal':
 			case 'insurance telematics':
 				$name = 'Insurance';
-				$slug = 'channels';
+				$taxonomy = 'channels';
 				break;
 
 			case 'mobility':
 			case 'auto mobility':
 				$name = 'Mobility';
-				$slug = 'channels';
+				$taxonomy = 'channels';
 				break;
 
 			case 'navigation & lbs':
 			case 'navigation and lbs':
 			case 'connected car':
 				$name = 'Connected Car';
-				$slug = 'channels';
+				$taxonomy = 'channels';
 				break;
 
 			case 'other':
 				$name = 'Other';
-				$slug = 'category';
+				$taxonomy = 'category';
 
 			case 'safety, adas & autonomous':
 			case 'safety, adas and autonomous':
 				$name = 'ADAS';
-				$slug = 'category';
+				$taxonomy = 'category';
 				break;
 
 			case 'security':
 				$name = 'Security';
-				$slug = 'channels';
+				$taxonomy = 'channels';
 				break;
 
 			case 'telematics':
 				$name = 'Telematics';
-				$slug = 'subject';
+				$taxonomy = 'subject';
 				break;
 
 			case 'telematics for evs':
 				$name = 'Electric Vehicles';
-				$slug = 'category';
+				$taxonomy = 'category';
 				break;
-
-			// case 'tags':
-			// 	//$name = $name;
-			// 	$slug = 'post_tag';
-			// 	break;
 
 			default: 
-				if ($slug === 'article-type') {
-					$slug = 'type';
-					$name = 'Article Type';
-				}
-				if ($slug === 'weekly-brief') {
-					$name = 'Weekly Brief';
-					$slug = 'brief';
-				}
-				if ($slug === 'tags') {
-					$slug = 'post_tag';
-				}
-				if ($slug === 'itunes-category') {
-					$name = 'Podcast';
-					$slug = 'podcast';
-				}
+				$taxonomy = 'post_tag';
+				// if ($slug === 'article-type') {
+				// 	$taxonomy = 'type';
+				// 	$name = 'Article Type';
+				// }
+				// if ($slug === 'weekly-brief') {
+				// 	$name = 'Weekly Brief';
+				// 	$taxonomy = 'brief';
+				// }
+				// if ($slug === 'tags') {
+				// 	$taxonomy = 'post_tag';
+				// }
+				// if ($slug === 'itunes-category') {
+				// 	$name = 'Podcast';
+				// 	$taxonomy = 'podcast';
+				// } else {
+				// 	$taxonomy = 'post_tag';
+				// }
 				break;
 		}
-
-		return [$name, $slug];
+		if (strlen($taxonomy)) {
+			return [$name, $taxonomy];
+		} else {
+			debug([$name, $slug, $taxonomy]);
+			throw new Exception('No taxonomy mapped?');
+		}
 	}
 
 	// more generic ... maps taxonmy types
@@ -286,13 +288,13 @@ class Taxonomy {
 		return $term_id;
 	}
 
-	private function getTaxonomyRecord($term_id, $slug) {
+	private function getTaxonomyRecord($term_id, $taxonomy) {
 		
 		$wp_term_taxonomy = DB::wptable('term_taxonomy');
 
 		$sql = "SELECT term_taxonomy_id 
 				FROM $wp_term_taxonomy 
-				WHERE taxonomy='$slug' AND term_id=$term_id";
+				WHERE taxonomy='$taxonomy' AND term_id=$term_id";
 		$record = $this->db->record($sql);
 		return $record;
 	}
@@ -309,44 +311,32 @@ class Taxonomy {
 		}
 
 		foreach ($taxonomies as $taxonomy) {
-			
-			$name = $this->makeWPTermName($taxonomy->name);
-			$slug = $this->slugify($taxonomy->type);
 
-// if (strtolower($slug) !== 'tags' && strtolower($slug) !== 'itunes-category') {
-// 	debug([$name, $slug]);
-// }
+			$name = $this->makeWPTermName($taxonomy->name);
+
+
 			if (strlen($name)) {
 				$term_group = 0;
 
-				list($name, $slug) = $this->remapNameCategory($name, $slug);
+				list($name, $taxname) = $this->remapNameCategory($name);
+				$slug = $this->slugify($name);
 
-				// is there a term for this name?
-				$sql = "SELECT term_id FROM $wp_terms WHERE name='$name' AND slug='$slug'";
-				$record = $this->db->record($sql);
+				$term_id = $this->getSetTerm($name, $slug);
 
-				if (!$record) {
-					if ($slug === 'post_tag') {
-						$slug_term = $this->slugify($name);
-					} else {
-						$slug_term = $slug;
-					}
-					$term_id = $this->createTerm($name, $slug);
-				} else {
-					$term_id = $record->term_id;
-				}
+				$this->terms[$taxname][$slug] = $term_id;
 
-				$this->terms[$slug][$this->slugify($name)] = $term_id;
-
-				$record = $this->getTaxonomyRecord($term_id, $slug);
+				$record = $this->getTaxonomyRecord($term_id, $taxname);
 
 				if ($record === NULL) {
-					$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$slug', '$name', 0, 0)";
+					$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$taxname', '$name', 0, 0)";
 				    $this->db->query($sql);
 				} else {
 					$term_taxonomy_id = $record->term_taxonomy_id;
 					$sql = "UPDATE $wp_term_taxonomy SET count = count+1 WHERE term_taxonomy_id = $term_taxonomy_id";
 				}
+			} else {
+				debug($taxonomy);
+				throw new Exception("Taxonomy does not have a name?");
 			}
 		}
 	}
@@ -454,21 +444,10 @@ class Taxonomy {
 		$wp_terms = DB::wptable('terms');
 
 		$name = $this->makeWPTermName($taxonomy->name);
-		$slug = $this->slugify($this->makeWPTermName($taxonomy->category));
 
-		$name = $this->makeWPTermName($taxonomy->name);
-		$slug = $this->slugify($taxonomy->category);
 
-		list($name, $slug) = $this->remapNameCategory($name, $slug);
-
-		if ($slug === 'post-tag') {
-			$slug = 'post_tag';
-		}
-//debug([$name, $slug]);
-
-		//list($name, $slug) = $this->remapNameCategory($name, $slug);
-
-//debug([$name, $slug]);
+		list($name, $taxname) = $this->remapNameCategory($name);
+		$slug = $this->slugify($name);
 
 		if (strlen($taxonomy->description)) {
 			$description = $taxonomy->name . ' ' . $taxonomy->description;
@@ -476,9 +455,11 @@ class Taxonomy {
 			$description = $taxonomy->name;
 		}
 
-		if (isset($this->terms[$slug][$this->slugify($name)])) {
-			$term_id = (integer) $this->terms[$slug][$this->slugify($name)];
+		if (isset($this->terms[$taxname][$slug])) {
+			$term_id = (integer) $this->terms[$taxname][$slug];
 		} else {
+			debug($name, $slug);
+			dd('why create term here?');
 			$term_id = $this->createTerm($name, $slug);
 		}
 
@@ -495,7 +476,7 @@ class Taxonomy {
 // debug($sql);
 // 		$record = $this->db->record($sql);
 
-		$record = $this->getTaxonomyRecord($term_id, $slug);
+		$record = $this->getTaxonomyRecord($term_id, $taxname);
 
 		if ($record) {
 			$term_taxonomy_id = $record->term_taxonomy_id;
@@ -505,7 +486,7 @@ class Taxonomy {
 			$this->db->query($sql);
 			return $term_taxonomy_id;
 		} else {
-			$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$slug', '$description', $parent, 1)";
+			$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$taxname', '$description', $parent, 1)";
 			$this->db->query($sql);
 			$term_taxonomy_id = $this->db->lastInsertId();
 		}
