@@ -165,25 +165,43 @@ class Taxonomy {
 				$taxonomy = 'category';
 				break;
 
+			// case 'company profile':
+			// 	$name = 'Company Profile';
+			// 	$taxonomy = 'category';
+			// 	break;
+
+			// case 'executive viewpoint':
+			// 	$name = 'Executive Viewpoint';
+			// 	$taxonomy = 'category';
+			// 	break;
+
+			// case 'industry insight':
+			// 	$name = 'Industry Insight';
+			// 	$taxonomy = 'category';
+			// 	break;
+
+			// case 'intelligence brief':
+			// 	$name = 'Intelligence Brief';
+			// 	$taxonomy = 'category';
+			// 	break;
+
+			// case 'press release':
+			// 	$name = 'Press Release';
+			// 	$taxonomy = 'category';
+			// 	break;
+
+			// case 'yes':
+			// 	$name = 'Yes';
+			// 	$taxonomy = 'brief';
+			// 	break;
+
+			// case 'no':
+			// 	$name = 'No';
+			// 	$taxonomy = 'brief';
+			// 	break;
+
 			default: 
 				$taxonomy = 'post_tag';
-				// if ($slug === 'article-type') {
-				// 	$taxonomy = 'type';
-				// 	$name = 'Article Type';
-				// }
-				// if ($slug === 'weekly-brief') {
-				// 	$name = 'Weekly Brief';
-				// 	$taxonomy = 'brief';
-				// }
-				// if ($slug === 'tags') {
-				// 	$taxonomy = 'post_tag';
-				// }
-				// if ($slug === 'itunes-category') {
-				// 	$name = 'Podcast';
-				// 	$taxonomy = 'podcast';
-				// } else {
-				// 	$taxonomy = 'post_tag';
-				// }
 				break;
 		}
 		if (strlen($taxonomy)) {
