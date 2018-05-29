@@ -167,23 +167,6 @@ class Taxonomy {
 
 			default: 
 				$taxonomy = 'post_tag';
-				// if ($slug === 'article-type') {
-				// 	$taxonomy = 'type';
-				// 	$name = 'Article Type';
-				// }
-				// if ($slug === 'weekly-brief') {
-				// 	$name = 'Weekly Brief';
-				// 	$taxonomy = 'brief';
-				// }
-				// if ($slug === 'tags') {
-				// 	$taxonomy = 'post_tag';
-				// }
-				// if ($slug === 'itunes-category') {
-				// 	$name = 'Podcast';
-				// 	$taxonomy = 'podcast';
-				// } else {
-				// 	$taxonomy = 'post_tag';
-				// }
 				break;
 		}
 		if (strlen($taxonomy)) {
@@ -313,8 +296,7 @@ class Taxonomy {
 		foreach ($taxonomies as $taxonomy) {
 
 			$name = $this->makeWPTermName($taxonomy->name);
-
-
+			
 			if (strlen($name)) {
 				$term_group = 0;
 
@@ -466,15 +448,6 @@ class Taxonomy {
 		$format = $taxonomy->format;
 		$weight = $taxonomy->weight;
 		$parent = $taxonomy->hierarchy;
-
-// 		$record = null;
-// 		// does the taxonomy exist, if so increase count
-// 		$sql = "SELECT term_taxonomy_id 
-// 				FROM   $wp_term_taxonomy 
-// 				WHERE  term_id = $term_id 
-// 				  AND  taxonomy = '$slug'";
-// debug($sql);
-// 		$record = $this->db->record($sql);
 
 		$record = $this->getTaxonomyRecord($term_id, $taxname);
 
