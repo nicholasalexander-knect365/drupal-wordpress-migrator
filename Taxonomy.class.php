@@ -67,6 +67,7 @@ class Taxonomy {
 
 	private function remapNameCategory($name) {
 
+		// if no taxonomy or not reconised, it may be a post_tag
 		$taxonomy = 'post_tag';
 		
 		switch ($this->option->project) {
@@ -80,16 +81,6 @@ class Taxonomy {
 
 		return [$name, $taxonomy];
 	}
-
-	// more generic ... maps taxonmy types
-	private function remap($taxonomyType) {
-
-		die('private function remap called??');
-
-		return $this->mapped[strtolower($taxonomyType)];
-
-	}
-
 
 	// TERMS 
 	private function termsAlreadyExist() {
@@ -107,14 +98,14 @@ class Taxonomy {
 	/**
 	 * checkTerms in Wordpress
 	 */
-	public function checkTerms() {
+	public function checkTermTaxonomyInitialised() {
 
 		$wp_term_taxonomy = DB::wptable('term_taxonomy');
 
 		$sql = "SELECT COUNT(*) AS c FROM $wp_term_taxonomy";
 		$this->db->query($sql); 
 		$items = $this->db->getRecord();
-		return ($items->c === 1);
+		return ($items->c < 2);
 	}
 
 	static public function slugify($str) {
