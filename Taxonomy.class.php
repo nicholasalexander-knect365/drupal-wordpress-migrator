@@ -275,6 +275,8 @@ class Taxonomy {
 	private function createTerm($name, $slug) {
 		
 		$wp_terms = DB::wptable('terms');
+		$slug = $this->slugify($name);
+
 		$term_group = 0;
 
 		$sql = "INSERT INTO $wp_terms (name, slug, term_group)
