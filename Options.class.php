@@ -49,6 +49,7 @@ class Options {
 	];
 
 	public function __construct() {
+
 		$this->defaults 	= false;
 		$this->help  		= false;
 		$this->verbose 		= false;
@@ -67,13 +68,13 @@ class Options {
 		$this->dusers 		= false;
 
 		$this->wordpressPath = '';
-		$this->wordpressURL  = 'http://tuauto.telecoms.local';
-		$this->wordpressDomain = 'tuauto.com';
+		$this->wordpressURL  = 'http://ioti.telecoms.local';
+		$this->wordpressDomain = 'iotworldtoday.com';
 
-		$this->drupalPath 	= '../drupal7/tu-auto';
+		$this->drupalPath 	= '../drupal7/ioti';
 		$this->s3bucket 	= 'http://pentontuautodrupalfs.s3.amazonaws.com';
 		$this->imageStore 	= getcwd() . '/images';
-		$this->project 		= 'tu-auto';
+		$this->project 		= '';
 
 		$this->clean  		= false;
 		$this->clearImages 	= false;
@@ -104,7 +105,7 @@ class Options {
 	}
 
 	private function serverOptions() {
-		$this->project = isset($options['project']) ? $options['project'] : 'tu-auto';
+		$this->project = isset($options['project']) ? $options['project'] : 'ioti';
 		$this->server = isset($options['server']) ? $options['server'] : 'local';
 		if ($this->project === 'tu-auto') {
 			$this->siteId = 39;
@@ -132,7 +133,7 @@ class Options {
 	}
 
 	public function setAll() {
-		
+
 		global $argv;
 
 		$firstArg = 1;
@@ -197,72 +198,100 @@ class Options {
 
 			} else {
 
-				$this->wordpressPath = isset($options['wordpressPath']) ? $options['wordpressPath'] : '';
-				// default option
-				if (in_array('d', array_keys($options))) {
+				$this->project = $options['project'];
 
-					$this->server = $options['server'];
-					if (isset($this->server) && $this->server === 'vm') {
-						$this->setDefaults();
-						$this->wordpressPath = '/var/www/public';
-						$this->wordpressURL = 'http://tuauto.telecoms.local';
-						$this->drupalPath = '/vagrant/drupal7/tu-auto';
-						return;
-
-					} else if (isset($this->server) && $this->server === 'vm2') {
-						$this->setDefaults();
-						$this->wordpressPath = '/home/vagrant/Code/client/k365/wp';
-						$this->wordpressURL = 'http://tuauto.local';
-						$this->drupalPath = '/home/vagrant/Code/client/k365/tu-auto';
-						return;
-
-					} else if (isset($this->server) && $this->server === 'staging1') {
-						$this->setDefaults();
-						$this->wordpressPath = '/srv/www/test1.telecoms.com';
-						$this->wordpressURL = 'http://beta.tu-auto.com';
-						$this->drupalPath = '/srv/www/test1.telecoms.com/drupal7/tu-auto';
-						return;
-
-					} else if (isset($this->server) && $this->server === 'staging') {
-						$this->setDefaults();
-						$this->wordpressPath = '/srv/www/test2.telecoms.com';
-						$this->wordpressURL = 'www.tu-auto.com';
-						$this->drupalPath = '/srv/www/test2.telecoms.com/migrator/drupal7/tu-auto';
-						return;
-
-						throw new Exception("\n-d default mode not available on staging:\n\nSuggest command line like:\n\nphp migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f --acf");
-
-					} else {
-
-						// first: check it is NOT staging!  - this is local (developer)
-						if (getcwd() === '/home/nicholas/Dev/migrator') {
+				if ($this->project === 'ioti') {
+					if (in_array('d', array_keys($options))) {
+						$this->server = $options->server;
+						if (isset($this->server) && $this->server === 'vm') {
 							$this->setDefaults();
-							$this->wordpressPath = '/home/nicholas/Dev/wordpress/tuauto';
-							$this->wordpressURL = 'http://tuauto.local';
-							$this->drupalPath = '/home/nicholas/Dev/drupal7/tu-auto';
+							$this->wordpressPath = '/var/www/public';
+							$this->wordpressURL = 'http://tuauto.telecoms.local';
+							$this->drupalPath = '/vagrant/drupal7/tu-auto';
 							return;
-						} else {
-							throw new Exception('Please do not use default mode on this server without --server indication');
+						} else if (isset($this->server) && $this->server === 'staging') {
+							$this->setDefaults();
+							$this->wordpressPath = '/var/www/public';
+							$this->wordpressURL = 'http://tuauto.telecoms.local';
+							$this->drupalPath = '/vagrant/drupal7/tu-auto';
+							return;
+						} else if (isset($this->server) && $this->server === 'local') {
+							$this->setDefaults();
+							$this->wordpressPath = '/home/nicholas/Dev/wordpress/ioti';
+							$this->wordpressURL = 'http://ioti.local';
+							$this->drupalPath = '/home/nicholas/Dev/drupal7/ioti';
+							return;
 						}
 					}
-				}
-				
-				if (empty($this->wordpressPath)) {
 
-					if ($options['server'] === 'local') {
-						$this->wordpressPath = '/home/nicholas/Dev/wordpress/tuauto';
+				} else if ($this->project === 'tuauto') {
+					$this->wordpressPath = isset($options['wordpressPath']) ? $options['wordpressPath'] : '';
+					// default option
+					if (in_array('d', array_keys($options))) {
+
+						$this->server = $options['server'];
+						if (isset($this->server) && $this->server === 'vm') {
+							$this->setDefaults();
+							$this->wordpressPath = '/var/www/public';
+							$this->wordpressURL = 'http://tuauto.telecoms.local';
+							$this->drupalPath = '/vagrant/drupal7/tu-auto';
+							return;
+
+						} else if (isset($this->server) && $this->server === 'vm2') {
+							$this->setDefaults();
+							$this->wordpressPath = '/home/vagrant/Code/client/k365/wp';
+							$this->wordpressURL = 'http://tuauto.local';
+							$this->drupalPath = '/home/vagrant/Code/client/k365/tu-auto';
+							return;
+
+						} else if (isset($this->server) && $this->server === 'staging1') {
+							$this->setDefaults();
+							$this->wordpressPath = '/srv/www/test1.telecoms.com';
+							$this->wordpressURL = 'http://beta.tu-auto.com';
+							$this->drupalPath = '/srv/www/test1.telecoms.com/drupal7/tu-auto';
+							return;
+
+						} else if (isset($this->server) && $this->server === 'staging') {
+							$this->setDefaults();
+							$this->wordpressPath = '/srv/www/test2.telecoms.com';
+							$this->wordpressURL = 'www.tu-auto.com';
+							$this->drupalPath = '/srv/www/test2.telecoms.com/migrator/drupal7/tu-auto';
+							return;
+
+							throw new Exception("\n-d default mode not available on staging:\n\nSuggest command line like:\n\nphp migrator.php --wordpressPath=/srv/www/test1.telecoms.com --project=tuauto --clean --drupalPath=/srv/www/test1.telecoms.com/drupal7/tu-auto --server=staging --wordpressURL=http://beta-tu.auto.com -n -u -t -f --acf");
+
+						} else {
+
+							// first: check it is NOT staging!  - this is local (developer)
+							if (getcwd() === '/home/nicholas/Dev/migrator') {
+								$this->setDefaults();
+								$this->wordpressPath = '/home/nicholas/Dev/wordpress/tuauto';
+								$this->wordpressURL = 'http://tuauto.local';
+								$this->drupalPath = '/home/nicholas/Dev/drupal7/tu-auto';
+								return;
+							} else {
+								throw new Exception('Please do not use default mode on this server without --server indication');
+							}
+						}
 					}
-					if ($options['server'] === 'vm') {
-						$this->wordpressPath = '/var/www/public';
-					}
-					if ($options['server'] === 'staging') {
-						$this->wordpressPath = '/srv/www/test2.telecoms.com';
+					
+					if (empty($this->wordpressPath)) {
+
+						if ($options['server'] === 'local') {
+							$this->wordpressPath = '/home/nicholas/Dev/wordpress/tuauto';
+						}
+						if ($options['server'] === 'vm') {
+							$this->wordpressPath = '/var/www/public';
+						}
+						if ($options['server'] === 'staging') {
+							$this->wordpressPath = '/srv/www/test2.telecoms.com';
+						}
+
 					}
 
-				}
-
-				if (empty($this->wordpressPath)) {
-					throw new Exception('Need to know the wordpress path, use --wordpressPath=/path/to/wp-config');
+					if (empty($this->wordpressPath)) {
+						throw new Exception('Need to know the wordpress path, use --wordpressPath=/path/to/wp-config');
+					}
 				}
 
 				foreach ($options as $option => $value) {

@@ -13,10 +13,10 @@ try {
 	$options = new Options();
 	$options->setAll();
 
-	// $project 	= $options->get('project');			// valid: tuauto, ioti
+	$project 	= $options->get('project');			// valid: tuauto, ioti
 	$s3bucket 	= $options->get('s3bucket');
 	$drupalPath = $options->get('drupalPath');		// where the drupal files are
-	// $wordpressPath = $options->get('wordpressPath');
+	$wordpressPath = $options->get('wordpressPath');
 
 	$imageStore = $options->get('imageStore');		// temporary image store
 	$server 	= $options->get('server');			// server = [local. vm, staging]
@@ -33,9 +33,12 @@ try {
 		die("\nHELP Mode\n\n");
 	}
 } catch (Exception $e) {
+
 	debug("Option setting error\n" . $e->getMessage() . "\n\n");
+
 	die;
 }
+
 /* connect databases */
 try {
 	$wp = new DB($server, 'wp', $options);

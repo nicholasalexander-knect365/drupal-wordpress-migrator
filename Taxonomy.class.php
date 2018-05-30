@@ -28,10 +28,6 @@ class Taxonomy {
 		$this->options = $options;
 	}
 
-	public function setDrupalDb($db) {
-		$this->drupalDB = $db;
-	}
-
 	public function __destroy() {
 		if ($this->options->verbose) {
 			print "\nFinished\n";
@@ -69,8 +65,9 @@ class Taxonomy {
 
 		// if no taxonomy or not reconised, it may be a post_tag
 		$taxonomy = 'post_tag';
-		
-		switch ($this->option->project) {
+dd($this->options);
+
+		switch ($this->options->project) {
 			case 'tuauto':
 				list($name, $taxonomy) = $this->TUAutoRemapNameCategory($name);
 				break;
@@ -98,14 +95,18 @@ class Taxonomy {
 	/**
 	 * checkTerms in Wordpress
 	 */
-	public function checkTermTaxonomyInitialised() {
+	public function checkTermTaxonomyExists() {
 
 		$wp_term_taxonomy = DB::wptable('term_taxonomy');
 
 		$sql = "SELECT COUNT(*) AS c FROM $wp_term_taxonomy";
 		$this->db->query($sql); 
 		$items = $this->db->getRecord();
-		return ($items->c < 2);
+
+		if ($items->c === 0) {
+			debug('Term Taxonomy is empty');
+		}
+		return ($items->c > 0);
 	}
 
 	static public function slugify($str) {
@@ -133,14 +134,6 @@ class Taxonomy {
 		return $text;
 	}
 
-	// D7 only
-	public function getVocabulary() {
-		$sql = "SELECT vid, name, machine_name, description, hierarchy, module, weight
-				FROM taxonomy_vocabulary
-				ORDER BY weight";
-		$vocabulary = $this->db->records($sql);
-		return $vocabulary;
-	}
 
 	private function makeWPTermName($name) {
 		return addslashes($name);
@@ -218,66 +211,6 @@ class Taxonomy {
 		}
 	}
 
-	/*
-	* D7 only ... get the Drupal taxonomyList
-	*/
-	public function fullTaxonomyList() {
-
-		$taxonomyNames = [];
-		$sql = 'SELECT DISTINCT td.tid, td.vid, td.name, v.name AS type
-				FROM taxonomy_term_data td
-				LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
-
-		$records = $this->db->records($sql);
-
-		return $records;
-	}
-
-	/**
-	 * D7 only ... full node taxonomy
-	 */
-	public function nodeTaxonomies($node) {
-		$nid = $node->nid;
-		$sql = "SELECT 	ti.nid as nid,
-						ti.tid as tid,
-						td.vid as vid,
-						td.name as name,
-						td.description as description,
-						td.weight as weight,
-						tv.name as category,
-						td.format as format,
-						tv.hierarchy as hierarchy
-				FROM taxonomy_index ti
-				INNER JOIN taxonomy_term_data td ON td.tid=ti.tid
-				INNER JOIN taxonomy_vocabulary tv ON tv.vid=td.vid
-				WHERE nid=$nid";
-
-		$taxonomies = $this->db->records($sql);
-
-		return $taxonomies;
-	}
-
-
-	// D7 only ... build the taxonomy term_data from drupal
-	private function getTermData($taxonomy) {
-
-		$termData = [];
-		$tid = $taxonomy->tid;
-
-		$sql = "SELECT * FROM taxonomy_term_data
-				WHERE tid = $tid
-				ORDER BY tid";
-
-		if (!$this->drupalDB) {
-			$termData = $this->db->records($sql);
-		} else {
-			$termData = $this->drupalDB->records($sql);
-		}
-
-		return $termData;
-	}
-
-	// wp only
 	private function getTermFromSlug($slug) {
 
 		$wp_terms = DB::wptable('terms');
@@ -288,7 +221,6 @@ class Taxonomy {
 		return $term;
 	}
 
-	// wp only
 	private function makeTermMeta($term_id, $name, $description, $postId) {
 
 			$wp_termmeta = DB::wptable('termmeta');
@@ -363,48 +295,8 @@ class Taxonomy {
 
 	// wp only
 	public function makeWPTermData($taxonomy, $postId) {
-// debug('makeWPTermData');debug($taxonomy);
-// 		$termData = $this->getTermData($taxonomy);
-// 		$term_id = $taxonomy->tid;
-// dd($termData);
-// 		if ($this->options->verbose > 1) {
-// 			print "\nMaking Wordpress Term Data for $term_id";
-// 		}
-
-		// if (strtolower($taxonomy->category) === 'tags') {
-		// 	$taxonomy->slug = 'tag';
-		// }
-
 		$term_taxonomy_id = $this->makeTermTaxonomy($taxonomy);
 		$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId);
-
-	}
-
-	// testing
-	public function getTaxonomyList($type) {
-
-throw new Exception('getTaxonomyList DEPRECATED');
-
-		switch ($type) {
-			case 'channels':
-				$taxonomies = ['connected-car',  'insurance', 'autoonmous', 'mobility', 'security',];
-				break;
-			case 'category';
-				$taxonomies = [ 'fleet', 'infotainment', 'adas', 'telematics', 'electric-vehicles'];
-				break;
-			case 'subject':
-				$taxonomies = ['user-experience-hmi', 'connected-car', 'security', 'data-analytics', 'artificial-intelligence', 'smart-cities', 'digital-transformation', 'investment-ma', 'regulation', 'commercial-vehicle'];
-				break;
-			case 'type':
-				$taxonomies = ['industry-insight', 'executive-viewpoint' ,'press-release', 'intelligence-type'];
-				break;
-			case 'brief':
-				$taxonomies = ['yes', 'no'];
-				break;
-			default:
-				die("\n" . $type . ' in testTaxonomyTypeExists has no implementation');
-		}
-		return $taxonomies;
 	}
 
 	public function getTags() {
@@ -473,5 +365,78 @@ throw new Exception('getTaxonomyList DEPRECATED');
 			return 0;
 		}
 		return (integer) $record->c;
+	}
+
+	public function setDrupalDb($db) {
+		$this->drupalDB = $db;
+	}
+
+
+	// D7 only
+	public function getVocabulary() {
+		$sql = "SELECT vid, name, machine_name, description, hierarchy, module, weight
+				FROM taxonomy_vocabulary
+				ORDER BY weight";
+		$vocabulary = $this->db->records($sql);
+		return $vocabulary;
+	}
+
+	/*
+	* D7 only ... get the Drupal taxonomyList
+	*/
+	public function fullTaxonomyList() {
+
+		$taxonomyNames = [];
+		$sql = 'SELECT DISTINCT td.tid, td.vid, td.name, v.name AS type
+				FROM taxonomy_term_data td
+				LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
+
+		$records = $this->db->records($sql);
+
+		return $records;
+	}
+
+	/**
+	 * D7 only ... full node taxonomy
+	 */
+	public function nodeTaxonomies($node) {
+		$nid = $node->nid;
+		$sql = "SELECT 	ti.nid as nid,
+						ti.tid as tid,
+						td.vid as vid,
+						td.name as name,
+						td.description as description,
+						td.weight as weight,
+						tv.name as category,
+						td.format as format,
+						tv.hierarchy as hierarchy
+				FROM taxonomy_index ti
+				INNER JOIN taxonomy_term_data td ON td.tid=ti.tid
+				INNER JOIN taxonomy_vocabulary tv ON tv.vid=td.vid
+				WHERE nid=$nid";
+
+		$taxonomies = $this->db->records($sql);
+
+		return $taxonomies;
+	}
+
+
+	// D7 only ... build the taxonomy term_data from drupal
+	private function getTermData($taxonomy) {
+
+		$termData = [];
+		$tid = $taxonomy->tid;
+
+		$sql = "SELECT * FROM taxonomy_term_data
+				WHERE tid = $tid
+				ORDER BY tid";
+
+		if (!$this->drupalDB) {
+			$termData = $this->db->records($sql);
+		} else {
+			$termData = $this->drupalDB->records($sql);
+		}
+
+		return $termData;
 	}
 }

@@ -120,17 +120,13 @@ if ($option['initialise']) {
 	// 	throw new Exception('Initialise called more than once???');
 	// }
 	$initialise = new Initialise($wp, $options);
-
-	// build the term_taxonomy if not already present
-	if ($wp_taxonomy->checkTerms()) {
-		$wp_taxonomy->buildTerms();
-	}
 	$initialise->cleanUp($wp);
 }
 
 $wp_termmeta_term_id = $wp_taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
 
 $nodeSource = 'drupal';
+
 if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$option['nodes'] && !$option['initialise'])) {
 	message("\nDrupal node data has already been imported to Wordpress.");
 	message("You can either clear it with the --initialise or -d[efaults] flag");
