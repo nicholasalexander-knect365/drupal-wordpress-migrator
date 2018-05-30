@@ -60,7 +60,6 @@ class Taxonomy {
 		}
 	}
 
-
 	private function remapNameCategory($name) {
 
 		// if no taxonomy or not reconised, it may be a post_tag
@@ -78,7 +77,6 @@ class Taxonomy {
 		return [$name, $taxonomy];
 	}
 
-	// TERMS 
 	private function termsAlreadyExist() {
 
 		$wp_terms = DB::wptable('terms');
@@ -91,9 +89,6 @@ class Taxonomy {
 		return false;
 	}
 
-	/**
-	 * checkTerms in Wordpress
-	 */
 	public function checkTermTaxonomyExists() {
 
 		$wp_term_taxonomy = DB::wptable('term_taxonomy');
@@ -123,7 +118,6 @@ class Taxonomy {
 
 		// replace any multiple dashes with a single hyphen
 		$text = preg_replace('/-+/', '-', $text);
-
 		$text = strtolower($text);
 
 		if (empty($text)) {
@@ -132,7 +126,6 @@ class Taxonomy {
 
 		return $text;
 	}
-
 
 	private function makeWPTermName($name) {
 		return addslashes($name);
@@ -233,7 +226,6 @@ class Taxonomy {
 			$this->db->query($sql);
 	}
 
-	// wp only
 	private function makeTermRelationship($taxonomy, $term_taxonomy_id, $postId) {
 
 		$wp_term_relationships = DB::wptable('term_relationships');
@@ -292,7 +284,6 @@ class Taxonomy {
 		return $term_taxonomy_id;
 	}
 
-	// wp only
 	public function makeWPTermData($taxonomy, $postId) {
 		$term_taxonomy_id = $this->makeTermTaxonomy($taxonomy);
 		$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId);
@@ -310,7 +301,6 @@ class Taxonomy {
 		return $records;
 	}
 
-	// establishment of a taxonomy term
 	public function tagExists($search) {
 
 		$wp_term_taxonomy = DB::wptable('term_taxonomy');
@@ -327,7 +317,6 @@ class Taxonomy {
 		return (integer) $record->c;
 	}
 
-	// establishment of a taxonomy term
 	public function termExists($search, $taxonomy) {
 
 		$wp_terms = DB::wptable('terms');
@@ -345,7 +334,6 @@ class Taxonomy {
 		return (integer) $record->c;
 	}
 
-	// 2. uses of a specific taxonomy without tags
 	public function countTaxonomyUse($taxonomy) {
 
 		$wp_term_relationships = DB::wptable('term_relationships');
@@ -369,6 +357,7 @@ class Taxonomy {
 	public function setDrupalDb($db) {
 		$this->drupalDB = $db;
 	}
+
 
 
 	/******************* Drupal 7 taxonomy functions ********************/
