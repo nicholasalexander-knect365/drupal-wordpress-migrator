@@ -65,7 +65,6 @@ class Taxonomy {
 
 		// if no taxonomy or not reconised, it may be a post_tag
 		$taxonomy = 'post_tag';
-dd($this->options);
 
 		switch ($this->options->project) {
 			case 'tuauto':
@@ -372,7 +371,8 @@ dd($this->options);
 	}
 
 
-	// D7 only
+	/******************* Drupal 7 taxonomy functions ********************/
+
 	public function getVocabulary() {
 		$sql = "SELECT vid, name, machine_name, description, hierarchy, module, weight
 				FROM taxonomy_vocabulary
