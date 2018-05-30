@@ -44,9 +44,7 @@ class Taxonomy {
 
 		if ($record && $record->c) {
 			$sql = "SELECT term_id FROM $wp_terms WHERE slug='$term_slug'";
-
 			$record = $this->db->record($sql);
-
 			return (integer) $record->term_id;
 
 		} else {
