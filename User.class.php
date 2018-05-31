@@ -5,12 +5,15 @@
 
 
 include_once "DB.class.php";
-define('MAX_USERS', 10000);
+define('MAX_USERS', 20000);
 
 class User {
 	
+	public $capabilities = [];
+
 	public $db;
 	public $drupalUsers;
+	public $drupalRoles;
 	public $config;
 
 	public function __construct($wp, $d7, $config) {
@@ -19,10 +22,16 @@ class User {
 		$this->d7 = $d7;
 		$this->config = $config;
 		$this->drupalUsers = [];
+		$this->drupalRoles = [];
+		$this->capabilities[0] = 'a:1:{s:13:"administrator";b:1;}';
+		$this->capabilities[1] = 'a:1:{s:6:"editor";b:1;}';
+		$this->capabilities[2] = 'a:1:{s:6:"author";b:1;}';
+		$this->capabilities[3] = 'a:1:{s:11:"contributor";b:1}';
+		$this->capabilities[4] = 'a:1:{s:10:"subscriber";b:1;}';
 	}
 
 	public function getDrupalUsers() {
-		$sql = "SELECT u.uid, u.name, u.mail, u.signature, u.timezone, u.language, u.created, r.name as role
+		$sql = "SELECT u.uid, u.name, u.mail, u.signature, u.timezone, u.language, u.created, r.name as role, r.rid as role_id
 			FROM users u
 			LEFT JOIN users_roles ur ON ur.uid = u.uid
 			LEFT JOIN role r on r.rid = ur.rid";
@@ -36,10 +45,23 @@ class User {
 	public function getTempDrupalUsers() {
 		$sql = "SELECT uid, name, mail, signature, timezone, language, created, role from dusers";
 		$this->drupalUsers = $this->db->records($sql);
+		return count((array)$this->drupalUsers);
 	}
 
 	public function countDrupalUsers() {
-		return count((array) $this->drupalUsers);
+		//debug($this->drupalUsers);
+
+		$c = 0;
+		$uniq = [];
+		$roles = [];
+		foreach($this->drupalUsers as $u) {
+			$uniq[$u->uid] = 1;
+			$roles[$u->role] = isset($roles[$u->role]) ? $roles[$u->role]+1 : 1;
+			$c++;
+		}
+		
+		$this->drupalRoles = $roles;
+		return count($uniq);
 	}
 
 	public function makeDrupalUsers() {
@@ -134,12 +156,6 @@ class User {
 		return $record;
 	}
 
-	// public function getDrupalUserByUid($id) {
-	// 	$sql = "SELECT * FROM users u WHERE u.uid = $id";
-	// 	$record = $this->d7->record($sql);
-	// 	return $record;
-	// }
-
 	public function getWordpressUserById($id) {
 
 		$sql = "SELECT * from wp_users where ID = $id";
@@ -209,17 +225,20 @@ class User {
 		return true;
 	}
 
-	public function doWordpressUsersExist() {
+	public function countWordpressUsers() {
 
 		$sql = "SELECT COUNT(*) AS c FROM wp_users";
 		$record = $this->db->record($sql);
 
 		if ($record && $record->c) {
-			return $record->c > 0;
+			return $record->c;
 		}
-		return false;
+		return 0;
 	}
 
+	public function doWordpressUsersExist() {
+		return $this->countWordpressUsers() > 0;
+	}
 
 	private function getUserImage($drupalUser) {
 		$uid = $drupalUser->uid;
@@ -229,6 +248,123 @@ class User {
 
 		$this->d7->record($sql);
 	}
+
+	// private function addMeta(integer $user_id, $key, $value) {
+	// 	$sql = sprintf("INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, %s, %s)", $user_id, $key, $value);
+	// 	debug($sql);
+	// }
+
+	// private function updateMeta(integer $user_id, $key, $value) {
+	// 	$sql = sprintf("UPDATE wp_usermeta SET $key = '$value' WHERE user_id=$user_id", $user_id, $key, $value);
+	// 	debug($sql);
+	// }
+
+	private function updateUserMeta($usermeta, $user_id, $blog_id = null) {
+
+		$sqlremove 		= "DELETE FROM wp_usermeta WHERE user_id=%d AND meta_key='%s'";
+		$sqlinsertfmt 	= "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, '%s', '%s')";
+		$sqlupdatefmt 	= "UPDATE wp_usermeta SET meta_value='%s' WHERE user_id=%d AND meta_key='%s' LIMIT 1";
+
+		foreach ($usermeta as $key => $value) {
+
+			if ($blog_id) {
+				$key = preg_replace('/%d/', $blog_id, $key);
+				$capabilityKey = sprintf('wp_%d_capabilities', $blog_id);
+				$roleKey = spirntf('wp_%d_roles', $blog_id);
+			} else {
+				$capabilityKey = 'wp_capabilities';
+				$roleKey = 'wp_roles';
+			}
+
+			// if ($clearUserMeta) {
+			// 	$q = sprintf($sqlremove, $user_id, $key);
+			// 	$this->db->query($q);
+			// }
+
+			// usermeta exists?
+//dd($user_id);
+			$sql = "SELECT * FROM wp_usermeta WHERE user_id=$user_id AND meta_key='$key'";
+			$usermeta = $this->db->record($sql);
+			if (count((array) $usermeta)) {
+				$q = sprintf($sqlupdatefmt, $value, $user_id, $key);
+			} else {
+				$q = sprintf($sqlinsertfmt, $user_id, $key, $value);
+			}
+			//debug($q);
+			$this->db->query($q);
+		}
+
+		// 1. load existing meta for this user
+		$sqlfind = sprintf("SELECT * from wp_usermeta WHERE user_id=%d", $user_id);
+		$existingUsermeta = $this->db->records($sqlfind);
+
+		if (count((array)$existingUsermeta)) {
+
+			foreach($existingUsermeta as $eUser) {
+				if ($eUser->meta_key === $capabilityKey) {
+					$max_capability = 4;
+					while ($max_capability >= 0 && $eUser->meta_value !== $this->capabilities[$max_capability]) {
+						$max_capability--;
+					}
+					if ($this->capabilities[$max_capability] !== $eUser->meta_value) {
+						$sql = sprintf($sqlupdatefmt, $this->capabilities[$max_capability], $user_id, $capabilityKey);
+						//debug($sql);
+						$this->db->query($sql);
+					}
+				}
+			}
+		}
+	}
+
+	private function determineCapability($role, $uid) {
+
+		$user_level = NULL;
+
+		if (strlen($role)) {
+
+			switch (strtolower($role)) {
+
+				case 'administrator':
+				case 'associate administrator':
+				case 'user care': 
+					$capability = $this->capabilities[0];
+					$user_level = 10;
+					break;
+
+				case 'editor':
+				case 'content manager':
+				case 'advanced registered user':
+				case 'content moderator':
+				case 'feeds manager':
+				case 'production user':
+					$capability = $this->capabilities[1];
+					$user_level = 7;
+					break;
+
+				case 'author':
+					$capability = $this->capabilities[2];
+					$user_level = 5;
+					break;
+				case 'contributor';
+					$capability = $this->capabilities[3];
+					$user_level = 3;
+
+				default:
+					$capability = $this->capabilities[4];
+					$user_level = 1;
+					break;
+			}
+		} else {
+			// admin user
+			if ((integer) $uid === 1) {
+				$capability = $this->capabilities[0];
+			} else {
+				$capability = $this->capabilities[4];
+			}
+		}
+		return [$capability, $user_level];
+	}
+
 
 	// wordpress UserMeta table
 	private function makeUserMeta($drupal_user, $user_id, $blog_id = NULL) {
@@ -248,94 +384,94 @@ class User {
 
 		$sourceDomain = $this->config->wordpressDomain;
 
-//todo this->site_id ??
-$blog_id = $this->config->siteId;
-if (!$blog_id) {
-	$blog_id=39;
-}
+		$uid = $drupal_user->uid;
+		if ($uid === 0) {
+			return;
+		}
 
-		if ($blog_id) {
+		$role = $drupal_user->role;
+		//$role_id = $drupal_user->role_id;
+		list($capability, $user_level) = $this->determineCapability($role, $uid);
+
+		if ($blog_id && $drupal_user->uid) {
+
+			// $capabilityKey = sprintf('wp_%d_capabilities', $blog_id);
+			// $roleKey = spirntf('wp_%d_roles', $blog_id);
+
 			$usermeta = [
-					'nickname' 							=> $wp_user->user_nicename,
-					'first_name' 						=> $first_name,
-					'last_name' 						=> $last_name,
-					'description' 						=> $first_name . ' ' . $last_name,
-					'wp_%d_user_avatar' 				=> '',
-					'primary_blog' 						=> $blog_id,
-					'source_domain' 					=> $sourceDomain,
-					'wp_%d_capabilities'				=> 'a:1:{s:6:"editor";b:1;}',
-					'wp_%d_user_level'					=> 7,
-					'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
-					'googleauthenticator_enabled' 		=> 'disabled',
-					'googleauthenticator_hidefromuser'	=> 'disabled',
-					'show_admin_bar_front'				=> true,
-					'use_ssl'							=> 0,
-					'admin_color'						=> 'fresh',
-					'comment_shortcuts'					=> false,
-					'syntax_highlighting'				=> true,
-					'rich_editing'						=> true,
-					'aim' 								=> '',
-					'yim' 								=> '', 
-					'jabber' 							=> '',
-					'locale'							=> '',
-					'dismissed_wp_pointers'				=> '',
-					'googleauthenticator_enabled'		=> false,
-					'googleauthenticator_hidefromuser'	=> false
+				'nickname' 							=> $wp_user->user_nicename,
+				'first_name' 						=> $first_name,
+				'last_name' 						=> $last_name,
+				'description' 						=> $first_name . ' ' . $last_name,
+				'primary_blog' 						=> $blog_id,
+				'source_domain' 					=> $sourceDomain,
+				'wp_%d_user_avatar' 				=> '',
+				/* 'wp_%d_role'						=> '', */
+				'wp_%d_capabilities'				=> $capability,
+				'wp_%d_user_level'					=> $user_level,
+				'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
+				'googleauthenticator_enabled' 		=> 'disabled',
+				'googleauthenticator_hidefromuser'	=> 'disabled',
+				'show_admin_bar_front'				=> true,
+				'use_ssl'							=> 0,
+				'admin_color'						=> 'fresh',
+				'comment_shortcuts'					=> false,
+				'syntax_highlighting'				=> true,
+				'rich_editing'						=> true,
+				'aim' 								=> '',
+				'yim' 								=> '', 
+				'jabber' 							=> '',
+				'locale'							=> '',
+				'dismissed_wp_pointers'				=> '',
+				'googleauthenticator_enabled'		=> false,
+				'googleauthenticator_hidefromuser'	=> false
 			];
+
 		} else {
+
 			$usermeta = [
-					'nickname' 							=> $wp_user->user_nicename,
-					'first_name' 						=> $first_name,
-					'last_name' 						=> $last_name,
-					'description' 						=> 'imported from drupal',
-					'wp_user_avatar' 					=> '',
-					'primary_blog' 						=> $blog_id,
-					'source_domain' 					=> $sourceDomain,
-					'wp_capabilities'					=> 'a:1:{s:6:"editor";b:1;}',
-					'wp_user_level'						=> 7,
-					'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
-					'googleauthenticator_enabled' 		=> 'disabled',
-					'googleauthenticator_hidefromuser'	=> 'disabled',
-					'show_admin_bar_front'				=> true,
-					'use_ssl'							=> 0,
-					'admin_color'						=> 'fresh',
-					'comment_shortcuts'					=> false,
-					'syntax_highlighting'				=> true,
-					'rich_editing'						=> true,
-					'aim' 								=> '',
-					'yim' 								=> '', 
-					'jabber' 							=> ''
+				'nickname' 							=> $wp_user->user_nicename,
+				'first_name' 						=> $first_name,
+				'last_name' 						=> $last_name,
+				'description' 						=> 'imported from drupal',
+				'wp_user_avatar' 					=> '',
+				'primary_blog' 						=> $blog_id,
+				'source_domain' 					=> $sourceDomain,
+				/* 'wp_role'							=> '', */
+				'wp_capabilities'					=> $capability,
+				'wp_user_level'						=> $user_level,
+				'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
+				'googleauthenticator_enabled' 		=> 'disabled',
+				'googleauthenticator_hidefromuser'	=> 'disabled',
+				'show_admin_bar_front'				=> true,
+				'use_ssl'							=> 0,
+				'admin_color'						=> 'fresh',
+				'comment_shortcuts'					=> false,
+				'syntax_highlighting'				=> true,
+				'rich_editing'						=> true,
+				'aim' 								=> '',
+				'yim' 								=> '', 
+				'jabber' 							=> ''
 			];
 		}
+		$this->updateUserMeta($usermeta, $user_id, $blog_id);
+	}
 
-		$clearUserMeta = false;
-		$sqlremove = "DELETE FROM wp_usermeta WHERE user_id=%d AND meta_key='%s'";
+	private function addUserMeta($drupal_user, $user_id, $blog_id = NULL) {
 
-		$sqlinsertfmt = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, '%s', '%s')";
-		$sqlupdatefmt = "UPDATE wp_usermeta SET meta_value='%s' WHERE user_id=%d AND meta_key='%s' LIMIT 1";
+// debug('here0');
+// dd($user_id);
+		$role = $drupal_user->role;
 
-		
-		foreach ($usermeta as $key => $value) {
+		list($capability, $user_level) = $this->determineCapability($role, $drupal_user->uid);
+		$usermeta = [
+			'wp_%d_user_avatar' 				=> '',
+			/* 'wp_%d_role'						=> '', */
+			'wp_%d_capabilities'				=> $capability,
+			'wp_%d_user_level'					=> $user_level,
+		];
+		$this->updateUserMeta($usermeta, $user_id);
 
-			if ($blog_id) {
-				$key = preg_replace('/%d/', $blog_id, $key);
-			}
-
-			if ($clearUserMeta) {
-				$q = sprintf($sqlremove, $user_id, $key);
-				$this->db->query($q);
-			}
-
-			// usermeta exists?
-			$sql = "SELECT * FROM wp_usermeta WHERE user_id=$user_id AND meta_key='$key'";
-			$usermeta = $this->db->record($sql);
-			if (count((array) $usermeta)) {
-				$q = sprintf($sqlupdatefmt, $user_id, $key, $value);
-			} else {
-				$q = sprintf($sqlinsertfmt, $user_id, $key, $value);
-			}
-			$this->db->query($q);
-		}
 	}
 
 	private function makeUserName($name, $email) {
@@ -381,28 +517,47 @@ if (!$blog_id) {
 				$this->db->query($sql);
 
 				$user_id = $this->db->lastInsertId();
+
+				if ($this->config->verbose === true) {
+					debug("\nWordpress user $user_id created");
+				}
 			} else {
 				$user_id = $record->user_id;
+
+				if ($this->config->verbose === true) {
+					debug("\nWordpress user $user_id already exists \n");
+				}
+			}
+			if ($this->config->progress && ($user_id % 100 === 0)) {
+
+				print ".";
 			}
 			return $user_id;
 		}
 		return null;
-// this is a change
 	}
 
 	public function createWordpressUsers($blog_id = null) {
 
-		foreach ($this->drupalUsers as $duser) {
+		foreach ($this->drupalUsers as $drupal_user) {
+			if ($drupal_user->uid > 0) {
 
-			if ($duser->uid > 0) {
-
-				$user_id = $this->makeWordpressUser($duser);
-
-				if (empty($user_id)) {
-					debug("\nDrupal user " . $duser->uid . " was not imported as there is no email address for that Drupal user.");
+				$user = $this->getWordpressUserByEmail($drupal_user->mail);
+				if ($user) {
+					$user_id = $user->ID;
 				}
-				if ($this->makeUserMeta($duser, $user_id, $blog_id)) {
-					debug("usermeta created for $duser");
+				if ($user_id) {
+					$user_id = $this->makeWordpressUser($drupal_user);
+					if (empty($user_id)) {
+						debug("\nDrupal user " . $drupal_user->uid . " was not imported as there is no email address for that Drupal user.");
+					}
+					if ($this->makeUserMeta($drupal_user, $user_id, $blog_id)) {
+						debug("usermeta created for $drupal_user");
+					}
+
+				} else {
+					// user exists, update the usermeta
+					$this->addUserMeta($drupal_user, $user_id, $blog_id);
 				}
 			}
 		}

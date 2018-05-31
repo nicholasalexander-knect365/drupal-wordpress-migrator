@@ -113,6 +113,7 @@ class Options {
 		if ($this->projecct === 'ioti') {
 			$this->siteId = 38;
 		}
+//		dd($this);
 	}
 
 	private function setDefaults() {
@@ -388,9 +389,9 @@ class Options {
 				}
 			}
 
-			if ($this->progress) {
-				$this->verbose = '.';
-			}
+			// if ($this->progress) {
+			// 	$this->verbose = '.';
+			// }
 		}
 	}
 }

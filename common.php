@@ -35,7 +35,6 @@ try {
 } catch (Exception $e) {
 
 	debug("Option setting error\n" . $e->getMessage() . "\n\n");
-
 	die;
 }
 
@@ -60,7 +59,9 @@ if ($d7) {
 
 $users = new User($wp, $d7, $options);
 
-// common
+//////////////////////////// END OF COMMON ////////////////////////////
+
+// HELPERS
 function dd($v) {
 	var_dump($v);
 	die;
