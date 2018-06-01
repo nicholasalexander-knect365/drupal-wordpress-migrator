@@ -86,14 +86,27 @@ class Node {
 			$limit = $this->limit;
 		}
 
-		$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content,p.field_precis_value as precis
-				FROM node n
-				INNER JOIN node_type t ON n.type=t.type
-				LEFT JOIN node_revision r ON r.nid=n.nid
-				LEFT JOIN field_data_body b on b.entity_id=n.nid
-				LEFT JOIN content_field_precis p on p.nid=n.nid
-				ORDER by nid
-				LIMIT $start, $limit";
+		$tables = $this->db->tables();
+
+		if (in_array('field_precis_value', $tables)) {
+
+			$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content,p.field_precis_value as precis
+					FROM node n
+					INNER JOIN node_type t ON n.type=t.type
+					LEFT JOIN node_revision r ON r.nid=n.nid
+					LEFT JOIN field_data_body b on b.entity_id=n.nid
+					LEFT JOIN content_field_precis p on p.nid=n.nid
+					ORDER by nid
+					LIMIT $start, $limit";
+		} else {
+			$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content
+					FROM node n
+					INNER JOIN node_type t ON n.type=t.type
+					LEFT JOIN node_revision r ON r.nid=n.nid
+					LEFT JOIN field_data_body b on b.entity_id=n.nid
+					ORDER by nid
+					LIMIT $start, $limit";
+		}
 
 		$nodes = $this->db->records($sql);
 		$this->start = $start + $limit;
@@ -101,14 +114,18 @@ class Node {
 		return $nodes;
 	}
 	public function getAllNodes() {
-		$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content,p.field_precis_value as precis
-				FROM node n
-				INNER JOIN node_type t ON n.type=t.type
-				LEFT JOIN node_revision r ON r.nid=n.nid
-				LEFT JOIN field_data_body b on b.entity_id=n.nid
-				LEFT JOIN content_field_precis p on p.nid=n.nid
-				ORDER by nid";
-		$nodes = $this->db->records($sql);
+		$sql = "SELECT COUNT(*) AS c FROM node n";
+		$record = $this->db->record($sql);
+		$nodes = $this->getNodeChunk($record->c);
+// 		$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content,p.field_precis_value as precis
+// 				FROM node n
+// 				INNER JOIN node_type t ON n.type=t.type
+// 				LEFT JOIN node_revision r ON r.nid=n.nid
+// 				LEFT JOIN field_data_body b on b.entity_id=n.nid
+// 				LEFT JOIN content_field_precis p on p.nid=n.nid
+// 				ORDER by nid";
+// debug(DB::strip($sql));
+// 		$nodes = $this->db->records($sql);
 		return $nodes;
 	}
 }

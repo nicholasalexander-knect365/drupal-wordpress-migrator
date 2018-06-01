@@ -50,6 +50,7 @@ $wp_post = new Post($wp, $options);
 $wp_termmeta = new WPTermMeta($wp);
 
 if ($options->users) {
+
 	// do not clear users unless it is specified
 	// read and transfer all users if -u specified
 
@@ -79,15 +80,15 @@ if ($options->users) {
 }
 
 // the files option is required to clear images
-if ($option['files']) {
+if ($options->files) {
 
 	$cmdPath = 'importCmds.sh';
 	$cmdFile = fopen($cmdPath, 'w+');
 
 	$files = new Files($d7, $s3bucket, [
-		'verbose' 	=> $option['verbose'],
-		'quiet' 	=> $option['quiet'],
-		'progress' 	=> $option['progress']
+		'verbose' 	=> $options->verbose,
+		'quiet' 	=> $options->quiet,
+		'progress' 	=> $options->progress
 	]);
 
 	$options->dbPrefix = DB::$wp_prefix;
@@ -115,10 +116,7 @@ $wp_fields = new Fields($wp);
 
 $drupal_nodes = null;
 
-if ($option['initialise']) {
-	// if ($once++ > 1) {
-	// 	throw new Exception('Initialise called more than once???');
-	// }
+if ($options->initialise) {
 	$initialise = new Initialise($wp, $options);
 	$initialise->cleanUp($wp);
 }
@@ -127,7 +125,7 @@ $wp_termmeta_term_id = $wp_taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
 
 $nodeSource = 'drupal';
 
-if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$option['nodes'] && !$option['initialise'])) {
+if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$options->nodes && !$options->initialise)) {
 	message("\nDrupal node data has already been imported to Wordpress.");
 	message("You can either clear it with the --initialise or -d[efaults] flag");
 	message("or the wp-posts will be used, and the other tables will be imported...\n");
@@ -136,7 +134,7 @@ if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$option['nodes'] &&
 	message("\nImporting Node data from drupal...\n");
 }
 
-if ($option['taxonomy']) {
+if ($options->taxonomy) {
 	if ($verbose) {
 		message("\nGetting Taxonomies...");
 	}
@@ -149,7 +147,7 @@ if ($option['taxonomy']) {
 	$wp_taxonomy->createTerms($taxonomies);
 }
 
-if ($option['fields']) {
+if ($options->fields) {
 	if ($verbose) {
 		message("\nGetting fields...");
 	}
@@ -161,7 +159,9 @@ if ($option['fields']) {
 			$fieldTables[] = $key . '_' . $field;
 		}
 	}
-	if ($verbose) debug($fieldTables);
+	if ($verbose) {
+		debug($fieldTables);
+	}
 }
 
 // how many nodes to process?
@@ -176,7 +176,7 @@ if ($nodeCount > $maxChunk) {
 $d7_node->setNodeChunkSize($nodeCount);
 $chunks = floor($nodeCount / $chunk) + 1;
 
-if ($option['fields']) {
+if ($options->fields) {
 	$postmeta = new PostMeta($wp, DB::wptable('postmeta'));
 }
 
@@ -194,9 +194,9 @@ for ($c = 0; $c < $chunks; $c++) {
 
 	$drupal_nodes = $d7_node->getNodeChunk($TESTLIMIT);
 
-	// if chunking is not required, read all records
-	//$drupal_nodes = $d7_node->getAllNodes();
-	//debug("\nNodes read: ". count((array)$drupal_nodes));
+	//if chunking is not required, read all records
+	$drupal_nodes = $d7_node->getAllNodes();
+	debug("\nNodes read: ". count((array)$drupal_nodes));
 
 	if (isset($drupal_nodes) && count($drupal_nodes)) {
 
@@ -205,11 +205,11 @@ for ($c = 0; $c < $chunks; $c++) {
 			$wpPostId = null;
 			$fileSet = null;
 
-			if ($option['nodes'] && $nodeSource === 'drupal') {
+			if ($options->nodes && $nodeSource === 'drupal') {
 				$d7_node->setNode($node);
 				$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
-
-				$files->getImagesDestination();
+debug($wpPostId);
+				//$files->getImagesDestination();
 				if ($wpPostId) {
 					$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
 				} else {
@@ -221,12 +221,13 @@ for ($c = 0; $c < $chunks; $c++) {
 				$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
 			}
 
-			if ($option['files']) {
+			if ($options->files) {
 				// getFiles stores a local copy
 				$fileSet = $files->getFiles($node->nid);
 
 				if (isset($fileSet)) {
 					foreach ($fileSet as $file) {
+debug($file);
 						//$files->moveFile($file);
 						if ($wpPostId) {
 							$wordpress->addMediaLibrary($wpPostId, $file, $options);
@@ -235,7 +236,7 @@ for ($c = 0; $c < $chunks; $c++) {
 				}
 			}
 
-			if ($option['taxonomy']) {
+			if ($options->taxonomy) {
 				$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
 				if ($taxonomies && count($taxonomies)) {
 					foreach ($taxonomies as $taxonomy) {
@@ -245,7 +246,7 @@ for ($c = 0; $c < $chunks; $c++) {
 						}
 					}
 
-					if (!$option['quiet'] && !$option['progress'] && ($verbose === true) ) {
+					if (!$options->quiet && !$options->progress && ($verbose === true) ) {
 						print "\nImported " . count($taxonomies) . " taxonomies.\n";
 					}
 				}
@@ -254,7 +255,7 @@ for ($c = 0; $c < $chunks; $c++) {
 			/* each node has a bunch of "fields" attached which can be additional content
 			   for the content type and can be text fields, images. comments, tags
 			*/
-			if ($wpPostId && $option['fields']) {
+			if ($wpPostId && $options->fields) {
 
 				// check each field table for content types and make WP POSTMETA
 				if ($fieldTables && count($fieldTables)) {

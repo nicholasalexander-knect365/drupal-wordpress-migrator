@@ -269,6 +269,12 @@ class Post extends DB {
 						break;
 
 					case 'type' : 
+						if ($value === 'media_entity') {
+
+debug($drupal_data);
+debug($value);
+return $drupal_data->title;
+						}
 						$values['post_type'] = static::$mapPostType[$value];
 						break;
 
@@ -287,6 +293,10 @@ debug($values);
 		//TODO: set to an option - probably global for all
 		$values['comment_status'] = true;
 
+		if (!isset($values['post_excerpt'])) {
+			$values['post_excerpt'] = substr($values['post_content'], 120);
+		}
+
 		foreach(static::$null_fields as $field) {
 			$values[$field] = '';
 		}
@@ -297,7 +307,7 @@ debug($values);
 		$sql = "INSERT into $wp_posts (" . implode(', ', array_keys($values)) . ") VALUES ('" . implode("', '", $values) ."')";
 		$this->db->query($sql); 
 		$post_id = $this->db->lastInsertId();
-
+//dd($sql);
 		return $post_id;
 
 		// TODO: deprecate this?

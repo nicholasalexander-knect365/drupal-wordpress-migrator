@@ -8,6 +8,8 @@ class DB {
 	public $wp;
 	public $d7;
 
+	public $tableNames;
+
 	private $config;
 	private $server;
 	private $type; 			// wp or d7 expected
@@ -52,7 +54,7 @@ class DB {
 			// debug($this->type);
 			throw new Exception("\nConnection failed: " . $this->type . ' ' . $this->connection->connect_error . "\n");
 		}
-
+		$this->tableNames = $this->tables();
 		return $this->connection;
 	}
 
@@ -131,6 +133,20 @@ class DB {
 		}
 		static::$wp_prefix = sprintf('wp_%d_', $blog_id);
 
+	}
+
+	public function tables() {
+
+		$dbName = $this->credentials[$this->type];
+		$sql = "SHOW TABLES";
+		$result = $this->records($sql);
+		$table_names = [];
+		$tablesIn = 'Tables_in_' . $dbName['database'];
+
+		foreach($result as $key => $record) {
+			$table_names[] = $record->$tablesIn;
+		}
+		return $table_names;
 	}
 
 	public function configure($config = null) {

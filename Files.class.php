@@ -99,13 +99,14 @@ class Files {
 		switch ($fileType) {
 			case 'public' :
 
-				$path = $this->drupalPath . '/sites/default/files/' . $file->filename;
+				$uri = preg_replace('/public:\/\//', '', $file->uri);
+				$path = $this->drupalPath . '/sites/default/files/' . $uri;
 				if ($this->verbose) {
 					print "\nCopying image ".$path;
 				}
 				if (file_exists($path)) {
 					try {
-//debug("copying public: image file ".$path);
+debug("copying public: image file ".$path);
 						copy($path, $this->imageStore . '/' . $file->filename);
 						if ($this->verbose) {
 							debug('copy from '.$path.' to '.$this->imageStore . '/' .$file->filename);

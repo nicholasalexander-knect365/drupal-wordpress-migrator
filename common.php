@@ -2,36 +2,32 @@
 
 define('DRUPAL_WP', 'DRUPAL_WP');
 
-$maxChunk = 1000000;
+$maxChunk = 10000;
 //$init = true;
 
-$debug = false;
 $once = 0;
+$option = NULL;
 
 /* control options */
 try {
+
 	$options = new Options();
 	$options->setAll();
 
-	$project 	= $options->get('project');			// valid: tuauto, ioti
-	$s3bucket 	= $options->get('s3bucket');
-	$drupalPath = $options->get('drupalPath');		// where the drupal files are
-	$wordpressPath = $options->get('wordpressPath');
+	$project 		= $options->get('project');			// valid: tuauto, ioti
+	$s3bucket 		= $options->get('s3bucket');
+	$drupalPath 	= $options->get('drupalPath');		// where the drupal files are
+	$wordpressPath 	= $options->get('wordpressPath');
+	$imageStore 	= $options->get('imageStore');		// temporary image store
+	$server 		= $options->get('server');			// server = [local. vm, staging]
+	$verbose 		= $options->get('verbose');			// tell me more
 
-	$imageStore = $options->get('imageStore');		// temporary image store
-	$server 	= $options->get('server');			// server = [local. vm, staging]
-	$verbose    = $options->get('verbose');			// tell me more
-
-	$option = [];
-
-	foreach ($options->all as $opt) {
-		$option[$opt] = $options->get($opt);
-	}
 	$options->showAll();
 
 	if ($options->get('help')) {
 		die("\nHELP Mode\n\n");
 	}
+
 } catch (Exception $e) {
 
 	debug("Option setting error\n" . $e->getMessage() . "\n\n");
@@ -74,9 +70,6 @@ function message($v) {
 		print "\n-----------------------------";
 	}
 	print "\n" . $v;
-	if ($verbose) {
-		print "\n-----------------------------";
-	}
 }
 
 function home() {
@@ -101,7 +94,7 @@ function debug($v, $singleton = 0) {
 	} else {
 		print "\n" . $v;
 	}
-	if ($verbose) {
-		print "\n-----------------------------";
-	}
+	// if ($verbose) {
+	// 	print "\n-----------------------------";
+	// }
 }
