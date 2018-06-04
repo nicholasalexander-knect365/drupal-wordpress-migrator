@@ -24,7 +24,12 @@ class Post extends DB {
 		'video'	  		=> 'video',
 		'article_banner' => 'banner',
 		'homepage_tabs'	=> 'homepage_tabs',
-		'page'			=> 'page'
+		'page'			=> 'page',
+		'media_entity'	=> 'media',
+
+		'block_content'	=> 'block',
+		'display_admin' => 'page',
+		'gating_copy'	=> 'page'
 	];
 
 	// map drupal fileds to wordpress fields
@@ -181,6 +186,7 @@ class Post extends DB {
 					//   to calculate GMT for this post
 					$values[$wpKey . '_gmt'] = $value;
 				}
+
 				switch ($key) {
 
 					case 'uid':
@@ -269,13 +275,16 @@ class Post extends DB {
 						break;
 
 					case 'type' : 
+//debug("\n>>>>" . $key . ' >>>>>> ' .$value);
 						if ($value === 'media_entity') {
-
-debug($drupal_data);
-debug($value);
-return $drupal_data->title;
+							if (is_numeric($drupal_data->title)) {
+								$value = sprintf('ThinkstockPhotos-%d.jpg', $drupal_data->title);
+//debug($value);
+							}
+							//$values['post_image'] = $value;
+						} else {
+							$values['post_type'] = static::$mapPostType[$value];
 						}
-						$values['post_type'] = static::$mapPostType[$value];
 						break;
 
 					case 'author':
@@ -291,7 +300,7 @@ debug($values);
 		}
 
 		//TODO: set to an option - probably global for all
-		$values['comment_status'] = true;
+		$values['comment_status'] = 'open';
 
 		if (!isset($values['post_excerpt'])) {
 			$values['post_excerpt'] = substr($values['post_content'], 120);

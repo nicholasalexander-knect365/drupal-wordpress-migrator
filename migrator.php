@@ -147,6 +147,8 @@ if ($options->taxonomy) {
 	$wp_taxonomy->createTerms($taxonomies);
 }
 
+$showDebug = false;
+
 if ($options->fields) {
 	if ($verbose) {
 		message("\nGetting fields...");
@@ -159,13 +161,13 @@ if ($options->fields) {
 			$fieldTables[] = $key . '_' . $field;
 		}
 	}
-	if ($verbose) {
+	if ($showDebug && $verbose) {
 		debug($fieldTables);
 	}
 }
 
-// how many nodes to process?
-$nodeCount = $d7_node->nodeCount();
+// how many nodes to process?  - override default status=published
+$nodeCount = $d7_node->nodeCount(NULL);
 
 if ($nodeCount > $maxChunk) {
 	$chunk = floor($nodeCount / $maxChunk);
@@ -195,9 +197,10 @@ for ($c = 0; $c < $chunks; $c++) {
 	$drupal_nodes = $d7_node->getNodeChunk($TESTLIMIT);
 
 	//if chunking is not required, read all records
-	$drupal_nodes = $d7_node->getAllNodes();
-	debug("\nNodes read: ". count((array)$drupal_nodes));
-
+	//$drupal_nodes = $d7_node->getAllNodes();
+	if ($verbose) {
+	 	debug("\nNodes read: ". count((array)$drupal_nodes));
+	}
 	if (isset($drupal_nodes) && count($drupal_nodes)) {
 
 		foreach ($drupal_nodes as $node) {
@@ -207,14 +210,26 @@ for ($c = 0; $c < $chunks; $c++) {
 
 			if ($options->nodes && $nodeSource === 'drupal') {
 				$d7_node->setNode($node);
-				$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
-debug($wpPostId);
-				//$files->getImagesDestination();
-				if ($wpPostId) {
-					$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
+//debug($node);
+//				if (preg_match('/^media_entity: (.*)$/', $wpPostId, $match)) {
+				if ($node->type === 'media_entity') {
+					$media_name = $node->title;
+					$fileSet = $files->getFiles($node->nid);				
+					if (isset($fileSet)) {
+						foreach ($fileSet as $file) {
+							$wordpress->addMediaLibrary($wpPostId, $file, $options);
+						}
+					}
+//debug("\n$wpPostId adding to media library ");
 				} else {
-					debug('makePost returned no value for this node??');
-					dd($node);
+					$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
+//debug("\n$wpPostId making a post");
+					if ($wpPostId) {
+						$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
+					} else {
+						debug('makePost returned no value for this node??');
+						dd($node);
+					}
 				}
 			} else {
 				// find the wpPostId for this node??
@@ -227,7 +242,7 @@ debug($wpPostId);
 
 				if (isset($fileSet)) {
 					foreach ($fileSet as $file) {
-debug($file);
+//debug($file);
 						//$files->moveFile($file);
 						if ($wpPostId) {
 							$wordpress->addMediaLibrary($wpPostId, $file, $options);

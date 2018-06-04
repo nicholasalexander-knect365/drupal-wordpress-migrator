@@ -257,7 +257,7 @@ class Taxonomy {
 			$term_id = (integer) $this->terms[$taxname][$slug];
 		} else {
 			debug($name, $slug);
-			dd('why create term here?');
+dd('why create term here?');
 			$term_id = $this->createTerm($name, $slug);
 		}
 

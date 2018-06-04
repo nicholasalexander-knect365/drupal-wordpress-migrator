@@ -50,9 +50,10 @@ class Files {
 	}
 
 	public function setImageStore($path) {
-	$this->imageStore = $path;
 
+		$this->imageStore = $path;
 		return;
+
 		// if ($this->dirEmpty($path)) {
 		// 	$this->imageStore = $path;
 		// } else {
@@ -106,7 +107,7 @@ class Files {
 				}
 				if (file_exists($path)) {
 					try {
-debug("copying public: image file ".$path);
+//debug("copying public: image file ".$path);
 						copy($path, $this->imageStore . '/' . $file->filename);
 						if ($this->verbose) {
 							debug('copy from '.$path.' to '.$this->imageStore . '/' .$file->filename);

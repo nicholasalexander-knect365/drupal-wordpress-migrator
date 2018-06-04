@@ -127,10 +127,10 @@ class Options {
 		$this->nodes 		= true;
 		$this->taxonomy 	= true;
 		$this->fields 		= true;
-		// $this->initialise 	= true;
-		// $this->clean 		= true;
-		// $this->clearImages 	= false;
-		// $this->sqlDebug 	= false;
+		$this->initialise 	= true;
+		$this->clean 		= true;
+		$this->clearImages 	= false;
+		$this->sqlDebug 	= false;
 		// $this->resetUserPassword 	= false;
 	}
 

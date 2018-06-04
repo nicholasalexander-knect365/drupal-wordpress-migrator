@@ -55,9 +55,13 @@ class Node {
 		$this->node = $node;
 	}
 
-	public function nodeCount() {
+	public function nodeCount($status = 1) {
 
-		$sql = "SELECT COUNT(*) AS c FROM node WHERE status = 1";
+		if ($status) {
+			$sql = "SELECT COUNT(*) AS c FROM node WHERE status = $status";
+		} else {
+			$sql = "SELECT COUNT(*) AS c FROM node";
+		}
 		$items = $this->db->record($sql);
 
 		return $items->c;
@@ -88,44 +92,37 @@ class Node {
 
 		$tables = $this->db->tables();
 
+		$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content";
+
+		$additionalClause = '';
+		// various Drupal modules may provide additional data linked to nodes 
+		// additional fields dependent on field_FIELD_NAME presence
 		if (in_array('field_precis_value', $tables)) {
-
-			$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content,p.field_precis_value as precis
-					FROM node n
-					INNER JOIN node_type t ON n.type=t.type
-					LEFT JOIN node_revision r ON r.nid=n.nid
-					LEFT JOIN field_data_body b on b.entity_id=n.nid
-					LEFT JOIN content_field_precis p on p.nid=n.nid
-					ORDER by nid
-					LIMIT $start, $limit";
-		} else {
-			$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content
-					FROM node n
-					INNER JOIN node_type t ON n.type=t.type
-					LEFT JOIN node_revision r ON r.nid=n.nid
-					LEFT JOIN field_data_body b on b.entity_id=n.nid
-					ORDER by nid
-					LIMIT $start, $limit";
+			$sql .= ", p.field_precis_value as precis";
+			$additionalClause .= " LEFT JOIN content_field_precis p on p.nid=n.nid";
 		}
-
+		$sql .= " FROM node n
+					INNER JOIN node_type t ON n.type=t.type
+					LEFT JOIN node_revision r ON r.nid=n.nid
+					LEFT JOIN field_data_body b on b.entity_id=n.nid
+					$additionalClause
+					ORDER by nid
+					LIMIT $start, $limit";
+//dd(DB::strip($sql));
 		$nodes = $this->db->records($sql);
 		$this->start = $start + $limit;
-
 		return $nodes;
 	}
+
 	public function getAllNodes() {
-		$sql = "SELECT COUNT(*) AS c FROM node n";
-		$record = $this->db->record($sql);
-		$nodes = $this->getNodeChunk($record->c);
-// 		$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content,p.field_precis_value as precis
-// 				FROM node n
-// 				INNER JOIN node_type t ON n.type=t.type
-// 				LEFT JOIN node_revision r ON r.nid=n.nid
-// 				LEFT JOIN field_data_body b on b.entity_id=n.nid
-// 				LEFT JOIN content_field_precis p on p.nid=n.nid
-// 				ORDER by nid";
-// debug(DB::strip($sql));
-// 		$nodes = $this->db->records($sql);
+		$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content
+				FROM node n
+				INNER JOIN node_type t ON n.type=t.type
+				LEFT JOIN node_revision r ON r.nid=n.nid
+				LEFT JOIN field_data_body b on b.entity_id=n.nid
+				ORDER by nid";
+
+		$nodes = $this->db->records($sql);
 		return $nodes;
 	}
 }
