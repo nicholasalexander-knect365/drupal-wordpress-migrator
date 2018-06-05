@@ -6,7 +6,6 @@ class RemapTaxonomy extends Taxonomy {
 
 	protected function IOTIRemapNameCategory($name) {
 		switch(trim(strtolower($name))) {
-			case 'article':
 			case 'news and analysis':
 			case 'strategy':
 			case 'analytics':
@@ -26,6 +25,16 @@ class RemapTaxonomy extends Taxonomy {
 			case 'smart home':
 			case 'transportation and logistics':
 				$taxonomy = 'category';
+				break;
+			case 'article':
+			case 'link':
+			case 'video':
+			case 'gallery':
+			case 'audio':
+			case 'webinar':
+			case 'white paper':
+			case 'standard page':
+				$taxonomy = 'type';
 				break;
 			default:
 				$taxonomy = 'post_tag';
