@@ -15,10 +15,11 @@ class Files {
 	public $drupalPath;
 	public $imageStore;
 	public $imagesDestination;
+	private $options;
 	private $verbose = false;
 	public $s3Bucket = 'http://pentontuautodrupalfs.s3.amazonaws.com';
 
-	public function __construct(DB $connection, $s3bucket = '', $args = []) {
+	public function __construct(DB $connection, $s3bucket = '', $options) {
 
 		$this->connection = $connection;
 		$this->nid = null;
@@ -26,7 +27,8 @@ class Files {
 			$this->s3Bucket = $s3bucket;
 		}
 		$this->type = 'node';
-		$this->verbose = isset($args['verbose']) ? $args['verbose'] : false;
+		$this->options = $options;
+		$this->verbose = $options->verbose;
 	}
 
 	public function isVerbose() {
@@ -93,10 +95,6 @@ class Files {
 
 		$fileType = $this->source($file->uri);
 
-// if ($this->verbose) {
-// 	debug('STOREIMAGEDATA:' . $file->uri . ' '. $fileType);
-// }
-
 		switch ($fileType) {
 			case 'public' :
 
@@ -107,7 +105,6 @@ class Files {
 				}
 				if (file_exists($path)) {
 					try {
-//debug("copying public: image file ".$path);
 						copy($path, $this->imageStore . '/' . $file->filename);
 						if ($this->verbose) {
 							debug('copy from '.$path.' to '.$this->imageStore . '/' .$file->filename);
@@ -130,9 +127,7 @@ class Files {
 					try {
 						$fileData = file_get_contents($path);
 						if (strlen($fileData) > 14) {
-							// if (is_string($this->verbose)) {
-							// 	print $this->verbose;
-							// } else 
+
 							if ($this->verbose) {
 								print "\nImage data size: " . strlen($fileData);
 							}
@@ -146,6 +141,7 @@ class Files {
 
 						}
 						else {
+
 							if ($this->verbose === true) {
 								debug("no content in $path - only ".strlen($fileData) . ' bytes??');
 							}
@@ -205,10 +201,16 @@ class Files {
 		return $files;
 	}
 
-	// bad idea: we should use wp-cli to do this
+
+	// moveFiles is deprecated in favour of 
+	// composing wp-cli commands in importCmds.php
+	// as Wordpress then builds the Media Library
 	public function moveFile($fileObject) {
 
-		$wp = new WP($this->db, $options);
+		throw new Exception('Files::moveFile is deprecated in favour of importCmds.sh file');
+		// DEPRECATE: use wp-cli to do this
+
+		$wp = new WP($this->connection, $this->options);
 
 		$source = $this->imageStore . $fileObject->filename;
 

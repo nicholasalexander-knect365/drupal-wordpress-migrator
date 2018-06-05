@@ -85,11 +85,7 @@ if ($options->files) {
 	$cmdPath = 'importCmds.sh';
 	$cmdFile = fopen($cmdPath, 'w+');
 
-	$files = new Files($d7, $s3bucket, [
-		'verbose' 	=> $options->verbose,
-		'quiet' 	=> $options->quiet,
-		'progress' 	=> $options->progress
-	]);
+	$files = new Files($d7, $s3bucket, $options);
 
 	$options->dbPrefix = DB::$wp_prefix;
 
@@ -210,20 +206,20 @@ for ($c = 0; $c < $chunks; $c++) {
 
 			if ($options->nodes && $nodeSource === 'drupal') {
 				$d7_node->setNode($node);
-//debug($node);
-//				if (preg_match('/^media_entity: (.*)$/', $wpPostId, $match)) {
+
 				if ($node->type === 'media_entity') {
 					$media_name = $node->title;
-					$fileSet = $files->getFiles($node->nid);				
+					$fileSet = $files->getFiles($node->nid);
 					if (isset($fileSet)) {
 						foreach ($fileSet as $file) {
 							$wordpress->addMediaLibrary($wpPostId, $file, $options);
 						}
 					}
-//debug("\n$wpPostId adding to media library ");
+
 				} else {
+
 					$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
-//debug("\n$wpPostId making a post");
+
 					if ($wpPostId) {
 						$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
 					} else {
@@ -242,7 +238,7 @@ for ($c = 0; $c < $chunks; $c++) {
 
 				if (isset($fileSet)) {
 					foreach ($fileSet as $file) {
-//debug($file);
+						// TODO: moveFile is deprecated
 						//$files->moveFile($file);
 						if ($wpPostId) {
 							$wordpress->addMediaLibrary($wpPostId, $file, $options);
@@ -275,7 +271,7 @@ for ($c = 0; $c < $chunks; $c++) {
 
 				// check each field table for content types and make WP POSTMETA
 				if ($fieldTables && count($fieldTables)) {
-
+//debug($fieldTables);
 					$object = new stdClass();
 					$event = new stdClass();
 					$report = new stdClass();
