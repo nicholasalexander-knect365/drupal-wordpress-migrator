@@ -6,6 +6,7 @@
  * i.e. addresses both Drupal (input) and Wordpress (output) functionality
  */
 require_once "DB.class.php";
+require_once "RemapTaxonomy.class.php";
 
 class Taxonomy {
 
@@ -58,18 +59,21 @@ class Taxonomy {
 		}
 	}
 
-	private function remapNameCategory($name) {
+	protected function remapNameCategory($name) {
 
 		// if no taxonomy or not reconised, it may be a post_tag
 		$taxonomy = 'post_tag';
+		$remap = new RemapTaxonomy($this->db, $this->options);
 
 		switch ($this->options->project) {
 			case 'tuauto':
-				list($name, $taxonomy) = $this->TUAutoRemapNameCategory($name);
+				list($name, $taxonomy) = $remap->TUAutoRemapNameCategory($name);
 				break;
 			case 'ioti':
-				$taxonomy = 'categories';
+				list($name, $taxonomy) = $remap->IOTIRemapNameCategory($name);
 				break;
+			default: 
+				throw new Exception('Can not remap for this project ' . $this->options->project);
 		}
 
 		return [$name, $taxonomy];
@@ -188,7 +192,7 @@ class Taxonomy {
 				$record = $this->getTaxonomyRecord($term_id, $taxname);
 
 				if ($record === NULL) {
-					$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$taxname', '$name', 0, 0)";
+					$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$taxname', '$name', 0, 1)";
 				    $this->db->query($sql);
 				} else {
 					$term_taxonomy_id = $record->term_taxonomy_id;
@@ -403,7 +407,6 @@ dd('why create term here?');
 				WHERE nid=$nid";
 
 		$taxonomies = $this->db->records($sql);
-
 		return $taxonomies;
 	}
 

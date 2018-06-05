@@ -253,6 +253,7 @@ for ($c = 0; $c < $chunks; $c++) {
 
 			if ($options->taxonomy) {
 				$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
+
 				if ($taxonomies && count($taxonomies)) {
 					foreach ($taxonomies as $taxonomy) {
 						$wp_taxonomy->makeWPTermData($taxonomy, $wpPostId);

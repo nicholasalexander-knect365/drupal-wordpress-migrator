@@ -4,6 +4,40 @@ require_once "Taxonomy.class.php";
 
 class RemapTaxonomy extends Taxonomy {
 
+	protected function IOTIRemapNameCategory($name) {
+		switch(trim(strtolower($name))) {
+			case 'article':
+			case 'news and analysis':
+			case 'strategy':
+			case 'analytics':
+			case 'infrastructure':
+			case 'engineering and development':
+			case 'security':
+			case 'startups':
+			case 'agriculture':
+			case 'automotive':
+			case 'healthcare':
+			case 'industrial iot (iiot)':
+			case 'personal':
+			case 'retail':
+			case 'smart buildings':
+			case 'smart cities':
+			case 'smart energy and utilties':
+			case 'smart home':
+			case 'transportation and logistics':
+				$taxonomy = 'category';
+				break;
+			default:
+				$taxonomy = 'post_tag';
+		}
+		if (strlen($taxonomy)) {
+			return [$name, $taxonomy];
+		} else {
+			debug([$name, $slug, $taxonomy]);
+			throw new Exception('No taxonomy mapped?');
+		}
+	}
+
 	protected function TUAutoRemapNameCategory($name) {
 		
 		switch(trim(strtolower($name))) {
