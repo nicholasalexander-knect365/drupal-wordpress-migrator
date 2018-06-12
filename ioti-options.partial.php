@@ -15,7 +15,7 @@
 
 		} else if (isset($this->server) && $this->server === 'staging') {
 			$this->setDefaults();
-			$this->wordpressPath = '/srv/www/public';
+			$this->wordpressPath = '/srv/www/test2.telecoms.com';
 			$this->wordpressURL = 'http://ioti.telecoms.local';
 			$this->drupalPath = 'images';
 			return;
