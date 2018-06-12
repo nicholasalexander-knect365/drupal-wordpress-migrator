@@ -9,8 +9,6 @@ class WPTerms {
 		$this->options = $options;
 	}
 
-
-
 	/*** 
 	 * tests if blank slugs are used 
 	 */

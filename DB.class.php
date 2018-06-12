@@ -168,7 +168,14 @@ class DB {
 						'password' => 'admin',
 						'host' => 'localhost'
 					];
-				}
+				} else if ($this->config->server === 'staging') {
+					$this->credentials['d7'] = [
+						// drupal database on test2
+						'database' => 'test2_telecoms_com',
+						'username' => 'test2_tele_com',
+						'password' => 'OhLoogai1Jook5mai7oc',
+						'host' => 'mysql'
+					];
 				break;
 			case 'tu-auto':
 				if ($this->config->server === 'staging1') {
@@ -178,26 +185,11 @@ class DB {
 						'password' => '9FbTCPWWTQi2',
 						'host' => 'mysql'
 					];
-				} else if ($this->config->server === 'staging') {
-					$this->credentials['d7'] = [
-						// drupal database on test2
-						'database' => 'test_tuauto',
-						'username' => 'test1_tele_com',
-						'password' => 'mu3Ohfei2eemoh8eich8',
-						'host' => 'mysql'
-					];
 				} else if ($this->config->server === 'vm') {
 					$this->credentials['d7'] = [
 						'database' => 'd7telematic5',
 						'username' => 'root',
 						'password' => 'root',
-						'host' => 'localhost'
-					];
-				} else if ($this->config->server === 'local') {
-					$this->credentials['d7'] = [
-						'database' => 'd7telematic5',
-						'username' => 'root',
-						'password' => 'admin',
 						'host' => 'localhost'
 					];
 				} else {

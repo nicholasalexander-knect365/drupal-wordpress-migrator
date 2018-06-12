@@ -3,7 +3,8 @@
 /* create Wordpress POST elements */
 
 include_once "DB.class.php";
-//include_once "User.class.php";
+define('WP_ADMIN_ID', 185333);
+define('DRUPAL_ADMIN_EMAIL', 'steve@adaptive.co.uk');
 
 class Post extends DB {
 
@@ -26,7 +27,6 @@ class Post extends DB {
 		'homepage_tabs'	=> 'homepage_tabs',
 		'page'			=> 'page',
 		'media_entity'	=> 'media',
-
 		'block_content'	=> 'block',
 		'display_admin' => 'page',
 		'gating_copy'	=> 'page'
@@ -158,6 +158,33 @@ class Post extends DB {
 		return $this->db->lastInsertId();
 	}
 
+	private function mediaPathsInContent($drupal_data, $deprecate = true) {
+
+		$postContent = $this->prepare($drupal_data->content);
+
+		if ($deprecate) {
+			return $postContent;
+		}
+
+		if (preg_match('/<img.*?src="http:\/\/(www\.)?ioti\.com/', $postContent, $src)) {
+
+			debug($postContent);
+			debug($src);
+			preg_match('/<img .*?src\=["](.*?)["]$/', $postContent, $parts);
+//dd($parts);
+
+			//<img src="http://www.ioti.com/sites/iot-institute.com/files/Enterprise%20IoT%20World.png"
+			$postContent = preg_replace('/src="http:\/\/(www\.)?ioti\.com\/sites\/iot\-institute\.com\/files\//','src="files/2018/06/', $postContent);
+		// get the image
+
+debug("\n---------------------------------");
+debug($postContent);
+
+			return $postContent;
+
+		}
+	}
+
 	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath, \User $users) {
 
 		$wp_posts = DB::wptable('posts');
@@ -170,27 +197,7 @@ class Post extends DB {
 		$nid = $drupal_data->nid;
 		$fileSet = $files->fileList($nid);
 
-		$postContent = $this->prepare($drupal_data->content);
-
-// later!
-if (false) {
-	if (preg_match('/<img.*?src="http:\/\/(www\.)?ioti\.com/', $postContent, $src)) {
-
-		debug($postContent);
-		debug($src);
-		preg_match('/<img .*?src\=["](.*?)["]$/', $postContent, $parts);
-		dd($parts);
-
-		//<img src="http://www.ioti.com/sites/iot-institute.com/files/Enterprise%20IoT%20World.png"
-		$postContent = preg_replace('/src="http:\/\/(www\.)?ioti\.com\/sites\/iot\-institute\.com\/files\//','src="files/2018/06/', $postContent);
-	// get the image
-
-		$drupal_data->content = $postContent;
-		debug("\n---------------------------------");
-		debug($postContent);
-		dd('END');
-	}
-}
+		$postContent = $this->mediaPathsInContent($drupal_data);
 
 		foreach($drupal_data as $key => $value) {
 
@@ -227,10 +234,12 @@ if (false) {
 				switch ($key) {
 					case 'uid':
 						$drupalUser = $users->getDrupalUserByUid($value);
-						if ($drupalUser && strlen($drupalUser->mail) > 4) {
-							if($value === 0 || $drupalUser->mail ==='steve@adaptive.co.uk') {
 
-								$wordpressUser = $users->getWordpressUserById(185333);
+						if ($drupalUser && strlen($drupalUser->mail) > 4) {
+
+							// TODO: tu-auto specifc
+							if($value === 0 || $drupalUser->mail === DRUPAL_ADMIN_EMAIL) {
+								$wordpressUser = $users->getWordpressUserById(WP_ADMIN_ID);
 								if ($this->options->verbose) {
 									print "\nWP user:";
 									debug($wordpressUser);
@@ -250,7 +259,7 @@ if (false) {
 							//
 							//TODO: replace with getWordpressUserById($adminEmail);
 							// where $adminEmail = 'administrator@domain' (it would have to be added)
-							$wordpressUser = $users->getWordpressUserById(185333);
+							$wordpressUser = $users->getWordpressUserById(WP_ADMIN_ID);
 						}
 						break;
 
