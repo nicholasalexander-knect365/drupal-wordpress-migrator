@@ -136,7 +136,7 @@ class DB {
 	public function configure($config = null) {
 
 		static $once = 0;
-		
+
 		$this->config = $config;
 		if ($this->config->verbose) {
 			print "\n" . ucfirst($this->config->server) . ' : ' . $this->type . ' connect request... for project '.$this->config->project;
@@ -156,7 +156,7 @@ class DB {
 				} else if ($this->config->server === 'staging') {
 					$this->credentials['d7'] = [
 						// drupal database on test2
-						'database' => 'test2_telecoms_com',
+						'database' => 'ioti_drupal',
 						'username' => 'test2_tele_com',
 						'password' => 'OhLoogai1Jook5mai7oc',
 						'host' => 'mysql'

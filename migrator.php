@@ -137,6 +137,7 @@ if ($options->taxonomy) {
 
 	$vocabularies = $d7_taxonomy->getVocabulary();
 	$taxonomies = $d7_taxonomy->fullTaxonomyList();
+
 	$wp_taxonomy->createTerms($taxonomies);
 
 }
