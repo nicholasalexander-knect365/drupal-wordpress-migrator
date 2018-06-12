@@ -36,12 +36,12 @@ try {
 
 /* connect databases */
 try {
-	$wp = new DB($server, 'wp', $options);
+	$wp = new DB('wp', $options);
 	if ($options->dusers) {
 		debug("INFO: Drupal database NOT opened in createWPusers mode");
 		$d7 = null;
 	} else {
-		$d7 = new DB($server, 'd7', $options);
+		$d7 = new DB('d7', $options);
 	}
 } catch (Exception $e) {
 	die( 'DB connection error: ' . $e->getMessage());

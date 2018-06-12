@@ -20,13 +20,13 @@ class DB {
 	private $rows;
 	private $sql;
 
-	public function __construct($server = 'local', $type, $config) {
-		$this->server = $server;
+	public function __construct($type, $config) {
 		$this->type = $type;
 		$this->config = $config;
 	}
 
 	private function connector($type = '') {
+
 		if (!$type) {
 			throw new Exception('Programming error: to connect to a Database, please use a type (wp or d7).');
 		}
@@ -40,7 +40,7 @@ class DB {
 				$credentials = $this->credentials['d7'];
 				break;
 			default:
-				die('Programming error: connection type ' . $type . ' has not been defined.');
+				throw new Exception('Programming error: connection type (' . $type . ') has not been defined.');
 		}
 
 		//debug($credentials);
@@ -136,7 +136,7 @@ class DB {
 	public function configure($config = null) {
 
 		static $once = 0;
-
+		
 		$this->config = $config;
 		if ($this->config->verbose) {
 			print "\n" . ucfirst($this->config->server) . ' : ' . $this->type . ' connect request... for project '.$this->config->project;

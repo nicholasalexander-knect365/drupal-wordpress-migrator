@@ -101,10 +101,12 @@ class Options {
 	}
 
 	public function get($name) {
+
 		return $this->$name;
 	}
 
 	private function serverOptions() {
+
 		$this->project = isset($options['project']) ? $options['project'] : 'ioti';
 		$this->server = isset($options['server']) ? $options['server'] : 'local';
 		if ($this->project === 'tu-auto') {
@@ -113,14 +115,14 @@ class Options {
 		if ($this->project === 'ioti') {
 			$this->siteId = 38;
 		}
-//		dd($this);
 	}
 
 	private function setDefaults() {
 
-		// $this->progress 	= true;
-		// $this->quiet 		= true;
-		// $this->verbose 		= false;
+		$this->progress 	= true;
+		$this->quiet 		= true;
+		$this->verbose 		= false;
+
 		$this->help 		= false;
 		$this->users 		= false;
 		$this->files 		= true;
@@ -131,6 +133,7 @@ class Options {
 		$this->clean 		= true;
 		$this->clearImages 	= false;
 		$this->sqlDebug 	= false;
+
 		// $this->resetUserPassword 	= false;
 	}
 
@@ -302,43 +305,17 @@ class Options {
 
 				if ($this->project === 'ioti') {
 
-					$this->siteId = 38;
-
-					if (in_array('d', array_keys($options))) {
-
-						if (isset($this->server) && $this->server === 'vm') {
-							$this->setDefaults();
-							$this->wordpressPath = '/var/www/public';
-							$this->wordpressURL = 'http://tuauto.telecoms.local';
-							$this->drupalPath = '/vagrant/drupal7/'.$this->project;
-							return;
-
-						} else if (isset($this->server) && $this->server === 'staging') {
-							$this->setDefaults();
-							$this->wordpressPath = '/srv/www/public';
-							$this->wordpressURL = 'http://ioti.telecoms.local';
-							$this->drupalPath = 'images';
-							return;
-
-						} else if (isset($this->server) && $this->server === 'local') {
-							$this->setDefaults();
-							$this->wordpressPath = '/home/nicholas/Dev/wordpress/' . $this->project;
-							$this->wordpressURL = 'http://ioti.local';
-							$this->drupalPath = '/home/nicholas/Dev/drupal7/' . $this->prject;
-							return;
-
-						} else {
-							throw new Exception("\nServer " . $this->server . " not configured for -d default options");
-						}
-					}
+					include "ioti-options.partial.php";
 
 				} else if ($this->project === 'tuauto') {
 
 					include "tuauto-options.partial.php";
 				}
+
 				if (empty($this->wordpressPath)) {
 					throw new Exception('Need to know the wordpress path, use --wordpressPath=/path/to/wp-config');
 				}
+
 			}
 		}
 	}
