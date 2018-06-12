@@ -214,14 +214,14 @@ for ($c = 0; $c < $chunks; $c++) {
 					$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
 				}
 
+				// TODO: test if addMediaLibrary is working for media_entity posts
 				if ($node->type === 'media_entity') {
 					$media_name = $node->title;
 					$media_set = $d7_fields->penton_media_images($node->nid);
-//debug($media_set);
+
 					if (!empty($media_set)) {
 						$file_set = $files->getFiles($node->nid);
 
-//debug($file_set);
 						if (isset($file_set)) {
 							foreach ($file_set as $file) {
 								// to add media_entity to the media library - we may need to know the wpPostId - but how?

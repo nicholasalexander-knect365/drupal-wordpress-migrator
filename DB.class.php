@@ -102,12 +102,9 @@ class DB {
 						if ($match[1] === 'HOST') {
 							$this->credentials['wp']['host'] = $matched[1];
 						}
-					// } else {
-					// 	debug($line);
 					}
 				}
 			}
-			//debug($this->credentials);
 		} else {
 
 			throw new Exception('wp-config does not exist PATH: ' . $wp_config . "\n");
@@ -115,10 +112,9 @@ class DB {
 	}
 
 	private function wpMultiSiteConfig($project) {
-
 		// the project's domain name exists in wp_domain_mapping on the staging site,
 		// but not necessarily on the vm site (and not on a local)
-		// using wp_blogs as a test for local/multisite
+		// therefore: using wp_blogs as a test for local/multisite
 		$sql = "SELECT * FROM wp_blogs WHERE domain LIKE '%$project%' LIMIT 1";
 		$record = $this->record($sql);
 
@@ -136,19 +132,6 @@ class DB {
 
 	}
 
-	public function tables() {
-
-		$dbName = $this->credentials[$this->type];
-		$sql = "SHOW TABLES";
-		$result = $this->records($sql);
-		$table_names = [];
-		$tablesIn = 'Tables_in_' . $dbName['database'];
-
-		foreach($result as $key => $record) {
-			$table_names[] = $record->$tablesIn;
-		}
-		return $table_names;
-	}
 
 	public function configure($config = null) {
 
@@ -160,9 +143,8 @@ class DB {
 		}
 
 		switch ($this->config->project) {
-
 			case 'ioti':
-
+				// DRUPAL DB CONFIG
 				if ($this->config->server === 'local') {
 					$this->credentials['d7'] = [
 						'database' => 'ioti_drupal',
@@ -221,7 +203,8 @@ class DB {
 		if ($this->db && $this->config->verbose) {
 			print "connected.";
 		}
-		
+
+		// configure Multisite in Wordpress
 		if ($this->type === 'wp') {
 
 			$this->wpMultiSiteConfig($this->config->project);
@@ -229,7 +212,9 @@ class DB {
 			$sql = "SHOW TABLES like 'wp_blogs'";
 			$record = $this->record($sql);
 
-			if ($record && count($record) && ($this->config->wordpressPath === '/var/www/public' || $this->config->wordpressPath === '/srv/www/test2.telecoms.com')) {
+			// multi-site config check
+			if ($record && count($record) && 
+				($this->config->wordpressPath === '/var/www/public' || $this->config->wordpressPath === '/srv/www/test2.telecoms.com' || $this->config->wordpressPath === '/srv/www/test3.telecoms.com' || $this->config->wordpressPath === '/srv/www/test1.telecoms.com')) {
 				if ($this->config->server === 'local') {
 					throw new Exception('CHECK FOR CONFIG ERROR: local server is not usually multisite.  If you are running on another server, please specify it with a --server=[vm,staging,live] directive');
 				}
@@ -241,6 +226,7 @@ class DB {
 			} else {
 				throw new Exception('Not multisite, yet server=local not set.  Please check your configuration!');
 			}
+
 		} else if ($this->type === 'd7') {
 			if ($once++ === 0) {
 				print "\n: Drupal 7 configured database connection.";
@@ -248,6 +234,21 @@ class DB {
 		} else {
 			throw new Exception($this->type . ' database configuration supported?');
 		}
+	}
+
+
+	public function tables() {
+
+		$dbName = $this->credentials[$this->type];
+		$sql = "SHOW TABLES";
+		$result = $this->records($sql);
+		$table_names = [];
+		$tablesIn = 'Tables_in_' . $dbName['database'];
+
+		foreach($result as $key => $record) {
+			$table_names[] = $record->$tablesIn;
+		}
+		return $table_names;
 	}
 
 	public static function wptable($type, $siteId = null) {
