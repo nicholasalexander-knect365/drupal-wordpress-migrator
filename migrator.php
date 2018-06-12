@@ -134,13 +134,11 @@ if ($options->taxonomy) {
 	if ($verbose) {
 		message("\nGetting Taxonomies...");
 	}
-	$vocabularies = $d7_taxonomy->getVocabulary();
-	
-	//$taxonomyNames = [];
-	
-	$taxonomies = $d7_taxonomy->fullTaxonomyList();
 
+	$vocabularies = $d7_taxonomy->getVocabulary();
+	$taxonomies = $d7_taxonomy->fullTaxonomyList();
 	$wp_taxonomy->createTerms($taxonomies);
+
 }
 
 $showDebug = false;
@@ -199,34 +197,40 @@ for ($c = 0; $c < $chunks; $c++) {
 	}
 	if (isset($drupal_nodes) && count($drupal_nodes)) {
 
+		$galleries = [];
+
 		foreach ($drupal_nodes as $node) {
 
 			$wpPostId = null;
 			$fileSet = null;
 
 			if ($options->nodes && $nodeSource === 'drupal') {
+
 				$d7_node->setNode($node);
+
+				$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
+
+				if ($wpPostId) {
+					$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
+				}
 
 				if ($node->type === 'media_entity') {
 					$media_name = $node->title;
-					$fileSet = $files->getFiles($node->nid);
-					if (isset($fileSet)) {
-						foreach ($fileSet as $file) {
-							$wordpress->addMediaLibrary($wpPostId, $file, $options);
+					$media_set = $d7_fields->penton_media_images($node->nid);
+//debug($media_set);
+					if (!empty($media_set)) {
+						$file_set = $files->getFiles($node->nid);
+
+//debug($file_set);
+						if (isset($file_set)) {
+							foreach ($file_set as $file) {
+								// to add media_entity to the media library - we may need to know the wpPostId - but how?
+								$wordpress->addMediaLibrary($wpPostId, $file, $options, $node->type);
+							}
 						}
 					}
-
-				} else {
-
-					$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
-
-					if ($wpPostId) {
-						$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
-					} else {
-						debug('makePost returned no value for this node??');
-						dd($node);
-					}
 				}
+
 			} else {
 				// find the wpPostId for this node??
 				$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
@@ -276,6 +280,8 @@ for ($c = 0; $c < $chunks; $c++) {
 					$event = new stdClass();
 					$report = new stdClass();
 
+					$gallery = [];
+// dd($fieldTables);
 					foreach($fieldTables as $fieldDataSource) {
 
 						$gather = new Gather($d7, $fieldDataSource);
@@ -284,28 +290,75 @@ for ($c = 0; $c < $chunks; $c++) {
 						$tableName = 'field_data_field_' . $fieldDataSource;
 						$func = 'get_' . $fieldDataSource;
 
+						//Gather brings in the fields with softdata
 						$data = $gather->$func($node->nid);
 
+
 						if (isset($data) && count($data)) {
+							$image->featured_image_id = null;
+							$image = new stdClass();
+							if ($data[0] === 'field_penton_media_image') {
+								if ($fieldDataSource === 'penton_media_image') {
+									$image->fid = $data[1]->field_penton_media_image_fid;
+									$image->alt = $data[1]->field_penton_media_image_alt;
+									$image->title = $data[1]->field_penton_media_image_title;
+									$image->width = $data[1]->field_penton_media_image_width;
+									$image->height = $data[1]->field_penton_media_image_height;
+								}
+							} else if ($data[0] === 'field_penton_media_type') {
+								$image->type = $data[1]->field_penton_media_type_value;
+								$image->nid = $node->nid; //$data[1]->entity_id;
+							
+							} else if ($data[0] === 'field_penton_media_credit') {
+								if ($data[1]->field_penton_media_credit_value) {
+									$image->credit = $data[1]->field_penton_media_credit_value;
+								}
+							} else if ($data[0] === 'field_penton_media_caption') {
+								if ($data[1]->field_penton_media_caption_value) {
+									$image->caption = $data[1]->field_penton_media_caption_value;
+								}
+							} else if ($data[0] === 'field_penton_link_media_feat_img') {
+									$image->featured_image_id = $data[1]->field_penton_link_media_feat_img_target_id;
+							}
+
+							// create a featured image
+							if (isset($image->featured_image_id)) {
+
+								$image_url = $d7_node->getNode($image->featured_image_id)->title;
+								//$post->makeAttachment($wpPostId, $image_url);
+								//$postmeta->createFields($wpPostId, ['_thumbnail_id' => $mediaId]);
+// debug($image);
+// debug($wpPostId);
+// 								$fileSet = $files->getFiles($node->nid);
+// debug($fileSet);
+								$wordpress->addUrlMediaLibrary($wpPostId, $image_url, $options, true);
+
+							}
+
+							if (count((array)$image)) {
+								$gallery[$wpPostId] = $image;
+								continue;
+							}
 
 							$object = new stdClass();
-							foreach ($data[1] as $field => $value) {
+							foreach ($data[1] as $key => $value) {
 
 								if (strlen($value) && $value !== 'a:0:{}') {
-									$shorterField = preg_replace('/^field_/', '', $field);
+
+									$shorterField = preg_replace('/^field_/', '', $key);
 									
-									if (preg_match('/_date_/', $field)) {
-										$data[1]->$field = date_format(date_create($data[1]->$field), 'U');
+									if (preg_match('/_date_/', $key)) {
+										$data[1]->$key = date_format(date_create($data[1]->$key), 'U');
 									}
-									
+
 									//e.g. $event->report_url_url
 									preg_match('/^(.*)_/', $shorterField, $match);
 
 									//$object = new stdClass(); //$match[1];
-									$object->$shorterField = $data[1]->$field;
+									$object->$shorterField = $data[1]->$key;
 									$fieldUpdate = [];
-									foreach($object as $key => $value) {
-										$fieldUpdate[$key] = isset($value) ? $value : '';
+									foreach($object as $k => $v) {
+										$fieldUpdate[$k] = isset($v) ? $v : '';
 									}
 									if (count($fieldUpdate)) {
 										$postmeta->createFields($wpPostId, $fieldUpdate);
@@ -314,9 +367,14 @@ for ($c = 0; $c < $chunks; $c++) {
 							}
 						}
 					}
+
+					if (count($gallery)) {
+						$galleries[] = $gallery;
+					}
 				}
 			}
 		}
+		debug($galleries, 0, 1);
 	}
 }
 

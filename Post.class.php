@@ -94,11 +94,8 @@ class Post extends DB {
 		$wp_postmeta = DB::wptable('postmeta');
 
 		$sql = "SELECT *, u.user_email AS user_email FROM $wp_posts p LEFT JOIN wp_users u ON p.post_author=u.ID WHERE p.ID=$wpPostId";
-		
-		//$sql = "SELECT * FROM $wp_posts WHERE ID=$wpPostId";
 		$record = $this->db->record($sql);
 
-//dd(DB::strip($sql));
 		$user_email = $record->user_email;
 
 		$post_name = Taxonomy::slugify($drupalNode->title);
@@ -146,6 +143,21 @@ class Post extends DB {
 		}
 	}
 
+	// make an attachment with a URL returning its postmeta ID
+	public function makeAttachment($wpPostId, $url) {
+
+		$wp_posts = DB::wptable('posts');
+		$wp_postmeta = DB::wptable('postmeta');
+
+		$guid = $this->options->get('wordpressPath') . '/' . $url;
+		$sql = "INSERT INTO $wp_posts (post_type, guid) VALUES ('attachment', $url)";
+		$this->db->query($sql);
+		$post_id = $this->db->lastInsertId();
+		$sql = "INSERT INTO $wp_postmeta (post_id, meta_key, meta_value) VALUES ($wpPostId, '_thumbnail_id', $post_id)";
+		$this->db->query($sql);
+		return $this->db->lastInsertId();
+	}
+
 	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath, \User $users) {
 
 		$wp_posts = DB::wptable('posts');
@@ -157,6 +169,28 @@ class Post extends DB {
 
 		$nid = $drupal_data->nid;
 		$fileSet = $files->fileList($nid);
+
+		$postContent = $this->prepare($drupal_data->content);
+
+// later!
+if (false) {
+	if (preg_match('/<img.*?src="http:\/\/(www\.)?ioti\.com/', $postContent, $src)) {
+
+		debug($postContent);
+		debug($src);
+		preg_match('/<img .*?src\=["](.*?)["]$/', $postContent, $parts);
+		dd($parts);
+
+		//<img src="http://www.ioti.com/sites/iot-institute.com/files/Enterprise%20IoT%20World.png"
+		$postContent = preg_replace('/src="http:\/\/(www\.)?ioti\.com\/sites\/iot\-institute\.com\/files\//','src="files/2018/06/', $postContent);
+	// get the image
+
+		$drupal_data->content = $postContent;
+		debug("\n---------------------------------");
+		debug($postContent);
+		dd('END');
+	}
+}
 
 		foreach($drupal_data as $key => $value) {
 
@@ -176,7 +210,7 @@ class Post extends DB {
 
 			} else {
 
-				$value = $this->prepare($value);
+				// $value = $this->prepare($value);
 
 				if ($key === 'created' || $key === 'changed') {
 					$value = date('Y-m-d h:i:s', $value);
@@ -187,8 +221,10 @@ class Post extends DB {
 					$values[$wpKey . '_gmt'] = $value;
 				}
 
-				switch ($key) {
+// debug($wpKey . ' ' .$key);
+// debug($value);
 
+				switch ($key) {
 					case 'uid':
 						$drupalUser = $users->getDrupalUserByUid($value);
 						if ($drupalUser && strlen($drupalUser->mail) > 4) {
@@ -228,12 +264,13 @@ class Post extends DB {
 						break;
 
 					case 'content':
+						$value = $this->prepare($value);
 						if ($options && $options->clean) {
 							$value = preg_replace('/ style\=[\'"].*?[\'"]/', '', $value);
 						}
-
-						if ($fileSet) {
-
+						if (isset($fileSet) && count($fileSet)) {
+// debug($values);
+// dd($fileSet);
 							// replace the filename in content: 
 							// drupal uses image.preview.png for thumbnails
 							// but we only want the actual filename
@@ -247,12 +284,14 @@ class Post extends DB {
 								if (preg_match('/src=["]([\w:\/\-\.\_]+)?["]/i', $value, $matched)) {
 									if (count($matched)>0 && strpos($matched[1], $preview)) {
 										$replaceFilename = $preview;
+// dd($value);
 									}
 								}
 
 								$value = preg_replace("/src=\".*?$replaceFilename\"/", "src=\"$wordpressPath/$filename\"" , $value);
 							}
 						}
+
 						$values[$wpKey] = $value;
 						break;
 
@@ -275,16 +314,22 @@ class Post extends DB {
 						break;
 
 					case 'type' : 
-//debug("\n>>>>" . $key . ' >>>>>> ' .$value);
+
 						if ($value === 'media_entity') {
+// debug($value);
+// debug($drupal_data->title);
 							if (is_numeric($drupal_data->title)) {
 								$value = sprintf('ThinkstockPhotos-%d.jpg', $drupal_data->title);
 //debug($value);
 							}
-							//$values['post_image'] = $value;
+							$values['post_image'] = $value;
+							// medi entities are featured images
+							return NULL;
 						} else {
+//debug("\n>>>>" . $key . ' >>>>>> ' .$value . ' <<<<< ' . static::$mapPostType[$value]);
 							$values['post_type'] = static::$mapPostType[$value];
 						}
+
 						break;
 
 					case 'author':
@@ -296,6 +341,7 @@ debug($values);
 					default: 
 						$values[$wpKey] = $value;
 				}
+//debug("\nkey = " . $wpKey . ' value = ' .$value);
 			}
 		}
 
@@ -316,7 +362,7 @@ debug($values);
 		$sql = "INSERT into $wp_posts (" . implode(', ', array_keys($values)) . ") VALUES ('" . implode("', '", $values) ."')";
 		$this->db->query($sql); 
 		$post_id = $this->db->lastInsertId();
-//dd($sql);
+//debug($sql);
 		return $post_id;
 
 		// TODO: deprecate this?
