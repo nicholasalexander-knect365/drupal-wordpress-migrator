@@ -168,6 +168,14 @@ class DB {
 						'host' => 'localhost'
 					];
 				}
+				if ($this->config->server === 'vm') {
+					$this->credentials['d7'] = [
+						'database' => 'ioti_drupal',
+						'username' => 'root',
+						'password' => 'root',
+						'host' => 'localhost'
+					];
+				}
 				break;
 			case 'tu-auto':
 				if ($this->config->server === 'staging1') {

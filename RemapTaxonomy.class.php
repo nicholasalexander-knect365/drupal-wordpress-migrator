@@ -6,8 +6,9 @@ class RemapTaxonomy extends Taxonomy {
 
 	protected function IOTIRemapNameCategory($name) {
 		switch(trim(strtolower($name))) {
+			case 'news':
 			case 'news and analysis':
-				$name = 'news';
+				$name = 'News and Analysis';
 				$taxonomy = 'type';
 				break;
 			case 'strategy':

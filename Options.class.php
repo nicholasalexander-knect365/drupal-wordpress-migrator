@@ -193,8 +193,8 @@ class Options {
 				print "\n  -f Files (Images)";
 				print "\n  --acf ACF Fields";
 				print "\n";
-				print "\n  -d --server=local - sets wordpressPath=~/Dev/wordpress/tuauto --project='tu-auto' --drupalPath=~/Dev/drupal7/tu-auto/ +verbose +files +nodes -taxonomy +fields +users +initialise +clean";
-				print "\n --d --server=vm sets defaults +progress +quiet -verbose -help +files +nodes -users +taxonomy +fields +initialise -clean +clearImages -sqlDebug --wordpressPath=/var/www/public --wordpressURL=http://tuauto.telecoms.local --drupalPath=/vagrant/drupal7/tu-auto";
+				print "\n  -d --server=local - sets wordpressPath=~/Dev/wordpress/tuauto --project='PROJECT' --drupalPath=~/Dev/drupal7/PROJECT/ +verbose +files +nodes -taxonomy +fields +users +initialise +clean";
+				print "\n --d --server=vm sets defaults +progress +quiet -verbose -help +files +nodes -users +taxonomy +fields +initialise -clean +clearImages -sqlDebug --wordpressPath=/var/www/public --wordpressURL=http://tuauto.telecoms.local --drupalPath=/vagrant/drupal7/PROJECT";
 				print "\n --d --server=staging - use explicit args";
 				print "\n";
 				die;
@@ -310,21 +310,21 @@ class Options {
 							$this->setDefaults();
 							$this->wordpressPath = '/var/www/public';
 							$this->wordpressURL = 'http://tuauto.telecoms.local';
-							$this->drupalPath = '/vagrant/drupal7/tu-auto';
+							$this->drupalPath = '/vagrant/drupal7/'.$this->project;
 							return;
 
 						} else if (isset($this->server) && $this->server === 'staging') {
 							$this->setDefaults();
 							$this->wordpressPath = '/var/www/public';
 							$this->wordpressURL = 'http://tuauto.telecoms.local';
-							$this->drupalPath = '/vagrant/drupal7/tu-auto';
+							$this->drupalPath = '/vagrant/drupal7/'.$this->project;
 							return;
 
 						} else if (isset($this->server) && $this->server === 'local') {
 							$this->setDefaults();
-							$this->wordpressPath = '/home/nicholas/Dev/wordpress/ioti';
+							$this->wordpressPath = '/home/nicholas/Dev/wordpress/' . $this->project;
 							$this->wordpressURL = 'http://ioti.local';
-							$this->drupalPath = '/home/nicholas/Dev/drupal7/ioti';
+							$this->drupalPath = '/home/nicholas/Dev/drupal7/' . $this->prject;
 							return;
 
 						} else {
