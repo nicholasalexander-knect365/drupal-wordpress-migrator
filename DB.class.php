@@ -160,7 +160,9 @@ class DB {
 		}
 
 		switch ($this->config->project) {
+
 			case 'ioti':
+
 				if ($this->config->server === 'local') {
 					$this->credentials['d7'] = [
 						'database' => 'ioti_drupal',
@@ -168,6 +170,7 @@ class DB {
 						'password' => 'admin',
 						'host' => 'localhost'
 					];
+
 				} else if ($this->config->server === 'staging') {
 					$this->credentials['d7'] = [
 						// drupal database on test2
@@ -176,7 +179,18 @@ class DB {
 						'password' => 'OhLoogai1Jook5mai7oc',
 						'host' => 'mysql'
 					];
+				}
+
+				if ($this->config->server === 'vm') {
+					$this->credentials['d7'] = [
+						'database' => 'ioti_drupal',
+						'username' => 'root',
+						'password' => 'root',
+						'host' => 'localhost'
+					];
+				}
 				break;
+
 			case 'tu-auto':
 				if ($this->config->server === 'staging1') {
 					$this->credentials['d7'] = [

@@ -8,6 +8,7 @@ class RemapTaxonomy extends Taxonomy {
 		// TODO: this is not yet complete: some taxonomies activate a parent,
 		// i.e. subject taxonomies are all also type=technolgies or type=vertical industries
 		switch(trim(strtolower($name))) {
+			case 'news':
 			case 'news and analysis':
 				$name = 'News';
 				$taxonomy = 'type';
