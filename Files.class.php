@@ -113,7 +113,9 @@ class Files {
 						debug('could not copy ' . $path);
 					}
 				} else {
-					print "\nimage path: $path does not exist";
+					if ($this->verbose) {
+						print "\nimage path: $path does not exist";
+					}
 				}
 				break;
 

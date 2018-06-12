@@ -21,7 +21,7 @@ class Node {
 		if ($vid) {
 			$sql .= " AND vid=$vid";
 		}
-		$this->db->runQuery($sql);
+		$this->db->query($sql);
 
 		$node = $this->db->getRecord();
 		$this->users[$node->nid] = $node;

@@ -5,39 +5,101 @@ require_once "Taxonomy.class.php";
 class RemapTaxonomy extends Taxonomy {
 
 	protected function IOTIRemapNameCategory($name) {
+		// TODO: this is not yet complete: some taxonomies activate a parent,
+		// i.e. subject taxonomies are all also type=technolgies or type=vertical industries
 		switch(trim(strtolower($name))) {
 			case 'news':
 			case 'news and analysis':
-				$name = 'News and Analysis';
+				$name = 'News';
 				$taxonomy = 'type';
 				break;
 			case 'strategy':
+				$name = 'Strategy';
+				$taxonomy = 'type';
+				break;
 			case 'analytics':
+				$name = 'Analytics';
+				$taxonomy = 'subject';
+				break;
 			case 'infrastructure':
+				$name = 'Architecture';
+				$taxonomy = 'subject';
+				break;
 			case 'engineering and development':
+				$name = 'Engineering/Development';
+				$taxonomy = 'subject';
+				break;
 			case 'security':
+				$name = 'Security';
+				$taxonomy = 'subject';
+				break;
 			case 'startups':
+				$name = 'Startups';
+				$taxonomy = 'strategy';
+				break;
 			case 'agriculture':
+				$name = 'Agriculture';
+				$taxonomy = 'strategy';
+				break;
 			case 'automotive':
+			case 'transport and logistics':
+				$name = 'Transportation/Logistics';
+				$taxonomy = 'subject';
+				break;
 			case 'healthcare':
+				$name = 'Healthcare';
+				$taxonomy = 'subject';
+				break;
 			case 'industrial iot (iiot)':
+				$name = 'IIoT';
+				$taxonomy = 'subject';
+				break;
 			case 'personal':
+				$name = 'Personal';
+				$taxonomy = 'strategy';
+				break;
 			case 'retail':
+				$name = 'Retail';
+				$taxonomy = 'subject';
+				break;
 			case 'smart buildings':
-			case 'smart cities':
-			case 'smart energy and utilties':
 			case 'smart home':
-			case 'transportation and logistics':
-				$taxonomy = 'category';
+				$name = 'Homes/Buildings';
+				$taxonomy = 'subject';
+				break;
+			case 'smart cities':
+				$name = 'Cities';
+				$taxonomy = 'subject';
+				break;
+			case 'smart energy and utilties':
+				$name = 'Energy';
+				$taxonomy = 'subject';
 				break;
 			case 'article':
 			case 'link':
+				
 			case 'video':
+				$name = 'Video';
+				$taxonomy = 'type';
+				break;
 			case 'gallery':
+				$name = 'Galleries';
+				$taxonomy = 'type';
+				break;
 			case 'audio':
+				$name = 'Podcasts';
+				$taxonomy = 'type';
+				break;
 			case 'webinar':
+				$name = 'Webinars';
+				$taxonomy = 'type';
+				break;
 			case 'white paper':
+				$name = 'Whitepapers';
+				$taxonomy = 'type';
+				break;
 			case 'standard page':
+				$name = 'page';
 				$taxonomy = 'type';
 				break;
 			default:

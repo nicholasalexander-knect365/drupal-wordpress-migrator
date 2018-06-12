@@ -76,7 +76,7 @@ function home() {
 	return getenv('HOME');
 }
 
-function debug($v, $singleton = 0) {
+function debug($v, $singleton = 0, $verbose = 0) {
 	global $verbose;
 	
 	if ($singleton) {

@@ -270,6 +270,7 @@ dd('why create term here?');
 		$parent = $taxonomy->hierarchy;
 
 		$record = $this->getTaxonomyRecord($term_id, $taxname);
+//debug($record);
 
 		if ($record) {
 			$term_taxonomy_id = $record->term_taxonomy_id;
@@ -383,7 +384,6 @@ dd('why create term here?');
 				LEFT JOIN taxonomy_vocabulary v ON td.vid=v.vid';
 
 		$records = $this->db->records($sql);
-
 		return $records;
 	}
 
