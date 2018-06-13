@@ -1,6 +1,9 @@
 <?php
 /***
  * rewriteSlugs.php
+ * purpose: reset wpterms slugs to be slugs of the name
+ * ONE OFF FOR TUAUTO for a bug-fix
+ * NO LONGER REQUIRED
  * by Nicholas Alexander for informa Knect365
  * 
  */
@@ -14,6 +17,8 @@ require "Options.class.php";
 require "User.class.php";
 //require "Node.class.php";
 require "Taxonomy.class.php";
+
+die('rewriteSlugs is a one-off script to fix a migration bug: no longer required.  It will be deprecated');
 
 // common routines including script init
 require "common.php";

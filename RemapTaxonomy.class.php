@@ -10,107 +10,78 @@ class RemapTaxonomy extends Taxonomy {
 		switch(trim(strtolower($name))) {
 			case 'news':
 			case 'news and analysis':
-				$name = 'News';
-				$taxonomy = 'type';
+				$taxset = ['type' => 'News'];
 				break;
-			case 'strategy':
-				$name = 'Strategy';
-				$taxonomy = 'type';
-				break;
-			case 'analytics':
-				$name = 'Analytics';
-				$taxonomy = 'subject';
-				break;
-			case 'infrastructure':
-				$name = 'Architecture';
-				$taxonomy = 'subject';
-				break;
-			case 'engineering and development':
-				$name = 'Engineering/Development';
-				$taxonomy = 'subject';
-				break;
-			case 'security':
-				$name = 'Security';
-				$taxonomy = 'subject';
-				break;
-			case 'startups':
-				$name = 'Startups';
-				$taxonomy = 'strategy';
-				break;
+
 			case 'agriculture':
-				$name = 'Agriculture';
-				$taxonomy = 'strategy';
-				break;
-			case 'automotive':
-			case 'transport and logistics':
-				$name = 'Transportation/Logistics';
-				$taxonomy = 'subject';
-				break;
-			case 'healthcare':
-				$name = 'Healthcare';
-				$taxonomy = 'subject';
-				break;
-			case 'industrial iot (iiot)':
-				$name = 'IIoT';
-				$taxonomy = 'subject';
-				break;
 			case 'personal':
-				$name = 'Personal';
-				$taxonomy = 'strategy';
+			case 'startups':
+			case 'strategy':
+				$taxset = ['type' => 'Strategy'];
 				break;
-			case 'retail':
-				$name = 'Retail';
-				$taxonomy = 'subject';
+
+			case 'analytics':
+				$taxset = ['type' => 'Technologies', 'subject' => 'Analytics'];
 				break;
+
+			case 'infrastructure':
+				$taxset = ['type' => 'Technologies', 'subject' => 'Architecture'];
+				break;
+
+			case 'engineering and development':
+				$taxset = ['type' => 'Technologies', 'subject' => 'Engineering/Development'];
+				break;
+
+			case 'security':
+				$taxset = ['type' => 'Technologies', 'subject' => 'Security'];
+				break;
+
+			case 'industrial iot (iiot)':
+				$taxset = ['type' => 'Vertical Industries', 'subject' => 'IIoT'];
+				break;
+
+			case 'smart cities':
+				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Cities'];
+				break;
+
+			case 'smart energy and utilties':
+				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Energy'];
+				break;
+
 			case 'smart buildings':
 			case 'smart home':
-				$name = 'Homes/Buildings';
-				$taxonomy = 'subject';
+				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Homes/Buildings'];
 				break;
-			case 'smart cities':
-				$name = 'Cities';
-				$taxonomy = 'subject';
+
+			case 'automotive':
+			case 'transport and logistics':
+				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Transportation/Logistics'];
 				break;
-			case 'smart energy and utilties':
-				$name = 'Energy';
-				$taxonomy = 'subject';
+
+			case 'healthcare':
+				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Healthcare'];
 				break;
+
+			case 'retail':
+				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Retail'];
+				break;
+
 			case 'article':
-			case 'link':
-				
-			case 'video':
-				$name = 'Video';
-				$taxonomy = 'type';
-				break;
 			case 'gallery':
-				$name = 'Galleries';
-				$taxonomy = 'type';
+			case 'link':
+				$taxset = ['type' => 'Business Resource'];
 				break;
+
+			case 'video':
 			case 'audio':
-				$name = 'Podcasts';
-				$taxonomy = 'type';
+				$taxset = ['type' => 'Other Content', 'subtype' => 'Video/Podcasts'];
 				break;
-			case 'webinar':
-				$name = 'Webinars';
-				$taxonomy = 'type';
-				break;
-			case 'white paper':
-				$name = 'Whitepapers';
-				$taxonomy = 'type';
-				break;
-			case 'standard page':
-				$name = 'page';
-				$taxonomy = 'type';
-				break;
+			
 			default:
-				$taxonomy = 'post_tag';
+				$taxset = ['post_tag' => $name];
+				break;
 		}
-		if (strlen($taxonomy)) {
-			return [$name, $taxonomy];
-		} else {
-			debug([$name, $slug, $taxonomy]);
-			throw new Exception('No taxonomy mapped?');
-		}
+		return $taxset;
 	}
 
 	protected function TUAutoRemapNameCategory($name) {

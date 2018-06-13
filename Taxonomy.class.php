@@ -68,15 +68,17 @@ class Taxonomy {
 		switch ($this->options->project) {
 			case 'tuauto':
 				list($name, $taxonomy) = $remap->TUAutoRemapNameCategory($name);
+				return [$taxonomy => $name];
 				break;
+
 			case 'ioti':
-				list($name, $taxonomy) = $remap->IOTIRemapNameCategory($name);
+				$taxonomies = $remap->IOTIRemapNameCategory($name);
+				return $taxonomies;
+
 				break;
 			default: 
 				throw new Exception('Can not remap for this project ' . $this->options->project);
 		}
-
-		return [$name, $taxonomy];
 	}
 
 	private function termsAlreadyExist() {
@@ -182,21 +184,24 @@ class Taxonomy {
 			if (strlen($name)) {
 				$term_group = 0;
 
-				list($name, $taxname) = $this->remapNameCategory($name);
-				$slug = $this->slugify($name);
+				$taxonomies = $this->remapNameCategory($name);
 
-				$term_id = $this->getSetTerm($name, $slug);
+				foreach ($taxonomies as $taxonomy => $taxname) {
 
-				$this->terms[$taxname][$slug] = $term_id;
+					$slug = $this->slugify($name);
+					$term_id = $this->getSetTerm($name, $slug);
 
-				$record = $this->getTaxonomyRecord($term_id, $taxname);
+					$this->terms[$taxname][$slug] = $term_id;
 
-				if ($record === NULL) {
-					$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$taxname', '$name', 0, 1)";
-				    $this->db->query($sql);
-				} else {
-					$term_taxonomy_id = $record->term_taxonomy_id;
-					$sql = "UPDATE $wp_term_taxonomy SET count = count+1 WHERE term_taxonomy_id = $term_taxonomy_id";
+					$record = $this->getTaxonomyRecord($term_id, $taxname);
+
+					if ($record === NULL) {
+						$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$taxname', '$name', 0, 1)";
+						$this->db->query($sql);
+					} else {
+						$term_taxonomy_id = $record->term_taxonomy_id;
+						$sql = "UPDATE $wp_term_taxonomy SET count = count+1 WHERE term_taxonomy_id = $term_taxonomy_id";
+					}
 				}
 			} else {
 				debug($taxonomy);
@@ -247,22 +252,27 @@ class Taxonomy {
 
 		$name = $this->makeWPTermName($taxonomy->name);
 
+		$taxonomies = $this->remapNameCategory($name);
 
-		list($name, $taxname) = $this->remapNameCategory($name);
-		$slug = $this->slugify($name);
+		foreach($taxonomies as $name => $taxname) {
 
-		if (strlen($taxonomy->description)) {
-			$description = $taxonomy->name . ' ' . $taxonomy->description;
-		} else {
-			$description = $taxonomy->name;
-		}
+			$slug = $this->slugify($name);
 
-		if (isset($this->terms[$taxname][$slug])) {
-			$term_id = (integer) $this->terms[$taxname][$slug];
-		} else {
-			debug($name, $slug);
-dd('why create term here?');
-			$term_id = $this->createTerm($name, $slug);
+			if (strlen($taxonomy->description)) {
+				$description = $taxonomy->name . ' ' . $taxonomy->description;
+			} else {
+				$description = $taxonomy->name;
+			}
+
+			if (isset($this->terms[$taxname][$slug])) {
+				$term_id = (integer) $this->terms[$taxname][$slug];
+			} else {
+				if ($this->options->verbose) {
+					debug('makeTermTaxonomy term created with:');
+					debug([$name, $slug]);
+				}
+				$term_id = $this->createTerm($name, $slug);
+			}
 		}
 
 		$format = $taxonomy->format;
