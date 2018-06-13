@@ -186,7 +186,7 @@ class Taxonomy {
 
 				$taxonomies = $this->remapNameCategory($name);
 
-				foreach ($taxonomies as $taxonomy => $taxname) {
+				foreach ($taxonomies as $taxname => $name) {
 
 					$slug = $this->slugify($name);
 					$term_id = $this->getSetTerm($name, $slug);
@@ -254,7 +254,7 @@ class Taxonomy {
 
 		$taxonomies = $this->remapNameCategory($name);
 
-		foreach($taxonomies as $name => $taxname) {
+		foreach($taxonomies as $taxname => $name) {
 
 			$slug = $this->slugify($name);
 
