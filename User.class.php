@@ -49,8 +49,6 @@ class User {
 	}
 
 	public function countDrupalUsers() {
-		//debug($this->drupalUsers);
-
 		$c = 0;
 		$uniq = [];
 		$roles = [];
@@ -270,7 +268,7 @@ class User {
 			if ($blog_id) {
 				$key = preg_replace('/%d/', $blog_id, $key);
 				$capabilityKey = sprintf('wp_%d_capabilities', $blog_id);
-				$roleKey = spirntf('wp_%d_roles', $blog_id);
+				$roleKey = sprintf('wp_%d_roles', $blog_id);
 			} else {
 				$capabilityKey = 'wp_capabilities';
 				$roleKey = 'wp_roles';

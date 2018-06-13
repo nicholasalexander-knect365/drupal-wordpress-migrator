@@ -15,10 +15,8 @@ require "User.class.php";
 require "common.php";
 
 // databases are now available as $wp and $d7
-$server = 'local';
-
-$users->getDrupalUsers(); //debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
-
+$users->getDrupalUsers(); 
+debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
 $users->makeDrupalUsers();
 
 debug("\n\nDrupal users have been stored in the wordpress dusers table\n\n");

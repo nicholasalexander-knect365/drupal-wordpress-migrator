@@ -26,7 +26,7 @@ if ($options->users) {
 	if ($options->dusers) {
 
 		if ($users->getTempDrupalUsers()) {
-			debug($users->countDrupalUsers() . ' users from temporary table (dusers)');
+			debug($users->countDrupalUsers() . ' users loaded from temporary table (dusers)');
 		} else {
 			debug ("\nError: Did not load users from the temporary dusers table, dusers requires a table to load from.");
 		}
@@ -34,18 +34,20 @@ if ($options->users) {
 	} else {
 
 		if ($users->doWordpressUsersExist()) {
+
 			debug("\nImporting Drupal users to add to existing Wordpress users");
 		} 
 		$users->getDrupalUsers(); 
-		debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
-
-		$users->createWordpressUsers($options->siteId);  
-		debug($users->wordpressUsers() . '... users created in Wordpress');
-
-		$users->makeAdminUser();
-
-		die("\n\nUsers imported, now run without the -u switch to do imports using these users.\n\n");
 	}
+
+	debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
+
+	$users->createWordpressUsers($options->siteId);  
+	debug($users->wordpressUsers() . '... users created in Wordpress');
+
+	$users->makeAdminUser();
+
+	die("\n\nUsers imported, now run without the -u switch to do imports using these users.\n\n");
 
 } else {
 
