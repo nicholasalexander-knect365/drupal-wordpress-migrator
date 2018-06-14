@@ -182,8 +182,8 @@ class Taxonomy {
 			$name = $this->makeWPTermName($taxonomy->name);
 			
 			if (strlen($name)) {
-				$term_group = 0;
 
+				$term_group = 0;
 				$taxonomies = $this->remapNameCategory($name);
 
 				foreach ($taxonomies as $taxname => $name) {
@@ -194,14 +194,13 @@ class Taxonomy {
 					$this->terms[$taxname][$slug] = $term_id;
 
 					$record = $this->getTaxonomyRecord($term_id, $taxname);
-
 					if ($record === NULL) {
 						$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$taxname', '$name', 0, 1)";
-						$this->db->query($sql);
 					} else {
 						$term_taxonomy_id = $record->term_taxonomy_id;
 						$sql = "UPDATE $wp_term_taxonomy SET count = count+1 WHERE term_taxonomy_id = $term_taxonomy_id";
 					}
+					$this->db->query($sql);
 				}
 			} else {
 				debug($taxonomy);
