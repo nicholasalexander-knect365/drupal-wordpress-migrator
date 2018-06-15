@@ -24,7 +24,7 @@
 			$this->setDefaults();
 			$this->wordpressPath = '/home/nicholas/Dev/wordpress/' . $this->project;
 			$this->wordpressURL = 'http://ioti.local';
-			$this->drupalPath = '/home/nicholas/Dev/drupal7/' . $this->prject;
+			$this->drupalPath = '/home/nicholas/Dev/drupal7/' . $this->project;
 			return;
 
 		} else {
