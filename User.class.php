@@ -346,6 +346,7 @@ class User {
 				case 'contributor';
 					$capability = $this->capabilities[3];
 					$user_level = 3;
+					break;
 
 				default:
 					$capability = $this->capabilities[4];
@@ -538,24 +539,23 @@ class User {
 	public function createWordpressUsers($blog_id = null) {
 
 		foreach ($this->drupalUsers as $drupal_user) {
+
 			if ($drupal_user->uid > 0) {
 
 				$user = $this->getWordpressUserByEmail($drupal_user->mail);
-				if ($user) {
+
+				if (isset($user) && $user->ID) {
 					$user_id = $user->ID;
-				}
-				if ($user_id) {
+				} else {
 					$user_id = $this->makeWordpressUser($drupal_user);
+
 					if (empty($user_id)) {
 						debug("\nDrupal user " . $drupal_user->uid . " was not imported as there is no email address for that Drupal user.");
 					}
-					if ($this->makeUserMeta($drupal_user, $user_id, $blog_id)) {
-						debug("usermeta created for $drupal_user");
-					}
-
-				} else {
-					// user exists, update the usermeta
-					$this->addUserMeta($drupal_user, $user_id, $blog_id);
+				}
+				$this->makeUserMeta($drupal_user, $user_id, $blog_id);
+				if ($this->config->verbose) {
+					debug("usermeta created for user $user_id");
 				}
 			}
 		}
