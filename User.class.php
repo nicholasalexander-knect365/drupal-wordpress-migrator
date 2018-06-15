@@ -322,19 +322,18 @@ class User {
 
 			switch (strtolower($role)) {
 
+				case 'user care':
 				case 'administrator':
 				case 'associate administrator':
-				case 'user care': 
 					$capability = $this->capabilities[0];
 					$user_level = 10;
 					break;
 
 				case 'editor':
-				case 'content manager':
-				case 'advanced registered user':
-				case 'content moderator':
 				case 'feeds manager':
 				case 'production user':
+				case 'content manager':
+				case 'content moderator':
 					$capability = $this->capabilities[1];
 					$user_level = 7;
 					break;
@@ -343,6 +342,7 @@ class User {
 					$capability = $this->capabilities[2];
 					$user_level = 5;
 					break;
+
 				case 'contributor';
 					$capability = $this->capabilities[3];
 					$user_level = 3;

@@ -137,7 +137,10 @@ class DB {
 
 		static $once = 0;
 
-		$this->config = $config;
+		if ($config) {
+			$this->config = $config;
+		}
+
 		if ($this->config->verbose) {
 			print "\n" . ucfirst($this->config->server) . ' : ' . $this->type . ' connect request... for project '.$this->config->project;
 		}

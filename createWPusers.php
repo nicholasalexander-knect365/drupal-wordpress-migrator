@@ -16,6 +16,8 @@ require "User.class.php";
 // common routines include script initialisation
 require "common.php";
 
+$users = new User($wp, $d7, $options);
+
 // databases are now available as $wp and $d7
 $wordpress = new WP($wp, $options);
 

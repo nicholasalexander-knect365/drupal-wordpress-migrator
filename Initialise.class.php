@@ -38,29 +38,43 @@ class Initialise {
 			$wp_terms = DB::wptable('terms');
 			$wp_postmeta = DB::wptable('postmeta');
 
-      $sql = "DELETE FROM $wp_term_relationships";
-      $db->query($sql);
-      $this->resetCounter($db, $wp_term_relationships);
 
-      $sql = "DELETE FROM $wp_posts WHERE post_type <> 'nav_menu_item'";
-      $db->query($sql);
-      $this->resetCounter($db, $wp_posts);
+			$terms_protect = [];
+			$taxonomy_protect = [];
 
-      $sql = "DELETE FROM $wp_terms";
-      $db->query($sql);
-      $this->resetCounter($db, $wp_terms);
+			// menu preservation
+			$sql = "SELECT term_id, term_taxonomy_id FROM $wp_term_taxonomy WHERE taxonomy='nav_menu'";
+			$menu_terms = $db->records($sql);
+			foreach($menu_terms as $term) {
+				$terms_protect[] = (integer)$term->term_id;
+				$taxonomy_protect[] = (integer)$term->term_taxonomy_id;
+			}
+			$termset = implode(',', $terms_protect);
+			$taxonomyset = implode(',', $taxonomy_protect);
 
-      $sql = "DELETE FROM $wp_termmeta";
-      $db->query($sql);
-      $this->resetCounter($db, $wp_termmeta);
+			$sql = "DELETE FROM $wp_term_relationships WHERE term_taxonomy_id NOT IN ($taxonomyset)";
+			$db->query($sql);
+			$this->resetCounter($db, $wp_term_relationships);
 
-      $sql = "DELETE FROM $wp_term_taxonomy WHERE taxonomy <> 'nav_menu'";
-      $db->query($sql);
-      $this->resetCounter($db, $wp_term_taxonomy);
+			$sql = "DELETE FROM $wp_posts WHERE post_type <> 'nav_menu_item'";
+			$db->query($sql);
+			$this->resetCounter($db, $wp_posts);
 
-      $sql = "DELETE FROM $wp_postmeta";
-      $db->query($sql);
-      $this->resetCounter($db, $wp_postmeta);
+			$sql = "DELETE FROM $wp_terms WHERE term_id NOT IN ($termset)";
+			$db->query($sql);
+			$this->resetCounter($db, $wp_terms);
+
+			$sql = "DELETE FROM $wp_termmeta";
+			$db->query($sql);
+			$this->resetCounter($db, $wp_termmeta);
+
+			$sql = "DELETE FROM $wp_term_taxonomy WHERE taxonomy <> 'nav_menu'";
+			$db->query($sql);
+			$this->resetCounter($db, $wp_term_taxonomy);
+
+			$sql = "DELETE FROM $wp_postmeta";
+			$db->query($sql);
+			$this->resetCounter($db, $wp_postmeta);
 
 		}
 	}

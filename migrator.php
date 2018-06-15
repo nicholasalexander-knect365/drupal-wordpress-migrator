@@ -39,6 +39,8 @@ require "Gather.class.php";
 // common routines include script initialisation
 require "common.php";
 
+$users = new User($wp, $d7, $options);
+
 // databases are now available as $wp and $d7
 $wordpress = new WP($wp, $options);
 
@@ -132,7 +134,7 @@ if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$options->nodes && 
 
 if ($options->taxonomy) {
 	if ($verbose) {
-		message("\nGetting Taxonomies...");
+		message("\nGetting Taxonomies from Drupal...");
 	}
 
 	$vocabularies = $d7_taxonomy->getVocabulary();
@@ -276,13 +278,13 @@ for ($c = 0; $c < $chunks; $c++) {
 
 				// check each field table for content types and make WP POSTMETA
 				if ($fieldTables && count($fieldTables)) {
-//debug($fieldTables);
+
 					$object = new stdClass();
 					$event = new stdClass();
 					$report = new stdClass();
 
 					$gallery = [];
-// dd($fieldTables);
+
 					foreach($fieldTables as $fieldDataSource) {
 
 						$gather = new Gather($d7, $fieldDataSource);

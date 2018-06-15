@@ -53,8 +53,6 @@ if ($d7) {
 	$d7->configure($options);
 }
 
-$users = new User($wp, $d7, $options);
-
 //////////////////////////// END OF COMMON ////////////////////////////
 
 // HELPERS
