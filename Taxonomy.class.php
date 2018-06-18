@@ -72,6 +72,7 @@ class Taxonomy {
 				break;
 
 			case 'ioti':
+			case 'iotworldtoday':
 				$taxonomies = $remap->IOTIRemapNameCategory($name);
 				return $taxonomies;
 
