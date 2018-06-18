@@ -147,6 +147,7 @@ class DB {
 
 		switch ($this->config->project) {
 			case 'ioti':
+			case 'iotworldtoday':
 				// DRUPAL DB CONFIG
 				if ($this->config->server === 'local') {
 					$this->credentials['d7'] = [
