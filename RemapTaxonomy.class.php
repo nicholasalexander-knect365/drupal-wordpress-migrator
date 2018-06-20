@@ -69,14 +69,28 @@ class RemapTaxonomy extends Taxonomy {
 			case 'article':
 			case 'gallery':
 			case 'link':
-				$taxset = ['type' => 'Business Resource'];
+				$taxset = ['type' => 'Business Resources'];
 				break;
 
 			case 'video':
 			case 'audio':
 				$taxset = ['type' => 'Other Content', 'subtype' => 'Video/Podcasts'];
 				break;
-			
+
+			case 'iot resources':
+				$taxset = ['type' => 'Business Resources'];
+				break;
+
+			case 'connect the world of things to live business':
+			case "exploring iot's cutting edge":
+			case 'five2ndwindow':
+			case 'hannover messe 2016':
+			case 'ideasxchange':
+			case 'manufacturing day':
+			case 'ovum viewpoints':
+				$taxset = ['programs' => $name];
+				break;
+
 			default:
 				$taxset = ['post_tag' => $name];
 				break;
