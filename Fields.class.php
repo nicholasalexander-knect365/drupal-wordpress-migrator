@@ -81,7 +81,7 @@ class Fields {
 				LEFT JOIN field_data_field_penton_media_credit cr ON cr.entity_id = i.entity_id
 				LEFT JOIN field_data_field_penton_media_type t ON t.entity_id = i.entity_id
 				WHERE i.entity_id = $media_node_id";
-
+//debug(DB::strip($sql));
 		$records = $this->db->records($sql);
 		return $records;
 	}

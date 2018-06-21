@@ -257,7 +257,7 @@ class User {
 	// 	debug($sql);
 	// }
 
-	private function updateUserMeta($usermeta, $user_id, $blog_id = null) {
+	private function updateUserMeta($usermeta, $user_id, $blog_id) {
 
 		$sqlremove 		= "DELETE FROM wp_usermeta WHERE user_id=%d AND meta_key='%s'";
 		$sqlinsertfmt 	= "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, '%s', '%s')";
@@ -366,7 +366,7 @@ class User {
 
 
 	// wordpress UserMeta table
-	private function makeUserMeta($drupal_user, $user_id, $blog_id = NULL) {
+	private function makeUserMeta($drupal_user, $user_id, $blog_id) {
 
 		$wp_user = $this->getWordpressUserById($user_id);
 
@@ -470,7 +470,6 @@ class User {
 			'wp_%d_user_level'					=> $user_level,
 		];
 		$this->updateUserMeta($usermeta, $user_id);
-
 	}
 
 	private function makeUserName($name, $email) {
@@ -485,7 +484,7 @@ class User {
 		return $newname;
 	}
 
-	public function makeWordpressUser($drupalUser) {
+	public function makeWordpressUser($drupalUser, $blog_id) {
 
 		$user_email = $drupalUser->mail;
 
@@ -517,6 +516,22 @@ class User {
 
 				$user_id = $this->db->lastInsertId();
 
+				$last_name = $first_name = '';
+				if (strlen($drupalUser->name) && strpos(' ', $drupalUser->name)) {
+					list($first_name, $last_name) = explode(' ', $drupalUser->name);
+				} else {
+					$last_name = $drupalUser->name;
+				}
+
+				if (strlen($first_name)) { 
+					$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, 'first_name', $first_name)";
+					$this->db->query($sql);
+				} 
+				if (strlen($last_name)) {
+					$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, 'last_name', $last_name)";
+					$this->db->query($sql);
+				}
+
 				if ($this->config->verbose === true) {
 					debug("\nWordpress user $user_id created");
 				}
@@ -536,7 +551,8 @@ class User {
 		return null;
 	}
 
-	public function createWordpressUsers($blog_id = null) {
+	// TODO: something did not work here on IOTI - 
+	public function createWordpressUsers($blog_id) {
 
 		foreach ($this->drupalUsers as $drupal_user) {
 
@@ -547,7 +563,7 @@ class User {
 				if (isset($user) && $user->ID) {
 					$user_id = $user->ID;
 				} else {
-					$user_id = $this->makeWordpressUser($drupal_user);
+					$user_id = $this->makeWordpressUser($drupal_user, $blog_id);
 
 					if (empty($user_id)) {
 						debug("\nDrupal user " . $drupal_user->uid . " was not imported as there is no email address for that Drupal user.");

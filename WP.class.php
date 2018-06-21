@@ -44,7 +44,7 @@ class WP {
 		// }
 
 		$name = basename($url);
-
+debug('addMedia:' . $wpPostId . ' '. $imageStore . ' ' . $url);
 		if (file_exists("$imageStore/$url")) {
 		// use wp-cli to add images to the media library
 			$wpUrl = $options->wordpressURL;
@@ -74,6 +74,7 @@ class WP {
 		$wordpressPath = $options->wordpressPath;
 		$imageStore = $options->imageStore;
 		$url = $file->filename;
+
 		$this->addMedia($wpPostId, $url, $imageStore, $options, $featured, $source);
 	}
 
@@ -81,6 +82,8 @@ class WP {
 
 		$wordpressPath = $options->wordpressPath;
 		$imageStore = $options->imageStore;
+// debug('adding to media library:');
+// debug($url . ' ' . $imageStore . ',' . $wpPostId );
 		$this->addMedia($wpPostId, $url, $imageStore, $options, $featured, $source);
 	}
 }

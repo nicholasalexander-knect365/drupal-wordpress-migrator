@@ -175,10 +175,50 @@ class Files {
 		$files = $this->connection->records($sql);
 
 		return $files;
-	} 
+	}
+
+	public function getMediaEntity($node) {
+		$nid = $node->nid;
+		// assume node is a media_entity
+
+		// sql to get alt and title of the 
+		$sql = "SELECT 	field_penton_media_image_fid as fid, 
+						field_penton_media_image_alt as alt, 
+						field_penton_media_image_title as title 
+				FROM field_data_field_penton_media_image 
+				WHERE bundle='media_entity' AND entity_id=$nid";
+		$record = $this->connection->record($sql);
+
+		return $record;
+	}
+
+	// in drupal, a media_entity can have an associated: 
+	//     featured_image 
+	//     image_gallery  ... and other entities that 
+	// define its use (disposition) and therefore may create wordpress featured images, image gallery 
+	public function getMediaEntityParentNodeId($node) {
+
+		$nid = $node->nid;
+
+		$sql = "SELECT entity_id 
+				FROM field_data_field_penton_link_media_feat_img 
+				WHERE bundle='article' AND field_penton_link_media_feat_img_target_id=$nid";
+
+		$record = $this->connection->record($sql);
+		if (isset($record) && $record->entity_id) {
+			return $record->entity_id;
+		}
+		return NULL;
+	}
+
+	// ????? may not be required
+	public function convertMediaEntityImages($files) {
+		foreach ($files as $file) {
+			$this->storeImageData($file);
+		}
+	}
 
 	public function getFiles($nid) {
-
 		set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
 			// error was suppressed with the @-operator
 			if (0 === error_reporting()) {

@@ -3,6 +3,7 @@
 /* create Wordpress POST elements */
 
 include_once "DB.class.php";
+
 define('WP_ADMIN_ID', 185333);
 define('DRUPAL_ADMIN_EMAIL', 'steve@adaptive.co.uk');
 
@@ -86,6 +87,21 @@ class Post extends DB {
 	protected function prepare($str) {
 		$str = $this->db->prepare($str);
 		return $str;
+	}
+
+	public function nodeToPost($nodeId) {
+		$wp_termmeta = DB::wptable('termmeta');
+		$taxonomy = new Taxonomy($this->db, $this->options);
+		$term_id = $taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
+
+		$sql = "SELECT * FROM $wp_termmeta WHERE term_id=$term_id AND meta_value=$nodeId";
+		$record = $this->db->record($sql);
+		if (isset($record) && isset($record->meta_key)) {
+			$wpPostId = $record->meta_key;
+			return $wpPostId;
+		} else {
+			return NULL;
+		}
 	}
 
 	public function replacePostContent($wpPostId, $drupalNode, $includeUser = false, $users = null) {
@@ -202,6 +218,7 @@ debug($postContent);
 		foreach($drupal_data as $key => $value) {
 
 			$wpKey = static::$mapped[$key];
+//debug($wpKey . ' ==> ' .$key);
 
 			// if drupal fields are prefixed make_ 
 			// they are post_meta and are created AFTER post is created
@@ -228,10 +245,10 @@ debug($postContent);
 					$values[$wpKey . '_gmt'] = $value;
 				}
 
-// debug($wpKey . ' ' .$key);
-// debug($value);
 
+// debug($value);
 				switch ($key) {
+
 					case 'uid':
 						$drupalUser = $users->getDrupalUserByUid($value);
 
@@ -350,6 +367,7 @@ debug($values);
 					default: 
 						$values[$wpKey] = $value;
 				}
+//if ($wpKey !== 'post_content') debug($values[$wpKey]);
 //debug("\nkey = " . $wpKey . ' value = ' .$value);
 			}
 		}
@@ -357,9 +375,10 @@ debug($values);
 		//TODO: set to an option - probably global for all
 		$values['comment_status'] = 'open';
 
-		if (!isset($values['post_excerpt'])) {
-			$values['post_excerpt'] = substr($values['post_content'], 120);
-		}
+		// if (!isset($values['post_excerpt'])) {
+		// 	$values['post_excerpt'] = substr($values['post_content'], 0, 120);
+		// }
+		$values['post_excerpt'] = '';
 
 		foreach(static::$null_fields as $field) {
 			$values[$field] = '';

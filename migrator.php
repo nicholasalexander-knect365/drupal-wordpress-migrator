@@ -187,7 +187,7 @@ $unassigned = [];
 
 // set a value ONLY for a test version that only does a few posts
 $TESTLIMIT = null;
-
+$media_flag = null; $node_flag = null;
 
 for ($c = 0; $c < $chunks; $c++) {
 
@@ -198,39 +198,62 @@ for ($c = 0; $c < $chunks; $c++) {
 	if ($verbose) {
 	 	debug("\nNodes read: ". count((array)$drupal_nodes));
 	}
+
 	if (isset($drupal_nodes) && count($drupal_nodes)) {
 
 		$galleries = [];
 
 		foreach ($drupal_nodes as $node) {
 
+if (preg_match('/Faith/', $node->title)) {
+	debug($node);
+	$node_flag = $node;
+}
+
 			$wpPostId = null;
 			$fileSet = null;
+			$nid = $node->nid;
 
 			if ($options->nodes && $nodeSource === 'drupal') {
 
 				$d7_node->setNode($node);
 
-				$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
-
-				if ($wpPostId) {
-					$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
-				}
-
 				// TODO: test if addMediaLibrary is working for media_entity posts
 				if ($node->type === 'media_entity') {
-					$media_name = $node->title;
+
+// $media_name = $node->title;
 					$media_set = $d7_fields->penton_media_images($node->nid);
 
-					if (!empty($media_set)) {
-						$file_set = $files->getFiles($node->nid);
 
-						if (isset($file_set)) {
-							foreach ($file_set as $file) {
-								// to add media_entity to the media library - we may need to know the wpPostId - but how?
-								$wordpress->addMediaLibrary($wpPostId, $file, $options, $node->type);
-							}
-						}
+// $wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
+
+// if(!$wpPostId) {
+// 	debug($wp_termmeta_term_id);
+// 	//debug($node);
+// 	//dd('check');
+// }
+
+					$featuredInNode = $files->getMediaEntityParentNodeId($node);
+					$featuredImages[$featuredInNode] = $media_set;
+// if (preg_match('/faith/', $media_set[0]->filename)) {
+// 	$media_flag = $node;
+// 	debug($featuredImages);
+// }
+					// 	if (!empty($media_set)) {
+					// 		$file_set = $files->getFiles($node->nid);
+					// 		if (isset($file_set)) {
+					// 			foreach ($file_set as $file) {
+					// 				// to add media_entity to the media library - we may need to know the wpPostId - but how?
+					// 				$wordpress->addMediaLibrary($wpPostId, $file, $options, $node->type);
+					// 			}
+					// 		}
+					// 	}
+					// }
+				} else {
+
+					$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
+					if ($wpPostId) {
+						$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
 					}
 				}
 
@@ -241,8 +264,20 @@ for ($c = 0; $c < $chunks; $c++) {
 
 			if ($options->files) {
 				// getFiles stores a local copy
-				$fileSet = $files->getFiles($node->nid);
+				$fileSet = $files->getFiles($nid);
 
+if (false && $node->type === 'media_entity') {
+	$sql = "SELECT fm.filename, fm.uri, field_penton_media_image_fid AS fid, field_penton_media_image_title AS title, field_penton_media_image_alt AS al
+		FROM field_data_field_penton_media_image fdfmi
+		JOIN file_managed fm ON fm.fid=fdfmi.field_penton_media_image_fid
+		WHERE entity_id=$nid";
+	debug($fileSet);
+		$imgs = $d7->records($sql);
+	debug($imgs);
+	if ($media_flag) {
+		dd('check');
+	}
+}
 				if (isset($fileSet)) {
 					foreach ($fileSet as $file) {
 						// TODO: moveFile is deprecated
@@ -376,10 +411,80 @@ for ($c = 0; $c < $chunks; $c++) {
 					}
 				}
 			}
+			// // process media_entitys 
+			// if ($options->project === 'ioti') {
+			// 	$sql = "SELECT fm.filename, fm.uri, field_penton_media_image_fid AS fid, field_penton_media_image_title AS title, field_penton_media_image_alt as al
+			// 			FROM field_data_field_penton_media_image fdfmi
+			// 			JOIN file_managed fm on fm.fid=fdfmi.field_penton_media_image_fid
+			// 			WHERE entity_id=$nid";
+			// 	$records = $d7->query($sql);
+
+			// 	if (isset($records) && count($records)) {
+
+			// 		foreach($records as $dimage) {
+				
+			// 			$filename = $dimage->filename;
+				
+			// 			// make the image:
+			// 			$imageId = $files->getMediaEntity();
+			// 			// make attachements
+			// 			$wp_post->makeAttachment($wpPostId, $imageId);
+
+			// 		}
+			// 		//debug(DB::strip($sql));
+			// 		//dd($records);
+			// 	}
+			// }
 		}
 		debug($galleries, 0, 1);
+
 	}
 }
+//dd($featuredImages);
+// foreach($featuredImages as $nodeId => $images) {
+// 	$files->convertMediaEntityImages($images);
+// }
+
+/*
+	process media_entities
+*/
+foreach ($featuredImages as $nodeId => $mediaSet) {
+	foreach($media_set as $media) {
+		$wp_post_id = $wp_post->nodeToPost($nodeId);
+
+debug('adding: ' . $wp_post_id);
+debug($media);
+
+		if ($wp_post_id) {
+			$wordpress->addUrlMediaLibrary($wp_post_id, $media->uri, $options, $featured = true, $source = '');
+		}
+	}
+}
+
+
+/*
+	process media galleries
+*/
+
+
+
+// post changes specific to a publication
+
+// ioti - 
+if ($options->project === 'ioti') {
+
+	$cmds = [];
+	$cmds[] = "update wp_38_posts p join wp_38_postmeta m on p.ID = m.post_id set post_excerpt=m.meta_value where m.meta_key='penton_content_summary_value' and p.ID=m.post_id and p.post_excerpt = ''";
+
+	foreach ($cmds as $sql) {
+		$wp->query($sql);
+	}
+
+
+
+}
+
+// run cmds
 
 if (count($unassigned)) {
 	debug($unassigned);
