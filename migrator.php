@@ -451,11 +451,11 @@ if (false && $node->type === 'media_entity') {
 foreach ($featuredImages as $nodeId => $mediaSet) {
 	foreach($media_set as $media) {
 		$wp_post_id = $wp_post->nodeToPost($nodeId);
-
-debug('adding: ' . $wp_post_id);
+debug('...Adding: ' . $wp_post_id);
 debug($media);
 
 		if ($wp_post_id) {
+			$wordpress->featuredImage($wp_post_id, $media->filename);
 			$wordpress->addUrlMediaLibrary($wp_post_id, $media->uri, $options, $featured = true, $source = '');
 		}
 	}

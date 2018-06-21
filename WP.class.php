@@ -22,20 +22,20 @@ class WP {
 		fclose($this->cmdFile);
 	}
 
-	// public function featuredImage($wpPostId, $url) {
+	public function featuredImage($wpPostId, $url) {
 
-	// 	$wp_posts = DB::wptable('posts');
-	// 	$wp_postmeta = DB::wptable('postmeta');
-	// 	$guid = $this->wp . '/' . $url;
+		$wp_posts = DB::wptable('posts');
+		$wp_postmeta = DB::wptable('postmeta');
+		$guid = $this->wp . '/' . $url;
 
-	// 	$sql = "INSERT INTO $wp_posts (post_type, guid) VALUES ('attachment', '$guid')";
-	// 	$this->db->query($sql);
-	// 	$image_id = $this->db->lastInsertId();
+		$sql = "INSERT INTO $wp_posts (post_type, guid) VALUES ('attachment', '$guid')";
+		$this->db->query($sql);
+		$image_id = $this->db->lastInsertId();
 
-	// 	$sql = "INSERT INTO $wp_postmeta (post_id, meta_key, meta_value) VALUES ($wpPostId, '_thumbnail_id', $image_id)";
-	// 	$this->db->query($sql);
+		$sql = "INSERT INTO $wp_postmeta (post_id, meta_key, meta_value) VALUES ($wpPostId, '_thumbnail_id', $image_id)";
+		$this->db->query($sql);
 
-	// }
+	}
 
 	private function addMedia($wpPostId, $url, $imageStore, $options, $featured, $source) {
 
