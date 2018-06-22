@@ -9,7 +9,7 @@
 		if (isset($this->server) && $this->server === 'vm') {
 			$this->setDefaults();
 			$this->wordpressPath = '/var/www/public';
-			$this->wordpressURL = 'http://tuauto.telecoms.local';
+			$this->wordpressURL = 'http://ioti.telecoms.local';
 			$this->drupalPath = '/vagrant/drupal7/'.$this->project;
 			return;
 

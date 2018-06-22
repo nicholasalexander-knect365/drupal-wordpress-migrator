@@ -363,12 +363,13 @@ if (false && $node->type === 'media_entity') {
 							if (isset($image->featured_image_id)) {
 
 								$image_url = $d7_node->getNode($image->featured_image_id)->title;
+
+								// 
 								//$post->makeAttachment($wpPostId, $image_url);
 								//$postmeta->createFields($wpPostId, ['_thumbnail_id' => $mediaId]);
-// debug($image);
-// debug($wpPostId);
-// 								$fileSet = $files->getFiles($node->nid);
-// debug($fileSet);
+ 								//$fileSet = $files->getFiles($node->nid);
+
+								// the actual import of images is done with wp-cli - addUrlMediaLibary writes these commands
 								$wordpress->addUrlMediaLibrary($wpPostId, $image_url, $options, true);
 
 							}
@@ -411,7 +412,7 @@ if (false && $node->type === 'media_entity') {
 					}
 				}
 			}
-			// // process media_entitys 
+			// // process media_entitys  - 
 			// if ($options->project === 'ioti') {
 			// 	$sql = "SELECT fm.filename, fm.uri, field_penton_media_image_fid AS fid, field_penton_media_image_title AS title, field_penton_media_image_alt as al
 			// 			FROM field_data_field_penton_media_image fdfmi
@@ -436,14 +437,9 @@ if (false && $node->type === 'media_entity') {
 			// 	}
 			// }
 		}
-		debug($galleries, 0, 1);
-
+		//debug($galleries, 0, 1);
 	}
 }
-//dd($featuredImages);
-// foreach($featuredImages as $nodeId => $images) {
-// 	$files->convertMediaEntityImages($images);
-// }
 
 /*
 	process media_entities
@@ -451,37 +447,31 @@ if (false && $node->type === 'media_entity') {
 foreach ($featuredImages as $nodeId => $mediaSet) {
 	foreach($media_set as $media) {
 		$wp_post_id = $wp_post->nodeToPost($nodeId);
-debug('...Adding: ' . $wp_post_id);
-debug($media);
 
+		//create wp-cli import statements
 		if ($wp_post_id) {
-			//$wordpress->featuredImage($wp_post_id, $media->filename);
 			$wordpress->addUrlMediaLibrary($wp_post_id, $media->uri, $options, $featured = true, $source = '');
 		}
 	}
 }
 
 
-/*
-	process media galleries
-*/
-
-
+/* process media galleries */
 
 // post changes specific to a publication
 
-// ioti - 
+// ioti -  use field_data_field_penton_content summary value field data to create excerpts
 if ($options->project === 'ioti') {
-
 	$cmds = [];
-	$cmds[] = "update wp_38_posts p join wp_38_postmeta m on p.ID = m.post_id set post_excerpt=m.meta_value where m.meta_key='penton_content_summary_value' and p.ID=m.post_id and p.post_excerpt = ''";
+	$cmds[] = "UPDATE wp_38_posts p JOIN wp_38_postmeta m ON p.ID = m.post_id 
+				SET post_excerpt = m.meta_value 
+				WHERE m.meta_key = 'penton_content_summary_value' 
+				 AND p.ID=m.post_id 
+				 AND p.post_excerpt = ''";
 
 	foreach ($cmds as $sql) {
 		$wp->query($sql);
 	}
-
-
-
 }
 
 // run cmds

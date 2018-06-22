@@ -22,8 +22,8 @@ class WP {
 		fclose($this->cmdFile);
 	}
 
-	// TODO: is this deprecated and we use wp-cli instead?
-	public function featuredImage($wpPostId, $url) {
+	// TODO: is this deprecated and we use wp-cli instead
+	public function DEPRECATEDfeaturedImage($wpPostId, $url) {
 
 		throw new Exception('featuredImage: call to deprecated function');
 
@@ -47,14 +47,14 @@ class WP {
 
 	private function addMedia($wpPostId, $url, $imageStore, $options, $featured, $source) {
 
-		// if (!$wpPostId) {
-		// 	throw new Exception('No wpPostId in call to addMedia');
-		// }
+		if (!$wpPostId) {
+			throw new Exception('No wpPostId in call to addMedia');
+		}
 
 		$name = basename($url);
-debug('addMedia:' . $wpPostId . ' '. $imageStore . ' ' . $url);
+
 		if (file_exists("$imageStore/$url")) {
-		// use wp-cli to add images to the media library
+			// use wp-cli to add images to the media library
 			$wpUrl = $options->wordpressURL;
 			if (empty($this->cmds[$url][$wpPostId])) {
 				$this->cmds[$url][$wpPostId] = 1;
@@ -90,8 +90,7 @@ debug('addMedia:' . $wpPostId . ' '. $imageStore . ' ' . $url);
 
 		$wordpressPath = $options->wordpressPath;
 		$imageStore = $options->imageStore;
-debug('adding to media library:');
-debug($url . ' ' . $imageStore . ',' . $wpPostId );
+
 		$this->addMedia($wpPostId, $url, $imageStore, $options, $featured, $source);
 	}
 }

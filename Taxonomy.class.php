@@ -111,10 +111,11 @@ class Taxonomy {
 	static public function slugify($str) {
 
 		$text = $str;
+
 		// replace non letter or digits by -
 		$text = preg_replace('/[^\pL\d]+/', '-', $text);
 
-		// convert text to utf-8 ?? probably not necessary
+		// convert text to utf-8 ?? appears to not be necessary
 		// $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
 
 		// replace anything not a hyphen or word char with nothing
@@ -280,7 +281,6 @@ class Taxonomy {
 		$parent = $taxonomy->hierarchy;
 
 		$record = $this->getTaxonomyRecord($term_id, $taxname);
-//debug($record);
 
 		if ($record) {
 			$term_taxonomy_id = $record->term_taxonomy_id;
