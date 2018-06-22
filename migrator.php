@@ -455,7 +455,7 @@ debug('...Adding: ' . $wp_post_id);
 debug($media);
 
 		if ($wp_post_id) {
-			$wordpress->featuredImage($wp_post_id, $media->filename);
+			//$wordpress->featuredImage($wp_post_id, $media->filename);
 			$wordpress->addUrlMediaLibrary($wp_post_id, $media->uri, $options, $featured = true, $source = '');
 		}
 	}

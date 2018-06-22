@@ -22,19 +22,27 @@ class WP {
 		fclose($this->cmdFile);
 	}
 
+	// TODO: is this deprecated and we use wp-cli instead?
 	public function featuredImage($wpPostId, $url) {
+
+		throw new Exception('featuredImage: call to deprecated function');
 
 		$wp_posts = DB::wptable('posts');
 		$wp_postmeta = DB::wptable('postmeta');
 		$guid = $this->wp . '/' . $url;
+		$today = date("Y-m-d H:i:s");
 
 		$sql = "INSERT INTO $wp_posts (post_type, guid) VALUES ('attachment', '$guid')";
 		$this->db->query($sql);
 		$image_id = $this->db->lastInsertId();
 
-		$sql = "INSERT INTO $wp_postmeta (post_id, meta_key, meta_value) VALUES ($wpPostId, '_thumbnail_id', $image_id)";
-		$this->db->query($sql);
+		if ($image_id) {
+			$sql = "INSERT INTO $wp_postmeta (post_id, meta_key, meta_value) VALUES ($wpPostId, '_thumbnail_id', $image_id)";
+			$this->db->query($sql);
 
+		} else {
+			throw new Exception("No image_id from insert into posts? " . $sql);
+		}
 	}
 
 	private function addMedia($wpPostId, $url, $imageStore, $options, $featured, $source) {
@@ -82,8 +90,8 @@ debug('addMedia:' . $wpPostId . ' '. $imageStore . ' ' . $url);
 
 		$wordpressPath = $options->wordpressPath;
 		$imageStore = $options->imageStore;
-// debug('adding to media library:');
-// debug($url . ' ' . $imageStore . ',' . $wpPostId );
+debug('adding to media library:');
+debug($url . ' ' . $imageStore . ',' . $wpPostId );
 		$this->addMedia($wpPostId, $url, $imageStore, $options, $featured, $source);
 	}
 }

@@ -94,12 +94,12 @@ class Post extends DB {
 		$taxonomy = new Taxonomy($this->db, $this->options);
 		$term_id = $taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
 
-		$sql = "SELECT * FROM $wp_termmeta WHERE term_id=$term_id AND meta_key='$nodeId'";
+		$sql = "SELECT * FROM $wp_termmeta WHERE term_id=$term_id AND FLOOR(meta_key)='$nodeId'";
 debug($sql);
 		$record = $this->db->record($sql);
 debug($record);
-		if (isset($record) && isset($record->meta_key)) {
-			$wpPostId = $record->meta_key;
+		if (isset($record) && isset($record->meta_value)) {
+			$wpPostId = (integer) $record->meta_value;
 			return $wpPostId;
 		} else {
 			return NULL;
