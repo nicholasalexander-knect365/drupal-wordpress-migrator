@@ -357,13 +357,15 @@ if (false && $node->type === 'media_entity') {
 								}
 							} else if ($data[0] === 'field_penton_link_media_feat_img') {
 									$image->featured_image_id = $data[1]->field_penton_link_media_feat_img_target_id;
+							} else if ($data[0] === 'field_penton_article_type_tid') {
+									$article_types = ['Article', 'Gallery', 'Audio', 'Video', 'Webinar', 'Data Table', 'White Paper'];
+									// TODO make wordpress postmeta elements
 							}
 
 							// create a featured image
 							if (isset($image->featured_image_id)) {
 
 								$image_url = $d7_node->getNode($image->featured_image_id)->title;
-
 								// 
 								//$post->makeAttachment($wpPostId, $image_url);
 								//$postmeta->createFields($wpPostId, ['_thumbnail_id' => $mediaId]);
