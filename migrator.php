@@ -81,13 +81,13 @@ if ($options->users) {
 	}
 }
 
+$files = new Files($d7, $s3bucket, $options);
+
 // the files option is required to clear images
 if ($options->files) {
 
 	$cmdPath = 'importCmds.sh';
 	$cmdFile = fopen($cmdPath, 'w+');
-
-	$files = new Files($d7, $s3bucket, $options);
 
 	$options->dbPrefix = DB::$wp_prefix;
 
