@@ -446,17 +446,18 @@ if (false && $node->type === 'media_entity') {
 /*
 	process media_entities
 */
-foreach ($featuredImages as $nodeId => $mediaSet) {
-	foreach($media_set as $media) {
-		$wp_post_id = $wp_post->nodeToPost($nodeId);
+if (isset($featuredImages) && count($featuredImages)) {
+	foreach ($featuredImages as $nodeId => $mediaSet) {
+		foreach($media_set as $media) {
+			$wp_post_id = $wp_post->nodeToPost($nodeId);
 
-		//create wp-cli import statements
-		if ($wp_post_id) {
-			$wordpress->addUrlMediaLibrary($wp_post_id, $media->uri, $options, $featured = true, $source = '');
+			//create wp-cli import statements
+			if ($wp_post_id) {
+				$wordpress->addUrlMediaLibrary($wp_post_id, $media->uri, $options, $featured = true, $source = '');
+			}
 		}
 	}
 }
-
 
 /* process media galleries */
 
