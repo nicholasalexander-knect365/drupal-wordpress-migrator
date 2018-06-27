@@ -134,3 +134,29 @@ Then, to build the live instance:
 
 Now you can test the LIVE server.
 
+
+## local multisite config
+
+### wp-config
+define('DB_NAME', 'telecoms_local');
+
+define('WP_DEBUG', false);
+define( 'WP_ALLOW_MULTISITE', true );
+define( 'MULTISITE', true );
+define( 'SUBDOMAIN_INSTALL', true );
+define( 'DOMAIN_CURRENT_SITE', 'multisite.local');
+define( 'PATH_CURRENT_SITE', '/' );
+define( 'SITE_ID_CURRENT_SITE', 1 );
+define( 'BLOG_ID_CURRENT_SITE', 1 );
+define( 'NOBLOGREDIRECT', 'http://multisite.local' );
+define( 'COOKIE_DOMAIN', false);
+
+php makeDrupalUsers.php --project=ioti --server=multisite --wordpressPath=/home/nicholas/Dev/wordpress/multisite
+makes the dusers table 
+
+php createWPusers.php --project=ioti --server=multisite --wordpressPath=/home/nicholas/Dev/wordpress/multisite -u
+creates wordpress users
+
+php migrator.php --project=ioti --server=multisite -d
+
+

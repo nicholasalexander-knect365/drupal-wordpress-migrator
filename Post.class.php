@@ -422,4 +422,14 @@ debug($values);
 		// }
 		// return $post_id;
 	}
+
+	public function updatePost($post_id, $field, $data) {
+
+		$wp_posts = DB::wptable('posts');
+		$sql = "UPDATE $wp_posts SET $field = '$data' WHERE ID = $post_id";
+		$this->db->query($sql);
+debug($sql);
+
+	}
+
 }

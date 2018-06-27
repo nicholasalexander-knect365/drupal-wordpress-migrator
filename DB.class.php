@@ -64,6 +64,9 @@ class DB {
 		if ($this->config->server === 'local' && empty($this->config->wordpressPath)) {
 			$this->config->wordpressPath = '/home/nicholas/Dev/wordpress/' . $this->config->project;
 
+		} else if ($this->config->server === 'multisite' && empty($this->config->wordpressPath)) {
+			$this->config->wordpressPath = '/home/nicholas/Dev/wordpress/multisite';
+
 		} else if ($this->config->server === 'vm' && empty($this->config->wordpressPath)) {
 			$this->config->wordpressPath = '/var/www/public';
 
@@ -118,14 +121,14 @@ class DB {
 		$sql = "SELECT * FROM wp_blogs WHERE domain LIKE '%$project%' LIMIT 1";
 		$record = $this->record($sql);
 
-		if (isset($record) && !empty($record) && count($record) === 1) {
+		if (isset($record) && !empty($record) && strlen($record->domain)) {
 			$blog_id = $record->blog_id;
 		} else {
 			if ($this->config->server === 'local' || $this->config->server === 'vm2') {
 				static::$wp_prefix = 'wp_';
 				return;
 			} else {
-				throw new Exception("ERROR: can not find $project in multisite configuration");
+				throw new Exception("\nERROR: can not find $project in multisite configuration (wp_blogs table)");
 			}
 		}
 		static::$wp_prefix = sprintf('wp_%d_', $blog_id);
@@ -149,7 +152,7 @@ class DB {
 			case 'ioti':
 			case 'iotworldtoday':
 				// DRUPAL DB CONFIG
-				if ($this->config->server === 'local') {
+				if ($this->config->server === 'local' || $this->config->server === 'multisite') {
 					$this->credentials['d7'] = [
 						'database' => 'ioti_drupal',
 						'username' => 'root',
@@ -217,14 +220,15 @@ class DB {
 			$record = $this->record($sql);
 
 			// multi-site config check
-			if ($record && count($record) && 
-				($this->config->wordpressPath === '/var/www/public' || $this->config->wordpressPath === '/srv/www/test2.telecoms.com' || $this->config->wordpressPath === '/srv/www/test3.telecoms.com' || $this->config->wordpressPath === '/srv/www/test1.telecoms.com')) {
+			if ($record && count((array)$record) && ($this->config->wordpressPath === '/var/www/public' || $this->config->wordpressPath === '/srv/www/test2.telecoms.com' || $this->config->wordpressPath === '/srv/www/test3.telecoms.com' || $this->config->wordpressPath === '/srv/www/test1.telecoms.com')) {
 				if ($this->config->server === 'local') {
 					throw new Exception('CHECK FOR CONFIG ERROR: local server is not usually multisite.  If you are running on another server, please specify it with a --server=[vm,staging,live] directive');
 				}
 				print "\n: Wordpress MultiSite loading siteId: ".$this->config->siteId;
 			} else if ($this->config->server === 'local') {
 				print "\n: Local mode";
+			} else if ($this->config->server === 'multisite') {
+				print "\n: Multisite mode";
 			} else if ($this->config->server === 'vm2') {
 				print "\n: Alternative VM mode (i.e. Homestead)";
 			} else {
@@ -235,6 +239,7 @@ class DB {
 			if ($once++ === 0) {
 				print "\n: Drupal 7 configured database connection.";
 			}
+
 		} else {
 			throw new Exception($this->type . ' database configuration supported?');
 		}

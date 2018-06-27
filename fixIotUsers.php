@@ -25,6 +25,9 @@ foreach($drupal_nodes as $node) {
 	$uid = $node->uid;
 	$duser = $users->getDrupalUser($uid);
 
+	// does user exist?
+	// no: report missing user
+	// yes: add a wp_38_capabilities for this user
 
 }
 

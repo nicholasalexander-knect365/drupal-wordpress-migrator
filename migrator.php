@@ -144,7 +144,7 @@ if ($options->taxonomy) {
 
 }
 
-$showDebug = false;
+$showDebug = true;
 
 if ($options->fields) {
 	if ($verbose) {
@@ -187,7 +187,8 @@ $unassigned = [];
 
 // set a value ONLY for a test version that only does a few posts
 $TESTLIMIT = null;
-$media_flag = null; $node_flag = null;
+$media_flag = null; 
+$node_flag = null;
 
 for ($c = 0; $c < $chunks; $c++) {
 
@@ -220,8 +221,6 @@ if (preg_match('/Faith/', $node->title)) {
 
 				// TODO: test if addMediaLibrary is working for media_entity posts
 				if ($node->type === 'media_entity') {
-
-// $media_name = $node->title;
 					$media_set = $d7_fields->penton_media_images($node->nid);
 
 
@@ -252,6 +251,7 @@ if (preg_match('/Faith/', $node->title)) {
 				} else {
 
 					$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
+
 					if ($wpPostId) {
 						$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
 					}
@@ -309,7 +309,7 @@ if (false && $node->type === 'media_entity') {
 			/* each node has a bunch of "fields" attached which can be additional content
 			   for the content type and can be text fields, images. comments, tags
 			*/
-			if ($wpPostId && $options->fields) {
+			if ($options->fields && $wpPostId) {
 
 				// check each field table for content types and make WP POSTMETA
 				if ($fieldTables && count($fieldTables)) {
@@ -331,10 +331,11 @@ if (false && $node->type === 'media_entity') {
 						//Gather brings in the fields with softdata
 						$data = $gather->$func($node->nid);
 
-
 						if (isset($data) && count($data)) {
-							$image->featured_image_id = null;
+
 							$image = new stdClass();
+							$image->featured_image_id = null;
+
 							if ($data[0] === 'field_penton_media_image') {
 								if ($fieldDataSource === 'penton_media_image') {
 									$image->fid = $data[1]->field_penton_media_image_fid;
@@ -357,6 +358,19 @@ if (false && $node->type === 'media_entity') {
 								}
 							} else if ($data[0] === 'field_penton_link_media_feat_img') {
 									$image->featured_image_id = $data[1]->field_penton_link_media_feat_img_target_id;
+
+							} else if ($data[0] === 'field_penton_author') {
+
+									$new_uid = $data[1]->field_penton_author_target_id;
+$newUserId = $users->getWordpressUserId($new_uid);
+if ($newUserId) {
+									$wp_post->updatePost($wpPostId, 'post_author', $newUserId);
+} else {
+	debug('no drupal_uid record for '.$new_uid);
+}
+									// create a usermeta 
+
+									//?? addUserMeta($drupal_user, $user_id, $blog_id = NULL);
 							} else if ($data[0] === 'field_penton_article_type_tid') {
 									$article_types = ['Article', 'Gallery', 'Audio', 'Video', 'Webinar', 'Data Table', 'White Paper'];
 									// TODO make wordpress postmeta elements

@@ -15,6 +15,7 @@ class User {
 	public $drupalUsers;
 	public $drupalRoles;
 	public $config;
+	private $drupal_uid_key = 'drupal_uid';
 
 	public function __construct($wp, $d7, $config) {
 		
@@ -456,10 +457,75 @@ class User {
 		$this->updateUserMeta($usermeta, $user_id, $blog_id);
 	}
 
+	private function userMetaExists($user_id, $meta_key) {
+		$sql = "SELECT umeta_id from wp_usermeta WHERE user_id = $user_id AND meta_key = '$meta_key'";
+		$record = $this->db->record($sql);
+		if ($record) {
+			return $record->umeta_id;
+		}
+		return null;
+	}
+
+
+		// // create or update a user's meta
+		// public function getOtherUserId($user_id = null, $key, $value = NULL) {
+		// 	if (empty($user_id) && empty($value)) {
+		// 		throw new Exception("\nERROR: getOtherUserId() requires either a Drupal or Wordpress ID!");
+		// 	}
+		// 	if ($user_id) {
+		// 		$sql = "SELECT meta_value AS s FROM wp_usermeta WHERE user_id = $user_id AND meta_key = 'drupal_uid'";
+		// 	} else {
+		// 		$sql = "SELECT user_id AS s FROM wp_usermeta WHERE meta_key='drupal_uid' AND meta_value='$value'";
+		// 	}
+		// 	$record = $this->db->record($sql);
+		// 	return $record->s;
+		// }
+
+	public function getDrupalUid($user_id){
+		$drupal_uid = $this->drupal_uid_key;
+		$sql = "SELECT meta_value AS s FROM wp_usermeta WHERE user_id = $user_id AND meta_key = '$drupal_uid'";
+		$record = $this->db->record($sql);
+		return $record->s;
+	}
+
+	public function getWordpressUserId($uid) {
+		$drupal_uid = $this->drupal_uid_key;
+		$sql = "SELECT user_id AS s FROM wp_usermeta WHERE meta_key='drupal_uid' AND meta_value='$drupal_uid'";
+		$record = $this->db->record($sql);
+		if ($record) {
+			return $record->s;
+		} else {
+			return NULL;
+		}
+	}
+
+	public function getSetUserMeta($user_id, $meta_key, $meta_value) {
+		if (empty($user_id) || empty($meta_key)) {
+			throw new Exception("\nUser->getSetUserMeta ERROR: user_id and meta_key must be set.  Invalid parameter user_id = $user_id, meta_key=$meta_key");
+		}
+		if ($this->userMetaExists($user_id, $meta_key)) {
+			$sql = "UPDATE wp_usermeta SET meta_value='$meta_value' WHERE meta_key='$meta_key' AND user_id=$user_id";
+		} else {
+			$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, '$meta_key', '$meta_value')";
+		}
+		$this->db->query($sql);
+	}
+
+	public function insertOrUpdateUserMeta($user_id, $key, $value) {
+		// exists?
+		$sql = "SELECT COUNT(*) as c FROM wp_usermeta WHERE meta_key = '$key' AND user_id = $user_id";
+		$record = $this->db->record($sql);
+		$umeta_id = $record->c;
+		if ($umeta_id) {
+			$sql = "UPDATE wp_usermeta SET meta_value = '$value' WHERE umeta_id = $id";
+		} else {
+			$sql = "INSERT INTO wp_usermeta ('user_id', 'meta_key', 'meta_value') WHERE user_id=$user_id AND meta_key='$key'";
+		}
+		$this->db->query($sql);
+	}
+
 	private function addUserMeta($drupal_user, $user_id, $blog_id = NULL) {
 
-// debug('here0');
-// dd($user_id);
 		$role = $drupal_user->role;
 
 		list($capability, $user_level) = $this->determineCapability($role, $drupal_user->uid);
@@ -473,6 +539,7 @@ class User {
 	}
 
 	private function makeUserName($name, $email) {
+
 		$names = explode(' ', $name);
 
 		if (count($names) > 1) {
@@ -480,6 +547,9 @@ class User {
 		} else {
 			$newname = $email;
 		}
+
+		// apostropies in username?
+		$newname = preg_replace('/[\']/','',$newname);
 
 		return $newname;
 	}
@@ -498,7 +568,8 @@ class User {
 				$user_login = $user_email;
 			}
 
-			$user_display_name = $user_nicename = $drupalUser->name;
+			$user_display_name = $user_nicename = addslashes($drupalUser->name);
+			$user_nicename = substr($user_nicename, 0, 50);
 
 			// set password to a non-deterministic value (it has to be reset)
 			$user_pass = $this->temporaryPassword($drupalUser->mail);
@@ -510,27 +581,32 @@ class User {
 			$record = $this->db->record($sql);
 
 			if (!$record || !isset($record->user_id)) {
+
 				$sql = "INSERT INTO wp_users (user_login, user_pass, user_nicename, user_email, user_registered, user_status)
 						VALUES ('$user_login', '$user_pass', '$user_nicename', '$user_email', '$user_registered', $user_status)";
 				$this->db->query($sql);
-
+//debug($sql);
 				$user_id = $this->db->lastInsertId();
-
+//debug($user_id);
 				$last_name = $first_name = '';
 				if (strlen($drupalUser->name) && strpos(' ', $drupalUser->name)) {
 					list($first_name, $last_name) = explode(' ', $drupalUser->name);
+					$first_name = addslashes($first_name);
 				} else {
-					$last_name = $drupalUser->name;
+					$last_name = addslashes($drupalUser->name);
 				}
 
 				if (strlen($first_name)) { 
-					$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, 'first_name', $first_name)";
+					$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, 'first_name', '$first_name')";
 					$this->db->query($sql);
 				} 
 				if (strlen($last_name)) {
-					$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, 'last_name', $last_name)";
+					$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, 'last_name', '$last_name')";
 					$this->db->query($sql);
 				}
+//debug($sql);
+				// keep a record of this user's drupal UID
+				$this->getSetUserMeta($user_id, 'drupal_uid', $drupalUser->uid);
 
 				if ($this->config->verbose === true) {
 					debug("\nWordpress user $user_id created");
@@ -563,7 +639,10 @@ class User {
 				if (isset($user) && $user->ID) {
 					$user_id = $user->ID;
 				} else {
+
 					$user_id = $this->makeWordpressUser($drupal_user, $blog_id);
+
+					$this->getSetUserMeta($user_id, $this->drupal_uid_key, $drupal_user->uid);
 
 					if (empty($user_id)) {
 						debug("\nDrupal user " . $drupal_user->uid . " was not imported as there is no email address for that Drupal user.");

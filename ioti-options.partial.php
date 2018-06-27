@@ -27,6 +27,13 @@
 			$this->drupalPath = '/home/nicholas/Dev/drupal7/' . $this->project;
 			return;
 
+		} else if (isset($this->server) && $this->server === 'multisite') {
+			$this->setDefaults();
+			$this->wordpressPath = '/home/nicholas/Dev/wordpress/' . $this->server;
+			$this->wordpressURL = 'http://ioti.multisite.local';
+			$this->drupalPath = '/home/nicholas/Dev/drupal7/' . $this->project;
+			return;
+
 		} else {
 			throw new Exception("\nServer " . $this->server . " not configured for -d default options");
 		}

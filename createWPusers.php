@@ -45,6 +45,8 @@ if ($options->users) {
 	debug($users->drupalUsersLoaded() . ' users loaded from Drupal');
 
 	$users->createWordpressUsers($options->siteId);  
+
+	
 	debug($users->wordpressUsers() . '... users created in Wordpress');
 
 	$users->makeAdminUser();
@@ -57,7 +59,7 @@ if ($options->users) {
 	if (!$wpUsers) {
 		die("\nERROR: wordpress users do not yet exist - you need to run with a -u flag\n");
 	} else {
-		debug("\nWordpress already has $wpUsers users");
+		debug("\nWordpress already has $wpUsers users.  To confirm you want to add the " . $users->countDrupalUsers() . ' Drupal users from ' . $options->project . ' please use a -u flag.');
 	}
 }
 
