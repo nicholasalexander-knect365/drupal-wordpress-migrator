@@ -29,6 +29,7 @@ class User {
 		$this->capabilities[2] = 'a:1:{s:6:"author";b:1;}';
 		$this->capabilities[3] = 'a:1:{s:11:"contributor";b:1}';
 		$this->capabilities[4] = 'a:1:{s:10:"subscriber";b:1;}';
+		$this->drupal_uid_key = 'drupal_' .$config->siteId . '_uid';
 	}
 
 	public function getDrupalUsers() {
@@ -490,7 +491,8 @@ class User {
 
 	public function getWordpressUserId($uid) {
 		$drupal_uid = $this->drupal_uid_key;
-		$sql = "SELECT user_id AS s FROM wp_usermeta WHERE meta_key='drupal_uid' AND meta_value='$drupal_uid'";
+		$sql = "SELECT user_id AS s FROM wp_usermeta WHERE meta_key='$drupal_uid' AND meta_value='$uid'";
+
 		$record = $this->db->record($sql);
 		if ($record) {
 			return $record->s;
@@ -648,7 +650,9 @@ class User {
 						debug("\nDrupal user " . $drupal_user->uid . " was not imported as there is no email address for that Drupal user.");
 					}
 				}
+
 				$this->makeUserMeta($drupal_user, $user_id, $blog_id);
+
 				if ($this->config->verbose) {
 					debug("usermeta created for user $user_id");
 				}
