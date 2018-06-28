@@ -9,7 +9,7 @@
  * 
  * use: 
  * php replaceContent.php 
- * --server=[staging,vm,local] --wordpressPath=/path/to/wordpress --project=[tuauto.ioti] --clean (strips out styles from html tags)
+ * --server=[staging,vm,local] --wordpressPath=/path/to/wordpress --project=[tuauto.iotworldtoday] --clean (strips out styles from html tags)
  */
 require "DB.class.php";
 require "WP.class.php";

@@ -14,7 +14,7 @@ try {
 	$options = new Options();
 	$options->setAll();
 
-	$project 		= $options->get('project');			// valid: tuauto, ioti
+	$project 		= $options->get('project');			// valid: tuauto, ioti (iotworldtoday)
 	$s3bucket 		= $options->get('s3bucket');
 	$drupalPath 	= $options->get('drupalPath');		// where the drupal files are
 	$wordpressPath 	= $options->get('wordpressPath');

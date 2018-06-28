@@ -478,7 +478,7 @@ if (isset($featuredImages) && count($featuredImages)) {
 
 // post changes specific to a publication
 //...ioti -  use field_data_field_penton_content summary value field data to create excerpts
-if ($options->project === 'ioti') {
+if ($options->project === 'ioti' || $options->project === 'iotworldtoday') {
 	$cmds = [];
 	$cmds[] = "UPDATE wp_38_posts p JOIN wp_38_postmeta m ON p.ID = m.post_id 
 				SET post_excerpt = m.meta_value 

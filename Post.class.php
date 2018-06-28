@@ -177,13 +177,15 @@ class Post extends DB {
 
 	private function mediaPathsInContent($drupal_data, $deprecate = true) {
 
+throw new Exception('mediaPathsInContent DEPRECATED');
+
 		$postContent = $this->prepare($drupal_data->content);
 
 		if ($deprecate) {
 			return $postContent;
 		}
 
-		if (preg_match('/<img.*?src="http:\/\/(www\.)?ioti\.com/', $postContent, $src)) {
+		if (preg_match('/<img.*?src="http:\/\/(www\.)?\t\.com/', $postContent, $src)) {
 
 			// debug($postContent);
 			// debug($src);

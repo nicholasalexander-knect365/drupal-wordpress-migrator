@@ -169,7 +169,6 @@ class DB {
 						'host' => 'mysql'
 					];
 				}
-
 				if ($this->config->server === 'vm') {
 					$this->credentials['d7'] = [
 						'database' => 'ioti_drupal',

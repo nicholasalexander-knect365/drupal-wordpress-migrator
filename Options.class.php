@@ -112,7 +112,7 @@ class Options {
 		if ($this->project === 'tu-auto') {
 			$this->siteId = 39;
 		}
-		if ($this->project === 'ioti') {
+		if ($this->project === 'ioti' || $this->project === 'iotworldtoday') {
 			$this->siteId = 38;
 		}
 	}
@@ -303,7 +303,7 @@ class Options {
 					}
 				}
 
-				if ($this->project === 'ioti') {
+				if ($this->project === 'ioti' || $this->project === 'iotworldtoday') {
 
 					include "ioti-options.partial.php";
 

@@ -151,12 +151,12 @@ define( 'BLOG_ID_CURRENT_SITE', 1 );
 define( 'NOBLOGREDIRECT', 'http://multisite.local' );
 define( 'COOKIE_DOMAIN', false);
 
-php makeDrupalUsers.php --project=ioti --server=multisite --wordpressPath=/home/nicholas/Dev/wordpress/multisite
+php makeDrupalUsers.php --project=iotworldtoday --server=multisite --wordpressPath=/home/nicholas/Dev/wordpress/multisite
 makes the dusers table 
 
-php createWPusers.php --project=ioti --server=multisite --wordpressPath=/home/nicholas/Dev/wordpress/multisite -u
+php createWPusers.php --project=iotworldtoday --server=multisite --wordpressPath=/home/nicholas/Dev/wordpress/multisite -u
 creates wordpress users
 
-php migrator.php --project=ioti --server=multisite -d
+php migrator.php --project=iotworldtoday --server=multisite -d
 
 
