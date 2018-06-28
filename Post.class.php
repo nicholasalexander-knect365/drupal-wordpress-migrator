@@ -177,8 +177,6 @@ class Post extends DB {
 
 	private function mediaPathsInContent($drupal_data, $deprecate = true) {
 
-throw new Exception('mediaPathsInContent DEPRECATED');
-
 		$postContent = $this->prepare($drupal_data->content);
 
 		if ($deprecate) {
@@ -187,17 +185,10 @@ throw new Exception('mediaPathsInContent DEPRECATED');
 
 		if (preg_match('/<img.*?src="http:\/\/(www\.)?\t\.com/', $postContent, $src)) {
 
-			// debug($postContent);
-			// debug($src);
 			preg_match('/<img .*?src\=["](.*?)["]$/', $postContent, $parts);
-//dd($parts);
 
 			//<img src="http://www.ioti.com/sites/iot-institute.com/files/Enterprise%20IoT%20World.png"
 			$postContent = preg_replace('/src="http:\/\/(www\.)?ioti\.com\/sites\/iot\-institute\.com\/files\//','src="files/2018/06/', $postContent);
-		// get the image
-
-// debug("\n---------------------------------");
-// debug($postContent);
 
 			return $postContent;
 
