@@ -266,6 +266,8 @@ for ($c = 0; $c < $chunks; $c++) {
 				// getFiles stores a local copy
 				$fileSet = $files->getFiles($nid);
 
+
+// THIS WAS PURELY FOR DEBUG/TESTING
 if (false && $node->type === 'media_entity') {
 	$sql = "SELECT fm.filename, fm.uri, field_penton_media_image_fid AS fid, field_penton_media_image_title AS title, field_penton_media_image_alt AS al
 		FROM field_data_field_penton_media_image fdfmi
@@ -298,7 +300,8 @@ if (false && $node->type === 'media_entity') {
 						if ($verbose) {
 							print "\n" . $taxonomy->category . ' : ' . $taxonomy->name;
 						}
-					}
+					}debug ($media);
+
 
 					if (!$options->quiet && !$options->progress && ($verbose === true) ) {
 						print "\nImported " . count($taxonomies) . " taxonomies.\n";
@@ -362,15 +365,13 @@ if (false && $node->type === 'media_entity') {
 							} else if ($data[0] === 'field_penton_author') {
 
 									$new_uid = $data[1]->field_penton_author_target_id;
-$newUserId = $users->getWordpressUserId($new_uid);
-if ($newUserId) {
-									$wp_post->updatePost($wpPostId, 'post_author', $newUserId);
-} else {
-	debug('no drupal_uid record for '.$new_uid);
-}
-									// create a usermeta 
+									$newUserId = $users->getWordpressUserId($new_uid);
+									if ($newUserId) {
+										$wp_post->updatePost($wpPostId, 'post_author', $newUserId);
+									} else {
+										debug('no drupal_uid record for '.$new_uid);
+									}
 
-									//?? addUserMeta($drupal_user, $user_id, $blog_id = NULL);
 							} else if ($data[0] === 'field_penton_article_type_tid') {
 									$article_types = ['Article', 'Gallery', 'Audio', 'Video', 'Webinar', 'Data Table', 'White Paper'];
 									// TODO make wordpress postmeta elements
@@ -460,24 +461,23 @@ if ($newUserId) {
 /*
 	process media_entities
 */
+
 if (isset($featuredImages) && count($featuredImages)) {
 	foreach ($featuredImages as $nodeId => $mediaSet) {
-		foreach($media_set as $media) {
+
+		foreach($mediaSet as $media) {
 			$wp_post_id = $wp_post->nodeToPost($nodeId);
 
 			//create wp-cli import statements
 			if ($wp_post_id) {
-				$wordpress->addUrlMediaLibrary($wp_post_id, $media->uri, $options, $featured = true, $source = '');
+				$wordpress->addMediaLibrary($wp_post_id, $media, $options, $featured = true, $source = '');
 			}
 		}
 	}
 }
 
-/* process media galleries */
-
 // post changes specific to a publication
-
-// ioti -  use field_data_field_penton_content summary value field data to create excerpts
+//...ioti -  use field_data_field_penton_content summary value field data to create excerpts
 if ($options->project === 'ioti') {
 	$cmds = [];
 	$cmds[] = "UPDATE wp_38_posts p JOIN wp_38_postmeta m ON p.ID = m.post_id 

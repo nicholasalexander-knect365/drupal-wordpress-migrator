@@ -83,6 +83,7 @@ class Fields {
 				WHERE i.entity_id = $media_node_id";
 //debug(DB::strip($sql));
 		$records = $this->db->records($sql);
+//debug($records);
 		return $records;
 	}
 

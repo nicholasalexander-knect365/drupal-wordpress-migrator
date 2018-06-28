@@ -7,12 +7,14 @@ class WP {
 	private $cmdFile;
 	private $options;
 	private $cmds;
+	private $preventDuplicates;
 
 	public function __construct($db, $options) {
 		$this->db = $db;
 		$this->wp = $options->wordpressPath;
 		$this->options = $options;
 		$this->cmds = [];
+		$this->preventDuplicates = [];
 		
 		$cmdPath = 'importCmds.sh';
 		$this->cmdFile = fopen($cmdPath, 'w+');
@@ -52,12 +54,17 @@ class WP {
 		}
 
 		$name = basename($url);
+debug("\naddMedia for the postID: ".$wpPostId . ' url '. $url);
 
 		if (file_exists("$imageStore/$url")) {
+
 			// use wp-cli to add images to the media library
 			$wpUrl = $options->wordpressURL;
-			if (empty($this->cmds[$url][$wpPostId])) {
-				$this->cmds[$url][$wpPostId] = 1;
+
+			if (empty($this->preventDuplicates[sprintf('%s%d', $url, $wpPostId)])) {
+
+				$this->preventDuplicates[sprintf('%s%d', $url, $wpPostId)] = 1;
+
 				if ($wpPostId) {
 					$cmd = "wp media import '$imageStore/$url' --post_id=$wpPostId --url='$wpUrl' --title=\"$name\"";
 					if ($featured) {
@@ -67,6 +74,8 @@ class WP {
 					$cmd = "wp media import '$imageStore/$url' --url='$wpUrl' --title=\"$name\"";
 				}
 				fputs($this->cmdFile, $cmd . "\n");
+			} else {
+debug('DUP? '.  sprintf('%s%d', $url, $wpPostId) . '='. $this->preventDuplicates[sprintf('%s%d', $url, $wpPostId)]);
 			}
 
 		} else {
@@ -86,11 +95,4 @@ class WP {
 		$this->addMedia($wpPostId, $url, $imageStore, $options, $featured, $source);
 	}
 
-	public function addUrlMediaLibrary($wpPostId, $url, $options, $featured = true, $source = '') {
-
-		$wordpressPath = $options->wordpressPath;
-		$imageStore = $options->imageStore;
-
-		$this->addMedia($wpPostId, $url, $imageStore, $options, $featured, $source);
-	}
 }
