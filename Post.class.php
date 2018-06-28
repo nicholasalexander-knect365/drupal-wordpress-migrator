@@ -185,8 +185,8 @@ class Post extends DB {
 
 		if (preg_match('/<img.*?src="http:\/\/(www\.)?ioti\.com/', $postContent, $src)) {
 
-			debug($postContent);
-			debug($src);
+			// debug($postContent);
+			// debug($src);
 			preg_match('/<img .*?src\=["](.*?)["]$/', $postContent, $parts);
 //dd($parts);
 
@@ -194,8 +194,8 @@ class Post extends DB {
 			$postContent = preg_replace('/src="http:\/\/(www\.)?ioti\.com\/sites\/iot\-institute\.com\/files\//','src="files/2018/06/', $postContent);
 		// get the image
 
-debug("\n---------------------------------");
-debug($postContent);
+// debug("\n---------------------------------");
+// debug($postContent);
 
 			return $postContent;
 

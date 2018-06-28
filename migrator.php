@@ -206,10 +206,10 @@ for ($c = 0; $c < $chunks; $c++) {
 
 		foreach ($drupal_nodes as $node) {
 
-if (preg_match('/Faith/', $node->title)) {
-	debug($node);
-	$node_flag = $node;
-}
+// if (preg_match('/Faith/', $node->title)) {
+// 	debug($node);
+// 	$node_flag = $node;
+// }
 
 			$wpPostId = null;
 			$fileSet = null;
