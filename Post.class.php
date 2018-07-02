@@ -421,7 +421,7 @@ debug($values);
 		$wp_posts = DB::wptable('posts');
 		$sql = "UPDATE $wp_posts SET $field = '$data' WHERE ID = $post_id";
 		$this->db->query($sql);
-debug($sql);
+//debug($sql);
 
 	}
 

@@ -46,8 +46,7 @@ if ($options->users) {
 
 	$users->createWordpressUsers($options->siteId);  
 
-	
-	debug($users->wordpressUsers() . '... users created in Wordpress');
+	debug($users->wordpressUsers() . '... users in Wordpress');
 
 	$users->makeAdminUser();
 

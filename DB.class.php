@@ -384,6 +384,11 @@ class DB {
 
 		if ($numRows > 1) {
 			debug('WARNING: record query returned more rows than the expected single row: ' . $sql);
+			throw new Exception('DB::record() multi row exception');
+
+			// added exception to trace these instances:
+			// as this function should only return a single record
+			// was previously forcing this with:
 			$numRows = $this->query($sql . ' LIMIT 1');
 		}
 		if ($numRows) {

@@ -206,11 +206,6 @@ for ($c = 0; $c < $chunks; $c++) {
 
 		foreach ($drupal_nodes as $node) {
 
-// if (preg_match('/Faith/', $node->title)) {
-// 	debug($node);
-// 	$node_flag = $node;
-// }
-
 			$wpPostId = null;
 			$fileSet = null;
 			$nid = $node->nid;
@@ -222,32 +217,23 @@ for ($c = 0; $c < $chunks; $c++) {
 				// TODO: test if addMediaLibrary is working for media_entity posts
 				if ($node->type === 'media_entity') {
 					$media_set = $d7_fields->penton_media_images($node->nid);
-
-
-// $wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
-
+$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
 // if(!$wpPostId) {
 // 	debug($wp_termmeta_term_id);
-// 	//debug($node);
-// 	//dd('check');
+// 	debug($node);
+// 	dd('check');
 // }
-
 					$featuredInNode = $files->getMediaEntityParentNodeId($node);
 					$featuredImages[$featuredInNode] = $media_set;
-// if (preg_match('/faith/', $media_set[0]->filename)) {
-// 	$media_flag = $node;
-// 	debug($featuredImages);
+// if (!empty($media_set)) {
+// 	$file_set = $files->getFiles($node->nid);
+// 	if (isset($file_set)) {
+// 		foreach ($file_set as $file) {
+// 			// to add media_entity to the media library - we may need to know the wpPostId - but how?
+// 			$wordpress->addMediaLibrary($wpPostId, $file, $options, $node->type);
+// 		}
+// 	}
 // }
-					// 	if (!empty($media_set)) {
-					// 		$file_set = $files->getFiles($node->nid);
-					// 		if (isset($file_set)) {
-					// 			foreach ($file_set as $file) {
-					// 				// to add media_entity to the media library - we may need to know the wpPostId - but how?
-					// 				$wordpress->addMediaLibrary($wpPostId, $file, $options, $node->type);
-					// 			}
-					// 		}
-					// 	}
-					// }
 				} else {
 
 					$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
@@ -269,12 +255,15 @@ for ($c = 0; $c < $chunks; $c++) {
 
 // THIS WAS PURELY FOR DEBUG/TESTING
 if (false && $node->type === 'media_entity') {
-	$sql = "SELECT fm.filename, fm.uri, field_penton_media_image_fid AS fid, field_penton_media_image_title AS title, field_penton_media_image_alt AS al
+	$sql = "SELECT fm.filename, fm.uri, 
+					field_penton_media_image_fid AS fid, 
+					field_penton_media_image_title AS title, 
+					field_penton_media_image_alt AS al
 		FROM field_data_field_penton_media_image fdfmi
 		JOIN file_managed fm ON fm.fid=fdfmi.field_penton_media_image_fid
 		WHERE entity_id=$nid";
 	debug($fileSet);
-		$imgs = $d7->records($sql);
+	$imgs = $d7->records($sql);
 	debug($imgs);
 	if ($media_flag) {
 		dd('check');
@@ -282,8 +271,6 @@ if (false && $node->type === 'media_entity') {
 }
 				if (isset($fileSet)) {
 					foreach ($fileSet as $file) {
-						// TODO: moveFile is deprecated
-						//$files->moveFile($file);
 						if ($wpPostId) {
 							$wordpress->addMediaLibrary($wpPostId, $file, $options);
 						}
@@ -300,7 +287,7 @@ if (false && $node->type === 'media_entity') {
 						if ($verbose) {
 							print "\n" . $taxonomy->category . ' : ' . $taxonomy->name;
 						}
-					}debug ($media);
+					}
 
 
 					if (!$options->quiet && !$options->progress && ($verbose === true) ) {
@@ -364,6 +351,7 @@ if (false && $node->type === 'media_entity') {
 
 							} else if ($data[0] === 'field_penton_author') {
 
+									// content_iller uses this:
 									$new_uid = $data[1]->field_penton_author_target_id;
 									$newUserId = $users->getWordpressUserId($new_uid);
 									if ($newUserId) {
@@ -373,8 +361,11 @@ if (false && $node->type === 'media_entity') {
 									}
 
 							} else if ($data[0] === 'field_penton_article_type_tid') {
+
 									$article_types = ['Article', 'Gallery', 'Audio', 'Video', 'Webinar', 'Data Table', 'White Paper'];
+
 									// TODO make wordpress postmeta elements
+
 							}
 
 							// create a featured image
@@ -400,6 +391,7 @@ if (false && $node->type === 'media_entity') {
 							foreach ($data[1] as $key => $value) {
 
 								if (strlen($value) && $value !== 'a:0:{}') {
+
 
 									$shorterField = preg_replace('/^field_/', '', $key);
 									

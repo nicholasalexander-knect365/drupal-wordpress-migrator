@@ -177,7 +177,8 @@ class User {
 	public function getWordpressUserByEmail($email) {
 		
 		if (strlen($email)>3) {
-			$sql = "SELECT * from wp_users where user_email = '$email'";
+
+			$sql = "SELECT * from wp_users where user_email = '$email' ORDER BY ID LIMIT 1";
 			$record = $this->db->record($sql);
 
 			return $record;
@@ -249,23 +250,54 @@ class User {
 		$this->d7->record($sql);
 	}
 
-	// private function addMeta(integer $user_id, $key, $value) {
-	// 	$sql = sprintf("INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, %s, %s)", $user_id, $key, $value);
-	// 	debug($sql);
-	// }
+	private function existantUser($user_id, $email = '', $blog_id) {
+		$sql = "SELECT COUNT(*) as c FROM wp_users WHERE user_id = $user_id";
+		$record = $this->db->record($sql);
 
-	// private function updateMeta(integer $user_id, $key, $value) {
-	// 	$sql = sprintf("UPDATE wp_usermeta SET $key = '$value' WHERE user_id=$user_id", $user_id, $key, $value);
-	// 	debug($sql);
-	// }
+		if ($record && $record->c && strlen($email)) {
+			$sql = "SELECT ID FROM wp_users WHERE user_email = '$email' ORDER BY ID LIMIT 1";
+			$record = $this->db->record($sql);
+			$user_id = $record->ID;
+			return $user_id;
+		} else {
+			return FALSE;
+		}
+	}
+
+	private function userHasBlogCapabilities($blog_id) {
+
+		// checks to see if a user exists in any other capacity than this blog
+		$wp_capabilities = sprintf('wp_%d_capabilities', $blog_id);
+		$sql = "SELECT COUNT(*) as c FROM wp_usermeta WHERE user_id = $user_id AND meta_key LIKE '$wp_capabilities'";
+		$record = $this->db->record($sql);
+
+		$user_in_this_blog = isset($record) && $record->c > 0;
+		$sql = "SELECT COUNT(*) as c FROM wp_usermeta WHERE user_id = $user_id AND meta_key LIKE 'wp_%_capabilities'";
+
+		$record = $this->db->record($sql);
+		$user_has_other_blogs = isset($record) && $record->c > $user_in_this_blog;
+
+		if ($user_has_other_blogs) {
+			return true;
+		} else if ($user_in_this_blog) {
+
+		}
+	}
 
 	private function updateUserMeta($usermeta, $user_id, $blog_id) {
 
-		$sqlremove 		= "DELETE FROM wp_usermeta WHERE user_id=%d AND meta_key='%s'";
+		$sqlremovefmt	= "DELETE FROM wp_usermeta WHERE user_id=%d AND meta_key='%s'";
 		$sqlinsertfmt 	= "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES (%d, '%s', '%s')";
 		$sqlupdatefmt 	= "UPDATE wp_usermeta SET meta_value='%s' WHERE user_id=%d AND meta_key='%s' LIMIT 1";
 
+		if (!is_array($usermeta)) {
+			throw new Exception('user meta is not an array?');
+		}
+
 		foreach ($usermeta as $key => $value) {
+			$sqlremove = sprintf($sqlremovefmt, $user_id, $key);
+			$sqlinsert = sprintf($sqlinsertfmt, $user_id, $key, $value);
+			$sqlupdate = sprintf($sqlupdatefmt, $value, $user_id, $key);
 
 			if ($blog_id) {
 				$key = preg_replace('/%d/', $blog_id, $key);
@@ -276,21 +308,28 @@ class User {
 				$roleKey = 'wp_roles';
 			}
 
-			// if ($clearUserMeta) {
-			// 	$q = sprintf($sqlremove, $user_id, $key);
-			// 	$this->db->query($q);
-			// }
-
 			// usermeta exists?
-//dd($user_id);
-			$sql = "SELECT * FROM wp_usermeta WHERE user_id=$user_id AND meta_key='$key'";
-			$usermeta = $this->db->record($sql);
-			if (count((array) $usermeta)) {
-				$q = sprintf($sqlupdatefmt, $value, $user_id, $key);
+			$sql = "SELECT COUNT(*) AS c FROM wp_usermeta WHERE user_id=$user_id AND meta_key='$key'";
+			$record = $this->db->record($sql);
+			$count_usermeta = (integer) $record->c;
+
+//debug("\nFound ".$count_usermeta . ' instances of metadata for '.$user_id . ' key ' . $key);
+
+			// is it a normal update
+			if ($count_usermeta === 1) {
+				$q = sprintf($sqlupdate, $value, $user_id, $key);
+//debug('making update: '.$sqlupdate);
+			// if there is more then one usermeta for this key/user, clear them and insert
+			} else if ($count_usermeta > 1) {
+				$q = sprintf($sqlremove, $user_id, $key);
+//debug($q);
+				$this->db->query($q);
+				$q = sprintf($sqlinsert, $user_id, $key, $value);
+			// otherwise, if it aint there, insert it
 			} else {
-				$q = sprintf($sqlinsertfmt, $user_id, $key, $value);
+				$q = sprintf($sqlinsert, $user_id, $key, $value);
 			}
-			//debug($q);
+//debug($q);
 			$this->db->query($q);
 		}
 
@@ -320,7 +359,9 @@ class User {
 
 		$user_level = NULL;
 
-		if (strlen($role)) {
+		// initial spec was to assign roles, this has since been changed for ioti 
+		// TODO: remove (unless they change their mind...)
+		if (FALSE && strlen($role)) {
 
 			switch (strtolower($role)) {
 
@@ -358,14 +399,19 @@ class User {
 		} else {
 			// admin user
 			if ((integer) $uid === 1) {
+
 				$capability = $this->capabilities[0];
+				$user_level = 10;
+
 			} else {
+
 				$capability = $this->capabilities[4];
+				$user_level = 1;
 			}
 		}
+
 		return [$capability, $user_level];
 	}
-
 
 	// wordpress UserMeta table
 	private function makeUserMeta($drupal_user, $user_id, $blog_id) {
@@ -406,6 +452,8 @@ class User {
 				'description' 						=> $first_name . ' ' . $last_name,
 				'primary_blog' 						=> $blog_id,
 				'source_domain' 					=> $sourceDomain,
+				'changed_password'					=> true,
+				'drupal_migration'					=> date('Y-m-d H:i:s'),
 				'wp_%d_user_avatar' 				=> '',
 				/* 'wp_%d_role'						=> '', */
 				'wp_%d_capabilities'				=> $capability,
@@ -467,20 +515,43 @@ class User {
 		return null;
 	}
 
+	// private function updateUserMeta($user_id, $meta_key, $meta_value) {
 
-		// // create or update a user's meta
-		// public function getOtherUserId($user_id = null, $key, $value = NULL) {
-		// 	if (empty($user_id) && empty($value)) {
-		// 		throw new Exception("\nERROR: getOtherUserId() requires either a Drupal or Wordpress ID!");
-		// 	}
-		// 	if ($user_id) {
-		// 		$sql = "SELECT meta_value AS s FROM wp_usermeta WHERE user_id = $user_id AND meta_key = 'drupal_uid'";
-		// 	} else {
-		// 		$sql = "SELECT user_id AS s FROM wp_usermeta WHERE meta_key='drupal_uid' AND meta_value='$value'";
-		// 	}
-		// 	$record = $this->db->record($sql);
-		// 	return $record->s;
-		// }
+	// 	if (empty($user_id) || empty($meta_key)) {
+	// 		throw new Exception("\nUser->getSetUserMeta ERROR: user_id and meta_key must be set.  Invalid parameter user_id = $user_id, meta_key=$meta_key");
+	// 	}
+
+	// 	if ($this->userMetaExists($user_id, $meta_key)) {
+	// 		$countUserMeta = $this->countUserMeta($user_id, $meta_key);
+	// 		if ($countUserMeta > 1) {
+	// 			$sql = "DELETE wp_usermeta WHERE meta_key='$meta_key' AND user_id=$user_id";
+	// 			$this->db->query($sql);
+	// 		}
+	// 		$sql = "UPDATE wp_usermeta SET meta_value='$meta_value' WHERE meta_key='$meta_key' AND user_id=$user_id";
+	// 	} else {
+	// 		$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, '$meta_key', '$meta_value')";
+	// 	}
+	// 	$this->db->query($sql);
+	// }
+
+	private function insertOrUpdateUserMeta($user_id, $key, $value) {
+		// exists?
+		$sql = "SELECT umeta_id  FROM wp_usermeta WHERE meta_key = '$key' AND user_id = $user_id";
+//debug($sql);
+		$record = $this->db->record($sql);
+		if ($record && $record->umeta_id) {
+			$umeta_id = $record->umeta_id;
+			$sql = "UPDATE wp_usermeta SET meta_value = '$value' WHERE umeta_id = $umeta_id";
+		} else {
+			$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, '$key', $value)";
+		}
+//debug($sql);
+		try {
+			$this->db->query($sql);
+		} catch (Exception $e) {
+			throw new Exception("\nError in query ".$sql. "\n".$e->getMessage());
+		}
+	}
 
 	public function getDrupalUid($user_id){
 		$drupal_uid = $this->drupal_uid_key;
@@ -501,44 +572,34 @@ class User {
 		}
 	}
 
-	public function getSetUserMeta($user_id, $meta_key, $meta_value) {
-		if (empty($user_id) || empty($meta_key)) {
-			throw new Exception("\nUser->getSetUserMeta ERROR: user_id and meta_key must be set.  Invalid parameter user_id = $user_id, meta_key=$meta_key");
-		}
-		if ($this->userMetaExists($user_id, $meta_key)) {
-			$sql = "UPDATE wp_usermeta SET meta_value='$meta_value' WHERE meta_key='$meta_key' AND user_id=$user_id";
-		} else {
-			$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, '$meta_key', '$meta_value')";
-		}
-		$this->db->query($sql);
-	}
 
-	public function insertOrUpdateUserMeta($user_id, $key, $value) {
-		// exists?
-		$sql = "SELECT COUNT(*) as c FROM wp_usermeta WHERE meta_key = '$key' AND user_id = $user_id";
-		$record = $this->db->record($sql);
-		$umeta_id = $record->c;
-		if ($umeta_id) {
-			$sql = "UPDATE wp_usermeta SET meta_value = '$value' WHERE umeta_id = $id";
-		} else {
-			$sql = "INSERT INTO wp_usermeta ('user_id', 'meta_key', 'meta_value') WHERE user_id=$user_id AND meta_key='$key'";
-		}
-		$this->db->query($sql);
-	}
+// deprecate?
+		// // create or update a user's meta
+		// public function getOtherUserId($user_id = null, $key, $value = NULL) {
+		// 	if (empty($user_id) && empty($value)) {
+		// 		throw new Exception("\nERROR: getOtherUserId() requires either a Drupal or Wordpress ID!");
+		// 	}
+		// 	if ($user_id) {
+		// 		$sql = "SELECT meta_value AS s FROM wp_usermeta WHERE user_id = $user_id AND meta_key = 'drupal_uid'";
+		// 	} else {
+		// 		$sql = "SELECT user_id AS s FROM wp_usermeta WHERE meta_key='drupal_uid' AND meta_value='$value'";
+		// 	}
+		// 	$record = $this->db->record($sql);
+		// 	return $record->s;
+		// }
+	// private function addUserMeta($drupal_user, $user_id, $blog_id = NULL) {
 
-	private function addUserMeta($drupal_user, $user_id, $blog_id = NULL) {
+	// 	$role = $drupal_user->role;
 
-		$role = $drupal_user->role;
-
-		list($capability, $user_level) = $this->determineCapability($role, $drupal_user->uid);
-		$usermeta = [
-			'wp_%d_user_avatar' 				=> '',
-			/* 'wp_%d_role'						=> '', */
-			'wp_%d_capabilities'				=> $capability,
-			'wp_%d_user_level'					=> $user_level,
-		];
-		$this->updateUserMeta($usermeta, $user_id);
-	}
+	// 	list($capability, $user_level) = $this->determineCapability($role, $drupal_user->uid);
+	// 	$usermeta = [
+	// 		'wp_%d_user_avatar' 				=> '',
+	// 		/* 'wp_%d_role'						=> '', */
+	// 		'wp_%d_capabilities'				=> $capability,
+	// 		'wp_%d_user_level'					=> $user_level,
+	// 	];
+	// 	$this->updateUserMeta($usermeta, $user_id);
+	// }
 
 	private function makeUserName($name, $email) {
 
@@ -606,9 +667,6 @@ class User {
 					$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, 'last_name', '$last_name')";
 					$this->db->query($sql);
 				}
-//debug($sql);
-				// keep a record of this user's drupal UID
-				$this->getSetUserMeta($user_id, 'drupal_uid', $drupalUser->uid);
 
 				if ($this->config->verbose === true) {
 					debug("\nWordpress user $user_id created");
@@ -631,7 +689,6 @@ class User {
 
 	// TODO: something did not work here on IOTI - 
 	public function createWordpressUsers($blog_id) {
-
 		foreach ($this->drupalUsers as $drupal_user) {
 
 			if ($drupal_user->uid > 0) {
@@ -639,12 +696,12 @@ class User {
 				$user = $this->getWordpressUserByEmail($drupal_user->mail);
 
 				if (isset($user) && $user->ID) {
+
 					$user_id = $user->ID;
+
 				} else {
 
 					$user_id = $this->makeWordpressUser($drupal_user, $blog_id);
-
-					$this->getSetUserMeta($user_id, $this->drupal_uid_key, $drupal_user->uid);
 
 					if (empty($user_id)) {
 						debug("\nDrupal user " . $drupal_user->uid . " was not imported as there is no email address for that Drupal user.");
@@ -652,6 +709,7 @@ class User {
 				}
 
 				$this->makeUserMeta($drupal_user, $user_id, $blog_id);
+				$this->insertOrUpdateUserMeta($user_id, $this->drupal_uid_key, $drupal_user->uid);
 
 				if ($this->config->verbose) {
 					debug("usermeta created for user $user_id");

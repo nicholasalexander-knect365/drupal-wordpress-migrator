@@ -67,7 +67,7 @@ class WPTermMeta {
 
 		$sql = "SELECT meta_value FROM $wp_termmeta WHERE term_id='$term_id' AND meta_key='$meta_key'";
 		$record = $this->db->record($sql);
-//debug($sql);
+
 		if ($record && $record->meta_value) {
 			return $record->meta_value;
 		}
