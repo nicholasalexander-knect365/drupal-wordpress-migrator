@@ -294,10 +294,9 @@ class User {
 			throw new Exception('user meta is not an array?');
 		}
 
+//debug($usermeta);
+
 		foreach ($usermeta as $key => $value) {
-			$sqlremove = sprintf($sqlremovefmt, $user_id, $key);
-			$sqlinsert = sprintf($sqlinsertfmt, $user_id, $key, $value);
-			$sqlupdate = sprintf($sqlupdatefmt, $value, $user_id, $key);
 
 			if ($blog_id) {
 				$key = preg_replace('/%d/', $blog_id, $key);
@@ -307,6 +306,11 @@ class User {
 				$capabilityKey = 'wp_capabilities';
 				$roleKey = 'wp_roles';
 			}
+// debug($key);
+// debug($value);
+			$sqlremove = sprintf($sqlremovefmt, $user_id, $key);
+			$sqlinsert = sprintf($sqlinsertfmt, $user_id, $key, $value);
+			$sqlupdate = sprintf($sqlupdatefmt, $value, $user_id, $key);
 
 			// usermeta exists?
 			$sql = "SELECT COUNT(*) AS c FROM wp_usermeta WHERE user_id=$user_id AND meta_key='$key'";

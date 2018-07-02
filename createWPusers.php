@@ -36,7 +36,6 @@ if ($options->users) {
 	} else {
 
 		if ($users->doWordpressUsersExist()) {
-
 			debug("\nImporting Drupal users to add to existing Wordpress users");
 		} 
 		$users->getDrupalUsers(); 
