@@ -121,6 +121,7 @@ if ($options->initialise) {
 
 $wp_termmeta_term_id = $wp_taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
 
+
 $nodeSource = 'drupal';
 
 if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$options->nodes && !$options->initialise)) {
@@ -217,14 +218,16 @@ for ($c = 0; $c < $chunks; $c++) {
 				// TODO: test if addMediaLibrary is working for media_entity posts
 				if ($node->type === 'media_entity') {
 					$media_set = $d7_fields->penton_media_images($node->nid);
-$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
+// $wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
 // if(!$wpPostId) {
 // 	debug($wp_termmeta_term_id);
 // 	debug($node);
 // 	dd('check');
 // }
-					$featuredInNode = $files->getMediaEntityParentNodeId($node);
-					$featuredImages[$featuredInNode] = $media_set;
+					$featuredInNodes = $files->getMediaEntityParentNodeIds($node);
+					foreach ($featuredInNodes as $featuredInNode) {
+						$featuredImages[$featuredInNode] = $media_set;
+					}
 // if (!empty($media_set)) {
 // 	$file_set = $files->getFiles($node->nid);
 // 	if (isset($file_set)) {
@@ -247,28 +250,26 @@ $wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
 				// find the wpPostId for this node??
 				$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
 			}
-
+			$imgfiledata = '';
 			if ($options->files) {
 				// getFiles stores a local copy
 				$fileSet = $files->getFiles($nid);
 
+				if ($node->type === 'media_entity') {
+					$sql = "SELECT fm.filename, fm.uri, 
+									field_penton_media_image_fid AS fid, 
+									field_penton_media_image_title AS title, 
+									field_penton_media_image_alt AS al
+						FROM field_data_field_penton_media_image fdfmi
+						JOIN file_managed fm ON fm.fid=fdfmi.field_penton_media_image_fid
+						WHERE entity_id=$nid";
+					// debug($fileSet);
+					//debug(DB::strip($sql));
 
-// THIS WAS PURELY FOR DEBUG/TESTING
-if (false && $node->type === 'media_entity') {
-	$sql = "SELECT fm.filename, fm.uri, 
-					field_penton_media_image_fid AS fid, 
-					field_penton_media_image_title AS title, 
-					field_penton_media_image_alt AS al
-		FROM field_data_field_penton_media_image fdfmi
-		JOIN file_managed fm ON fm.fid=fdfmi.field_penton_media_image_fid
-		WHERE entity_id=$nid";
-	debug($fileSet);
-	$imgs = $d7->records($sql);
-	debug($imgs);
-	if ($media_flag) {
-		dd('check');
-	}
-}
+					$imgfiledata = $d7->records($sql);
+					// debug($node);
+					// debug($imgfiledata);
+				}
 				if (isset($fileSet)) {
 					foreach ($fileSet as $file) {
 						if ($wpPostId) {
@@ -288,7 +289,6 @@ if (false && $node->type === 'media_entity') {
 							print "\n" . $taxonomy->category . ' : ' . $taxonomy->name;
 						}
 					}
-
 
 					if (!$options->quiet && !$options->progress && ($verbose === true) ) {
 						print "\nImported " . count($taxonomies) . " taxonomies.\n";
@@ -360,16 +360,28 @@ if (false && $node->type === 'media_entity') {
 										debug('no drupal_uid record for '.$new_uid);
 									}
 
-							} else if ($data[0] === 'field_penton_article_type_tid') {
 
-									$article_types = ['Article', 'Gallery', 'Audio', 'Video', 'Webinar', 'Data Table', 'White Paper'];
+							} else if ($data[0] === 'field_penton_article_type') {
 
-									// TODO make wordpress postmeta elements
+									$article_types = ['Article', 'Gallery', 'Audio', 'Video', 'Webinar', 'Data Table', 'White Paper', 'Link'];
 
+									$type_tid = (integer) $data[1]->field_penton_article_type_tid;
+									if ($type_tid < 9) {
+										$article_type = $article_types[$type_tid - 1];
+									} else {
+										dd($data);
+									}
+									$postmeta->createUpdatePostMeta($wpPostId, 'article_type', $article_type);
+
+							} else if ($data[0] === 'field_penton_native_advertising') {
+									$sponsored = (integer) $data[1]->field_penton_native_advertising_value;
+									$taxonomy = new Taxonomy($wp, $options);
+									$term_id = $taxonomy->getSetTerm('Sponsored Content', 'sponsored-content', 'Attributes');
+									$taxonomy->updateInsertTaxonomy($term_id, 'Attributes');
 							}
 
 							// create a featured image
-							if (isset($image->featured_image_id)) {
+							if (FALSE && isset($image->featured_image_id)) {
 
 								$image_url = $d7_node->getNode($image->featured_image_id)->title;
 								// 
@@ -377,8 +389,11 @@ if (false && $node->type === 'media_entity') {
 								//$postmeta->createFields($wpPostId, ['_thumbnail_id' => $mediaId]);
  								//$fileSet = $files->getFiles($node->nid);
 
+//debug($wpPostId);
+//debug($d7_node->getNode($image->featured_image_id));
+dd($imgfiledata);
 								// the actual import of images is done with wp-cli - addUrlMediaLibary writes these commands
-								$wordpress->addUrlMediaLibrary($wpPostId, $image_url, $options, true);
+								$wordpress->addMediaLibrary($wpPostId, $image_url, $options, true);
 
 							}
 

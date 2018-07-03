@@ -68,7 +68,7 @@ class Options {
 		$this->dusers 		= false;
 
 		$this->wordpressPath = '';
-		$this->wordpressURL  = 'http://ioti.telecoms.local';
+		$this->wordpressURL  = 'http://ioti.multisite.local';
 		$this->wordpressDomain = 'iotworldtoday.com';
 
 		$this->drupalPath 	= '../drupal7/ioti';

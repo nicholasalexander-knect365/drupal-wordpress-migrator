@@ -572,6 +572,7 @@ class User {
 		if ($record) {
 			return $record->s;
 		} else {
+			debug($sql);
 			return NULL;
 		}
 	}

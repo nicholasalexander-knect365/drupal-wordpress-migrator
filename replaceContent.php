@@ -39,7 +39,7 @@ $wp_taxonomy = new Taxonomy($wp, $options);
 $drupal_wp_term_id = $wp_taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
 
 if (!$drupal_wp_term_id) {
-	throw new Exception("ERROR: \nNo Drupal Node ID record in wp_postmeta\n");
+	throw new Exception("ERROR: \nNo DRUPAL_WP record in wp_postmeta\n");
 }
 
 $includeUsers = isset($options->users);

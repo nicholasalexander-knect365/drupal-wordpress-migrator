@@ -98,6 +98,23 @@ class PostMeta extends DB {
 		return $id;
 	}
 
+	public function createUpdatePostMeta($postId, $key, $value) {
+
+		$wp_postmeta = DB::wptable('postmeta');
+
+		$sql = "SELECT meta_id FROM $wp_postmeta WHERE post_id=$postId AND meta_key='$key'";
+		$record = $this->db->record($sql);
+
+		if (isset($record) && $record->meta_id) {
+			$meta_id = $record->meta_id;
+			$sql = "UPDATE $wp_postmeta SET meta_value='$value' WHERE meta_id=$meta_id";
+		} else {
+			$sql = "INSERT INTO $wp_postmeta (post_id, meta_key, meta_value) VALUES ($postId, '$key', '$value')";
+		}
+//debug($sql);
+		$this->db->query($sql);
+	}
+
 	// wordpress entities create
 	public function createFields($wpPostId, $data) {
 

@@ -196,7 +196,7 @@ class Files {
 	//     featured_image 
 	//     image_gallery  ... and other entities that 
 	// define its use (disposition) and therefore may create wordpress featured images, image gallery 
-	public function getMediaEntityParentNodeId($node) {
+	public function getMediaEntityParentNodeIds($node) {
 
 		$nid = $node->nid;
 
@@ -204,11 +204,9 @@ class Files {
 				FROM field_data_field_penton_link_media_feat_img 
 				WHERE bundle='article' AND field_penton_link_media_feat_img_target_id=$nid";
 
-		$record = $this->connection->record($sql);
-		if (isset($record) && $record->entity_id) {
-			return $record->entity_id;
-		}
-		return NULL;
+		$records = $this->connection->records($sql);
+		return $records;
+
 	}
 
 	// ????? may not be required

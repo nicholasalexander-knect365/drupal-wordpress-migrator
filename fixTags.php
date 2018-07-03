@@ -35,7 +35,7 @@ $wp_post = new Post($wp);
 
 $wp_terms = new WPTerms($wp, $options);
 $wp_termmeta = new WPTermMeta($wp);
-$wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, 'Drupal Node ID');
+$wp_termmeta_term_id = $wp_termmeta->getSetTerm(DRUPAL_WP, DRUPAL_WP);
 
 
 $wp_terms->removeBlankSlugs();

@@ -198,6 +198,7 @@ class Post extends DB {
 	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath, \User $users) {
 
 		$wp_posts = DB::wptable('posts');
+		$blog_id = $options->siteId;
 
 		$values = [];
 		$metas = [];
@@ -263,7 +264,7 @@ class Post extends DB {
 								$values[$wpKey] = $wordpressUser->ID;
 							} else {
 								/// makeWordpressUser is private .... we only want to now make them
-								$values[$wpKey] = $users->makeWordpressUser($drupalUser);
+								$values[$wpKey] = $users->makeWordpressUser($drupalUser, $blog_id);
 							}
 						} else {
 							debug("$value user with this uid can not be found in the Drupal Database, post assigned to default user in Wordpress");
@@ -380,6 +381,8 @@ debug($values);
 		foreach(static::$static_fields as $field => $value) {
 			$values[$field] = $value;
 		}
+
+		// detect if this content already exists 
 
 		$sql = "INSERT into $wp_posts (" . implode(', ', array_keys($values)) . ") VALUES ('" . implode("', '", $values) ."')";
 		$this->db->query($sql); 

@@ -383,7 +383,8 @@ class DB {
 		$numRows = $this->query($sql);
 
 		if ($numRows > 1) {
-			debug('WARNING: record query returned more rows than the expected single row: ' . $sql);
+			debug('WARNING: record query returned more rows than the expected single row: ');
+			debug(DB::strip($sql));
 			throw new Exception('DB::record() multi row exception');
 
 			// added exception to trace these instances:

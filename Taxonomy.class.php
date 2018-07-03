@@ -36,17 +36,47 @@ class Taxonomy {
 	}
 
 	// set the term and return its ID, OR get the ID of the $term_name
-	public function getSetTerm($term_name, $term_slug) {
+	public function getSetTerm($term_name, $term_slug, $taxonomy = null) {
 
 		$wp_terms = DB::wptable('terms');
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
 
 		$sql = "SELECT COUNT(*) as c FROM $wp_terms WHERE slug='$term_slug'";
+
 		$record = $this->db->record($sql);
 
-		if ($record && $record->c) {
+		if ($record && (integer) $record->c === 1) {
+
 			$sql = "SELECT term_id FROM $wp_terms WHERE slug='$term_slug'";
+
 			$record = $this->db->record($sql);
 			return (integer) $record->term_id;
+
+		} else if ($record && (integer) $record->c > 1) {
+
+			if ($taxonomy) {
+
+				$sql = "SELECT * FROM $wp_terms t INNER JOIN $wp_term_taxonomy tt ON tt.term_id=t.term_id 
+						WHERE tt.taxonomy='$taxonomy' AND t.slug='$term_slug'";
+				$records = $this->db->records($sql);
+				$number_found = count($records);
+
+				if ($number_found > 1) {
+					debug(DB::strip($sql));
+					debug($records);
+					throw new Exception("ERROR: Can not isolate a term for $term_slug with taxonomy $taxonomy");
+				} else if ($number_found === 1) {
+					$term_id = (integer) $records[0]->term_id;
+				} else {
+					$sql = "INSERT INTO $wp_terms (name, slug, term_group) VALUES ('$term_name', '$term_slug', 0)";
+					$this->db->query($sql);
+					$term_id = $this->db->lastInsertId();
+				}
+
+			} else {
+
+				throw new Exception("\n\nERROR: can not getSet term $term_slug without a taxonomy as multiple instances of the term slug already exist");
+			}
 
 		} else {
 
@@ -54,9 +84,9 @@ class Taxonomy {
 
 			$this->db->query($sql);
 			$term_id = $this->db->lastInsertId();
-
-			return (integer) $term_id;
 		}
+
+		return (integer) $term_id;
 	}
 
 	protected function remapNameCategory($name) {
@@ -191,7 +221,7 @@ class Taxonomy {
 				foreach ($taxonomies as $taxname => $name) {
 
 					$slug = $this->slugify($name);
-					$term_id = $this->getSetTerm($name, $slug);
+					$term_id = $this->getSetTerm($name, $slug, $taxname);
 
 					$this->terms[$taxname][$slug] = $term_id;
 
@@ -279,6 +309,13 @@ class Taxonomy {
 		$format = $taxonomy->format;
 		$weight = $taxonomy->weight;
 		$parent = $taxonomy->hierarchy;
+		return $this->updateInsertTaxonomy($term_id, $taxname);
+	}
+
+	public function updateInsertTaxonomy($term_id, $taxname, $parent = 0, $description = '') {
+
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
+		//$wp_terms = DB::wptable('terms');
 
 		$record = $this->getTaxonomyRecord($term_id, $taxname);
 
@@ -297,11 +334,14 @@ class Taxonomy {
 		return $term_taxonomy_id;
 	}
 
+	// wordpress
 	public function makeWPTermData($taxonomy, $postId) {
 		$term_taxonomy_id = $this->makeTermTaxonomy($taxonomy);
 		$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId);
 	}
 
+
+	// wordpress
 	public function getTags() {
 		
 		$wp_terms = DB::wptable('terms');
