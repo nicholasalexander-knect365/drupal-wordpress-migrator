@@ -565,14 +565,18 @@ class User {
 	}
 
 	public function getWordpressUserId($uid) {
-		$drupal_uid = $this->drupal_uid_key;
-		$sql = "SELECT user_id AS s FROM wp_usermeta WHERE meta_key='$drupal_uid' AND meta_value='$uid'";
 
+		$drupal_uid = $this->drupal_uid_key;
+		$sql = "SELECT * FROM telecoms_local.wp_usermeta WHERE meta_key='$drupal_uid' AND meta_value LIKE '$uid'";
+//debug($sql);
+//debug($this->db);
 		$record = $this->db->record($sql);
+//debug($record);
+
 		if ($record) {
-			return $record->s;
+			return $record->user_id;
 		} else {
-			debug($sql);
+			
 			return NULL;
 		}
 	}

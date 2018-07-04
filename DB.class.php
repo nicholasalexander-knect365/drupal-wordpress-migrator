@@ -392,12 +392,10 @@ class DB {
 			// was previously forcing this with:
 			$numRows = $this->query($sql . ' LIMIT 1');
 		}
-		if ($numRows) {
-			$record = $this->getRecord();
-			return $record;
-		} else {
-			return null;
-		}
+
+		$record = $this->getRecord();
+		return $record;
+
 	} 
 
 	public function records($sql) {

@@ -363,13 +363,12 @@ for ($c = 0; $c < $chunks; $c++) {
 
 							} else if ($data[0] === 'field_penton_article_type') {
 
+									// IOTI specific "article types" (they are all being imported as posts)
 									$article_types = ['Article', 'Gallery', 'Audio', 'Video', 'Webinar', 'Data Table', 'White Paper', 'Link'];
 
 									$type_tid = (integer) $data[1]->field_penton_article_type_tid;
 									if ($type_tid < 9) {
 										$article_type = $article_types[$type_tid - 1];
-									} else {
-										dd($data);
 									}
 									$postmeta->createUpdatePostMeta($wpPostId, 'article_type', $article_type);
 

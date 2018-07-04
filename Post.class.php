@@ -89,12 +89,42 @@ class Post extends DB {
 		return $str;
 	}
 
+	public function getPost($postId) {
+		
+		$wp_posts = DB::wptable('posts');
+
+		$sql = "SELECT * FROM $wp_posts WHERE ID=$postId";
+		$record = $this->db->record($sql);
+
+		return $record;
+	}
+
+	public function updatePostRecord($post, $field, $value) {
+
+		$wp_posts = DB::wptable('posts');
+		$postId = $post->ID;
+
+		if ($postId) {
+			$sql = "UPDATE $wp_posts SET $field=$value WHERE ID=$postId LIMIT 1";
+			$this->db->query($sql);
+		}
+	}
+
+	public function updatePost($post_id, $field, $data) {
+
+		$wp_posts = DB::wptable('posts');
+		$sql = "UPDATE $wp_posts SET $field = '$data' WHERE ID = $post_id";
+		$this->db->query($sql);
+//debug($sql);
+
+	}
+
 	public function nodeToPost($nodeId) {
 		$wp_termmeta = DB::wptable('termmeta');
 		$taxonomy = new Taxonomy($this->db, $this->options);
 		$term_id = $taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
 
-		$sql = "SELECT * FROM $wp_termmeta WHERE term_id=$term_id AND FLOOR(meta_key)='$nodeId'";
+		$sql = "SELECT * FROM $wp_termmeta WHERE term_id=$term_id AND FLOOR(meta_key)=$nodeId";
 		$record = $this->db->record($sql);
 
 		if (isset($record) && isset($record->meta_value)) {
@@ -419,13 +449,5 @@ debug($values);
 		// return $post_id;
 	}
 
-	public function updatePost($post_id, $field, $data) {
-
-		$wp_posts = DB::wptable('posts');
-		$sql = "UPDATE $wp_posts SET $field = '$data' WHERE ID = $post_id";
-		$this->db->query($sql);
-//debug($sql);
-
-	}
 
 }
