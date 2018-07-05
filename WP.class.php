@@ -34,9 +34,9 @@ class WP {
 		if ($this->options->server === 'multisite') {
 			$handle = 'telecoms_local';
 		} else if ($this->options->server === 'staging') {
-			$handle = 'test1_telecoms_com';
-		} else if ($this->options->server === 'beta') {
 			$handle = 'test2_telecoms_com';
+		} else if ($this->options->server === 'beta') {
+			$handle = 'test1_telecoms_com';
 		} else if ($this->options->server === 'local') {
 			$handle = 'ioti';
 		} else {

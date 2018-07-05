@@ -10,23 +10,36 @@
  * use: 
  * php replaceContent.php 
  * --server=[staging,vm,local] --wordpressPath=/path/to/wordpress --project=[tuauto.iotworldtoday] --clean (strips out styles from html tags)
+ 
+ BUG: THIS SCRIPT selects wrong DB in common configs??  i.e. it tries to run Wordpress queries on Drupal - needs more config
+
  */
+
+die('authorCheckIoit.php - script does not work correctly, use migrator')
+
 require "DB.class.php";
 require "WP.class.php";
-print "\nReplace Content: this script replaces post content and populates users (with -u option)\n";
 
 require "Initialise.class.php";
 require "Options.class.php";
 require "Post.class.php";
 require "WPTermMeta.class.php";
 require "User.class.php";
+
 require "Node.class.php";
+require "Files.class.php";
 require "Taxonomy.class.php";
+
+require "Fields.class.php";
+require "FieldSet.class.php";
+require "Gather.class.php";
 
 // common routines including script init
 require "common.php";
+
 $users = new User($wp, $d7, $options);
 
+print "\nReplace Content: this script replaces post content and populates users (with -u option)\n";
 print "\n\nThere are ".$users->wordpressUsers();
 
 // databases are now available as $wp and $d7
@@ -77,7 +90,10 @@ foreach($records as $record) {
 			if ($verbose) debug($post->ID . ' ' . $post->post_author . ' ' . $record->author_id . ' '. $post->post_title);
 
 			// find the usermeta that returns the wordpress author
-			$wpUserId = $users->getWordpressUserId($record->author_id);
+			//$wpUserId = $wordpress->getWordpressUserId($record->author_id, $drupalUid);
+$sql = "SELECT * FROM wp_usermeta WHERE meta_key='$drupal_uid' AND meta_value LIKE '$uid'";
+$record = $wp->query($sql);
+$wpUserId = $record->user_id;
 
 			if ($wpUserId) {
 				debug('UPDATE: post author being set to '.$wpUserId);
