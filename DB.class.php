@@ -176,8 +176,9 @@ class DB {
 					$this->credentials['d7'] = [
 						// drupal database on test2
 						'database' => 'ioti_drupal',
-						'username' => 'test1_tele_com',
-						'password' => 'mu3Ohfei2eemoh8eich8',
+						'username' => 'test2_tele_com',
+						'password' => 'OhLoogai1Jook5mai7oc',
+						//'password' => 'mu3Ohfei2eemoh8eich8',
 						'host' => 'mysql'
 					];
 				} else if ($this->config->server === 'vm') {
