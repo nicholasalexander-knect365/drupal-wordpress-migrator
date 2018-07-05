@@ -204,7 +204,7 @@ for ($c = 0; $c < $chunks; $c++) {
 	if (isset($drupal_nodes) && count($drupal_nodes)) {
 
 		$galleries = [];
-
+$featuredImages = [];
 		foreach ($drupal_nodes as $node) {
 
 			$wpPostId = null;
@@ -225,9 +225,14 @@ for ($c = 0; $c < $chunks; $c++) {
 // 	dd('check');
 // }
 					$featuredInNodes = $files->getMediaEntityParentNodeIds($node);
+
 					foreach ($featuredInNodes as $featuredInNode) {
-						$featuredImages[$featuredInNode] = $media_set;
+						foreach($featuredInNode as $node_id) {
+							$featuredImages[$node_id] = $media_set;
+						}
 					}
+// debug($media_set);
+// debug ($featuredImages);
 // if (!empty($media_set)) {
 // 	$file_set = $files->getFiles($node->nid);
 // 	if (isset($file_set)) {
