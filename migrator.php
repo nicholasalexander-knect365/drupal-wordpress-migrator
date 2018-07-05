@@ -225,10 +225,11 @@ $featuredImages = [];
 // 	dd('check');
 // }
 					$featuredInNodes = $files->getMediaEntityParentNodeIds($node);
-
-					foreach ($featuredInNodes as $featuredInNode) {
-						foreach($featuredInNode as $node_id) {
-							$featuredImages[$node_id] = $media_set;
+					if (count($featuredInNodes)) {
+						foreach ($featuredInNodes as $featuredInNode) {
+							foreach($featuredInNode as $node_id) {
+								$featuredImages[$node_id] = $media_set;
+							}
 						}
 					}
 // debug($media_set);
