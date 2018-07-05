@@ -93,7 +93,7 @@ class WP {
 		}
 
 		$name = basename($url);
-debug("\naddMedia for the postID: ".$wpPostId . ' url '. $url);
+//debug("\naddMedia for the postID: ".$wpPostId . ' url '. $url);
 
 		if (file_exists("$imageStore/$url")) {
 

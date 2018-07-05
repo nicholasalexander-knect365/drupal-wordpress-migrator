@@ -225,7 +225,7 @@ class Post extends DB {
 		}
 	}
 
-	public function makePost($drupal_data, $options = NULL, $files, $wordpressPath, \User $users) {
+	public function makePost($post_name, $drupal_data, $options = NULL, $files, $wordpressPath, \User $users) {
 
 		$wp_posts = DB::wptable('posts');
 		$blog_id = $options->siteId;
@@ -239,6 +239,12 @@ class Post extends DB {
 		$fileSet = $files->fileList($nid);
 
 		$postContent = $this->mediaPathsInContent($drupal_data);
+
+// debug("Making Post with ");
+// debug($drupal_data);
+
+
+//$slugUrl = $drupal_data->slugname->
 
 		foreach($drupal_data as $key => $value) {
 
@@ -259,6 +265,7 @@ class Post extends DB {
 
 			} else {
 
+				// TODO: why is this commented out?
 				// $value = $this->prepare($value);
 
 				if ($key === 'created' || $key === 'changed') {
@@ -270,8 +277,6 @@ class Post extends DB {
 					$values[$wpKey . '_gmt'] = $value;
 				}
 
-
-// debug($value);
 				switch ($key) {
 
 					case 'uid':
@@ -412,9 +417,43 @@ debug($values);
 			$values[$field] = $value;
 		}
 
-		// detect if this content already exists 
+		if (!$post_name) {
+			debug('post name has no value from this node');
+			dd($drupal_data);
+		}
 
-		$sql = "INSERT into $wp_posts (" . implode(', ', array_keys($values)) . ") VALUES ('" . implode("', '", $values) ."')";
+		$values['post_name'] = $post_name;
+
+		// does post exist?
+		$sql = "SELECT * from $wp_posts WHERE post_name='$post_name' LIMIT 1";
+		$postFound = $this->db->record($sql);
+// debug($sql);
+// debug($postFound);
+
+		// if (isset($postsFound) && count($postsFound) > 1) {
+
+		// 	debug($postsFound);
+		// 	throw new Exception('more than one found with query ' . $sql);
+
+		// } else 
+		if (isset($postFound)) {
+
+			$post_found_id = $postFound->ID;
+			// do updates
+			$sql = "UPDATE $wp_posts SET ";
+			$clauses = [];
+
+			foreach ($values as $key => $value) {
+				$clauses[] = $key . "='" . $value . "'";
+			}
+			$sql .= implode (',', $clauses);
+
+			$sql .= " WHERE ID='$post_found_id'";
+
+		} else {
+
+				$sql = "INSERT into $wp_posts (" . implode(', ', array_keys($values)) . ") VALUES ('" . implode("', '", $values) ."')";
+		}
 		$this->db->query($sql); 
 		$post_id = $this->db->lastInsertId();
 //debug($sql);

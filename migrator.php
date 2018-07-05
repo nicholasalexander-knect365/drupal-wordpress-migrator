@@ -204,12 +204,17 @@ for ($c = 0; $c < $chunks; $c++) {
 	if (isset($drupal_nodes) && count($drupal_nodes)) {
 
 		$galleries = [];
-$featuredImages = [];
+		$featuredImages = [];
+
 		foreach ($drupal_nodes as $node) {
 
 			$wpPostId = null;
 			$fileSet = null;
 			$nid = $node->nid;
+
+			if (in_array($node->type, ['block_content', 'display_admin', 'gating_copy'])) {
+				continue;
+			}
 
 			if ($options->nodes && $nodeSource === 'drupal') {
 
@@ -225,6 +230,10 @@ $featuredImages = [];
 // 	dd('check');
 // }
 					$featuredInNodes = $files->getMediaEntityParentNodeIds($node);
+
+// debug('featuredInNodes');
+// debug($featuredInNodes);
+
 					if (count($featuredInNodes)) {
 						foreach ($featuredInNodes as $featuredInNode) {
 							foreach($featuredInNode as $node_id) {
@@ -232,8 +241,12 @@ $featuredImages = [];
 							}
 						}
 					}
+
+// debug('media set');
 // debug($media_set);
+// debug('featuredImages');
 // debug ($featuredImages);
+
 // if (!empty($media_set)) {
 // 	$file_set = $files->getFiles($node->nid);
 // 	if (isset($file_set)) {
@@ -245,10 +258,32 @@ $featuredImages = [];
 // }
 				} else {
 
-					$wpPostId = $wp_post->makePost($node, $options, $files, $options->imageStore, $users);
+					$url = $d7_node->getNodeUrls($node);
+// debug($node->nid);
+// debug($url);
+					if (isset($url) && strlen($url)) {
+						// create a postmeta for the $drupal URL
+						if (preg_match('/(.*)\/(.*)/', $url, $matches)) {
+							$post_name = $matches[2];
+							if (!strlen($post_name)) {
+								debug('post_name ??');
+								debug($post_name);
+								dd($url);
+							}
+						} else if (strlen($url)) {
+							$post_name = $url;
+						} else {
+							$post_name = Taxonomy::slugify($node->title);
+						}
 
-					if ($wpPostId) {
-						$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
+						$wpPostId = $wp_post->makePost($post_name, $node, $options, $files, $options->imageStore, $users);
+
+						if ($wpPostId) {
+							$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
+						}
+					} else {
+						debug($node);
+						throw new Exception("can not get path from this node");
 					}
 				}
 
@@ -256,6 +291,7 @@ $featuredImages = [];
 				// find the wpPostId for this node??
 				$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
 			}
+
 			$imgfiledata = '';
 			if ($options->files) {
 				// getFiles stores a local copy
@@ -483,6 +519,11 @@ if (isset($featuredImages) && count($featuredImages)) {
 			//create wp-cli import statements
 			if ($wp_post_id) {
 				$wordpress->addMediaLibrary($wp_post_id, $media, $options, $featured = true, $source = '');
+			} else {
+
+				continue;
+
+				dd('Node to post did not find a post for '.$nodeId);
 			}
 		}
 	}
