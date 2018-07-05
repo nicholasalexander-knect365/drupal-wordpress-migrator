@@ -73,10 +73,14 @@ class DB {
 		} else if ($this->config->server === 'vm2' && empty($this->config->wordpressPath)) {
 			$this->config->wordpressPath = '/home/vagrant/Code/client/k365/wp';
 
+		} else if ($this->config->server === 'beta' && empty($this->config->wordpressPath)) {
+			$this->config->wordpressPath = '/srv/www/test1.telecoms.com';
+			//throw new Exception("ERROR: this server requires a --wordpressPath setting!");
 		} else if ($this->config->server === 'staging' && empty($this->config->wordpressPath)) {
 			$this->config->wordpressPath = '/srv/www/test2.telecoms.com';
 			//throw new Exception("ERROR: this server requires a --wordpressPath setting!");
 		}
+
 
 		$wp_config = $this->config->wordpressPath . '/wp-config.php';
 
@@ -168,14 +172,23 @@ class DB {
 						'password' => 'OhLoogai1Jook5mai7oc',
 						'host' => 'mysql'
 					];
-				}
-				if ($this->config->server === 'vm') {
+				} else if ($this->config->server === 'beta') {
+					$this->credentials['d7'] = [
+						// drupal database on test2
+						'database' => 'ioti_drupal',
+						'username' => 'test1_tele_com',
+						'password' => 'mu3Ohfei2eemoh8eich8',
+						'host' => 'mysql'
+					];
+				} else if ($this->config->server === 'vm') {
 					$this->credentials['d7'] = [
 						'database' => 'ioti_drupal',
 						'username' => 'root',
 						'password' => 'root',
 						'host' => 'localhost'
 					];
+				} else {
+					throw new Exception('Unknown server configuration');
 				}
 				break;
 
@@ -221,7 +234,7 @@ class DB {
 			// multi-site config check
 			if ($record && count((array)$record) && ($this->config->wordpressPath === '/var/www/public' || $this->config->wordpressPath === '/srv/www/test2.telecoms.com' || $this->config->wordpressPath === '/srv/www/test3.telecoms.com' || $this->config->wordpressPath === '/srv/www/test1.telecoms.com')) {
 				if ($this->config->server === 'local') {
-					throw new Exception('CHECK FOR CONFIG ERROR: local server is not usually multisite.  If you are running on another server, please specify it with a --server=[vm,staging,live] directive');
+					throw new Exception('CHECK FOR CONFIG ERROR: local server is not usually multisite.  If you are running on another server, please specify it with a --server=[vm,staging,beta] directive');
 				}
 				print "\n: Wordpress MultiSite loading siteId: ".$this->config->siteId;
 			} else if ($this->config->server === 'local') {

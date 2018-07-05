@@ -165,7 +165,7 @@ class Options {
 				print "\n";
 
 				print "\nServer:";
-				print "\n*  --server=[local,vm,staging,live]";
+				print "\n*  --server=[local,vm,staging,beta]";
 				print "\n*  --project=[name of project, e.g. tu-auto, ioti]";
 				print "\n";
 

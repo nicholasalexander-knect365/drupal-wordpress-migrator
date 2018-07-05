@@ -9,16 +9,15 @@ define('MAX_USERS', 20000);
 
 class User {
 	
-	public $capabilities = [];
+	private $capabilities = [];
 
-	public $db;
-	public $drupalUsers;
-	public $drupalRoles;
-	public $config;
-	private $drupal_uid_key = 'drupal_uid';
+	private $db;
+	private $drupalUsers;
+	private $drupalRoles;
+	private $config;
+	private $drupal_uid_key = ''; //'drupal_uid';
 
 	public function __construct($wp, $d7, $config) {
-		
 		$this->db = $wp;
 		$this->d7 = $d7;
 		$this->config = $config;
@@ -564,22 +563,7 @@ class User {
 		return $record->s;
 	}
 
-	public function getWordpressUserId($uid) {
 
-		$drupal_uid = $this->drupal_uid_key;
-		$sql = "SELECT * FROM telecoms_local.wp_usermeta WHERE meta_key='$drupal_uid' AND meta_value LIKE '$uid'";
-//debug($sql);
-//debug($this->db);
-		$record = $this->db->record($sql);
-//debug($record);
-
-		if ($record) {
-			return $record->user_id;
-		} else {
-			
-			return NULL;
-		}
-	}
 
 
 // deprecate?

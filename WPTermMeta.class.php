@@ -15,7 +15,7 @@ class WPTermMeta {
 		$wp_termmeta = DB::wptable('termmeta');
 
 		$sql = "SELECT COUNT(*) AS c FROM $wp_termmeta WHERE term_id=$term_id AND meta_key='$meta_key'";
-		$this->db->query($sql);		
+		$this->db->query($sql);
 		$record = $this->db->record($sql);
 		return ($record && $record->c);
 	}

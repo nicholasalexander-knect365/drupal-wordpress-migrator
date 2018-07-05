@@ -353,7 +353,7 @@ for ($c = 0; $c < $chunks; $c++) {
 
 									// content_iller uses this:
 									$new_uid = $data[1]->field_penton_author_target_id;
-									$newUserId = $users->getWordpressUserId($new_uid);
+									$newUserId = $wordpress->getWordpressUserId($new_uid, $drupalUid);
 									if ($newUserId) {
 										$wp_post->updatePost($wpPostId, 'post_author', $newUserId);
 									} else {

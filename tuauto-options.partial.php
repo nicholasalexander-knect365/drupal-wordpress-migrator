@@ -19,7 +19,7 @@ if (in_array('d', array_keys($options))) {
 		$this->drupalPath = '/home/vagrant/Code/client/k365/tu-auto';
 		return;
 
-	} else if (isset($this->server) && $this->server === 'staging1') {
+	} else if (isset($this->server) && $this->server === 'beta') {
 		$this->setDefaults();
 		$this->wordpressPath = '/srv/www/test1.telecoms.com';
 		$this->wordpressURL = 'http://beta.tu-auto.com';
@@ -59,6 +59,9 @@ if (empty($this->wordpressPath)) {
 	}
 	if ($options['server'] === 'staging') {
 		$this->wordpressPath = '/srv/www/test2.telecoms.com';
+	}
+	if ($options['server'] === 'beta') {
+		$this->wordpressPath = '/srv/www/test1.telecoms.com';
 	}
 }
 

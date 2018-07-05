@@ -19,7 +19,7 @@ try {
 	$drupalPath 	= $options->get('drupalPath');		// where the drupal files are
 	$wordpressPath 	= $options->get('wordpressPath');
 	$imageStore 	= $options->get('imageStore');		// temporary image store
-	$server 		= $options->get('server');			// server = [local. vm, staging]
+	$server 		= $options->get('server');			// server = [local. vm, staging, beta]
 	$verbose 		= $options->get('verbose');			// tell me more
 
 	$options->showAll();
@@ -47,11 +47,14 @@ try {
 	die( 'DB connection error: ' . $e->getMessage());
 }
 
+
 // configure the wordpress environment
 $wp->configure($options);
 if ($d7) {
 	$d7->configure($options);
 }
+
+$drupalUid = sprintf('drupal_%d_uid', $options->siteId);
 
 //////////////////////////// END OF COMMON ////////////////////////////
 

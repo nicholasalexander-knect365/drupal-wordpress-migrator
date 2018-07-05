@@ -1,9 +1,11 @@
 <?php
 
+require_once "DB.class.php";
+
 class WP {
 	
-	public $db;
-	public $wp;
+	private $db;
+	private $wp;
 	private $cmdFile;
 	private $options;
 	private $cmds;
@@ -22,6 +24,43 @@ class WP {
 
 	public function __destruct() {
 		fclose($this->cmdFile);
+	}
+
+	// passing in the file handle as sometimes it switched databases after doing drupal queries
+	public function getWordpressUserId($uid, $drupalUidKey) {
+
+		//$wpress = new DB('wp', $this->options);
+//dd($this->options);
+		if ($this->options->server === 'multisite') {
+			$handle = 'telecoms_local';
+		} else if ($this->options->server === 'staging') {
+			$handle = 'test1_telecoms_com';
+		} else if ($this->options->server === 'beta') {
+			$handle = 'test2_telecoms_com';
+		} else if ($this->options->server === 'local') {
+			$handle = 'ioti';
+		} else {
+			dd($this->options);
+		}
+//$handle = 'telecoms_local';
+
+		$drupal_uid = $drupalUidKey; //$this->drupal_uid_key;
+
+		$sql = "SELECT * FROM `$handle`.wp_usermeta WHERE meta_key='$drupal_uid' AND meta_value LIKE '$uid'";
+
+//debug($sql);
+
+		$record = $this->db->record($sql);
+		//$record = $wpress->record($sql);
+
+//debug($record);
+
+		if ($record) {
+			return $record->user_id;
+		} else {
+
+			return NULL;
+		}
 	}
 
 	// TODO: is this deprecated and we use wp-cli instead
