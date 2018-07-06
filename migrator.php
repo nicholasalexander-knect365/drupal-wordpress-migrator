@@ -419,15 +419,13 @@ for ($c = 0; $c < $chunks; $c++) {
 							} else if ($data[0] === 'field_penton_native_advertising') {
 
 								$sponsored = (integer) $data[1]->field_penton_native_advertising_value;
-
-								$tx = new Taxonomy($wp, $options);
-
-								$term_id = $tx->getSetTerm('Sponsored', 'sponsored', 'Attributes');
-
-								$term_taxonomy_id = (integer) $tx->updateInsertTaxonomy($term_id, 'sponsored');
-
-								$tx->createTermRelationship($term_taxonomy_id, $wpPostId);
-
+debug($sponsored);
+								if ($sponsored) {
+									$tx = new Taxonomy($wp, $options);
+									$term_id = $tx->getSetTerm('Sponsored', 'sponsored', 'Attributes');
+									$term_taxonomy_id = (integer) $tx->updateInsertTaxonomy($term_id, 'sponsored');
+									$tx->createTermRelationship($term_taxonomy_id, $wpPostId);
+								}
 
 							} else {
 								if ($debug_fields) debug($data);

@@ -35,6 +35,10 @@ class Taxonomy {
 		}
 	}
 
+
+	//TODO TECH-DEBT: terms are NOT unique by SLUG!!!!
+	// they must be unique by SLUG and TERM_TAXONOMY
+
 	// set the term and return its ID, OR get the ID of the $term_name
 	public function getSetTerm($term_name, $term_slug, $taxonomy = null) {
 
@@ -54,6 +58,8 @@ class Taxonomy {
 
 		} else if ($record && (integer) $record->c > 1) {
 
+			// TODO: investigate potential for bug where it keeps adding 
+			//       because there is more than one term with the same name
 			if ($taxonomy) {
 
 				$sql = "SELECT * FROM $wp_terms t INNER JOIN $wp_term_taxonomy tt ON tt.term_id=t.term_id 
@@ -265,6 +271,9 @@ class Taxonomy {
 	}
 
 	public function createTermRelationship($term_taxonomy_id, $postId) {
+
+
+
 		$wp_term_relationships = DB::wptable('term_relationships');
 		$term_order = 0;
 
