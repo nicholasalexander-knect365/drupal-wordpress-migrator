@@ -112,6 +112,7 @@ $fieldSet = new FieldSet($d7);
 
 $wp_fields = new Fields($wp);
 
+$debug_fields = false;
 $drupal_nodes = null;
 
 if ($options->initialise) {
@@ -312,6 +313,7 @@ for ($c = 0; $c < $chunks; $c++) {
 					// debug($node);
 					// debug($imgfiledata);
 				}
+				// this never happens as media_entites are not making Posts and there is no wpPostId
 				if (isset($fileSet)) {
 					foreach ($fileSet as $file) {
 						if ($wpPostId) {
@@ -393,32 +395,42 @@ for ($c = 0; $c < $chunks; $c++) {
 
 							} else if ($data[0] === 'field_penton_author') {
 
-									// content_iller uses this:
-									$new_uid = $data[1]->field_penton_author_target_id;
-									$newUserId = $wordpress->getWordpressUserId($new_uid, $drupalUid);
-									if ($newUserId) {
-										$wp_post->updatePost($wpPostId, 'post_author', $newUserId);
-									} else {
-										debug('no drupal_uid record for '.$new_uid);
-									}
+								// content_iller uses this:
+								$new_uid = $data[1]->field_penton_author_target_id;
+								$newUserId = $wordpress->getWordpressUserId($new_uid, $drupalUid);
+								if ($newUserId) {
+									$wp_post->updatePost($wpPostId, 'post_author', $newUserId);
+								} else {
+									debug('no drupal_uid record for '.$new_uid);
+								}
 
 
 							} else if ($data[0] === 'field_penton_article_type') {
 
-									// IOTI specific "article types" (they are all being imported as posts)
-									$article_types = ['Article', 'Gallery', 'Audio', 'Video', 'Webinar', 'Data Table', 'White Paper', 'Link'];
+								// IOTI specific "article types" (they are all being imported as posts)
+								$article_types = ['Article', 'Gallery', 'Audio', 'Video', 'Webinar', 'Data Table', 'White Paper', 'Link'];
 
-									$type_tid = (integer) $data[1]->field_penton_article_type_tid;
-									if ($type_tid < 9) {
-										$article_type = $article_types[$type_tid - 1];
-									}
-									$postmeta->createUpdatePostMeta($wpPostId, 'article_type', $article_type);
+								$type_tid = (integer) $data[1]->field_penton_article_type_tid;
+								if ($type_tid < 9) {
+									$article_type = $article_types[$type_tid - 1];
+								}
+								$postmeta->createUpdatePostMeta($wpPostId, 'article_type', $article_type);
 
 							} else if ($data[0] === 'field_penton_native_advertising') {
-									$sponsored = (integer) $data[1]->field_penton_native_advertising_value;
-									$taxonomy = new Taxonomy($wp, $options);
-									$term_id = $taxonomy->getSetTerm('Sponsored Content', 'sponsored-content', 'Attributes');
-									$taxonomy->updateInsertTaxonomy($term_id, 'Attributes');
+
+								$sponsored = (integer) $data[1]->field_penton_native_advertising_value;
+
+								$tx = new Taxonomy($wp, $options);
+
+								$term_id = $tx->getSetTerm('Sponsored Content', 'sponsored', 'Attributes');
+
+								$term_taxonomy_id = (integer) $tx->updateInsertTaxonomy($term_id, 'sponsored');
+
+								$tx->createTermRelationship($term_taxonomy_id, $wpPostId);
+
+
+							} else {
+								if ($debug_fields) debug($data);
 							}
 
 							// create a featured image
@@ -511,19 +523,19 @@ dd($imgfiledata);
 */
 
 if (isset($featuredImages) && count($featuredImages)) {
+
 	foreach ($featuredImages as $nodeId => $mediaSet) {
+		
+		$wp_post_id = $wp_post->nodeToPost($nodeId);
+		//debug('d='.$nodeId . ' wp='.$wp_post_id);
 
 		foreach($mediaSet as $media) {
-			$wp_post_id = $wp_post->nodeToPost($nodeId);
 
 			//create wp-cli import statements
 			if ($wp_post_id) {
 				$wordpress->addMediaLibrary($wp_post_id, $media, $options, $featured = true, $source = '');
 			} else {
-
 				continue;
-
-				dd('Node to post did not find a post for '.$nodeId);
 			}
 		}
 	}

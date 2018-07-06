@@ -264,6 +264,16 @@ class Taxonomy {
 			$this->db->query($sql);
 	}
 
+	public function createTermRelationship($term_taxonomy_id, $postId) {
+		$wp_term_relationships = DB::wptable('term_relationships');
+		$term_order = 0;
+
+		$sql = "INSERT INTO $wp_term_relationships (object_id, term_taxonomy_id, term_order)
+				VALUES ($postId, $term_taxonomy_id, $term_order)";
+
+		$this->db->query($sql);
+	}
+
 	private function makeTermRelationship($taxonomy, $term_taxonomy_id, $postId) {
 
 		$wp_term_relationships = DB::wptable('term_relationships');
