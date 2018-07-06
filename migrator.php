@@ -422,7 +422,7 @@ for ($c = 0; $c < $chunks; $c++) {
 
 								$tx = new Taxonomy($wp, $options);
 
-								$term_id = $tx->getSetTerm('Sponsored Content', 'sponsored', 'Attributes');
+								$term_id = $tx->getSetTerm('Sponsored', 'sponsored', 'Attributes');
 
 								$term_taxonomy_id = (integer) $tx->updateInsertTaxonomy($term_id, 'sponsored');
 
