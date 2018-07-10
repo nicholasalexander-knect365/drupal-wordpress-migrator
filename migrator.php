@@ -186,6 +186,9 @@ if ($verbose) {
 }
 
 $unassigned = [];
+$BT = "START TRANSACTION";
+$CT = "COMMIT";
+
 
 // set a value ONLY for a test version that only does a few posts
 $TESTLIMIT = null;
@@ -208,6 +211,8 @@ for ($c = 0; $c < $chunks; $c++) {
 		$featuredImages = [];
 
 		foreach ($drupal_nodes as $node) {
+
+			$wp->query($BT);
 
 			$wpPostId = null;
 			$fileSet = null;
@@ -528,6 +533,7 @@ dd($imgfiledata);
 			// 		//dd($records);
 			// 	}
 			// }
+			$wp->query($CT);
 		}
 		//debug($galleries, 0, 1);
 	}

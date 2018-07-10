@@ -46,7 +46,7 @@ if ($options->users) {
 					$usersCreated = $users->getTempDrupalUsers($chunk);
 					print(" ... creating ".$usersCreated.' users in Wordpress ');
 					$users->createWordpressUsers($options->siteId);
-					print("...ZZzzz ..");
+					print(" ... ZZzzz ... ");
 					$wp->query($CT);
 				} catch (Exception $e) {
 					throw new Exception("MYSQL ERROR: ".$e->getMessage());
