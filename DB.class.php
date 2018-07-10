@@ -167,7 +167,7 @@ class DB {
 				} else if ($this->config->server === 'staging') {
 					$this->credentials['d7'] = [
 						// drupal database on test2
-						'database' => 'iot_drupal',
+						'database' => 'ioti_drupal',
 						'username' => 'test2_tele_com',
 						'password' => 'OhLoogai1Jook5mai7oc',
 						'host' => 'mysql'
