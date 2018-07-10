@@ -29,7 +29,7 @@ class RemapTaxonomy extends Taxonomy {
 				break;
 
 			case 'engineering and development':
-				$taxset = ['type' => 'Technologies', 'subject' => 'Engineering/Development'];
+				$taxset = ['type' => 'Technologies', 'subject' => 'Engineering / Development'];
 				break;
 
 			case 'security':
@@ -55,7 +55,7 @@ class RemapTaxonomy extends Taxonomy {
 
 			case 'automotive':
 			case 'transport and logistics':
-				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Transportation/Logistics'];
+				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Transportation / Logistics'];
 				break;
 
 			case 'healthcare':
@@ -74,7 +74,7 @@ class RemapTaxonomy extends Taxonomy {
 
 			case 'video':
 			case 'audio':
-				$taxset = ['type' => 'Other Content', 'subtype' => 'Video/Podcasts'];
+				$taxset = ['type' => 'Other Content', 'subtype' => 'Video / Podcasts'];
 				break;
 
 			case 'iot resources':
