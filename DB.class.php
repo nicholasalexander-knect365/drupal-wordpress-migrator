@@ -158,7 +158,7 @@ class DB {
 				// DRUPAL DB CONFIG
 				if ($this->config->server === 'local' || $this->config->server === 'multisite') {
 					$this->credentials['d7'] = [
-						'database' => 'ioti_drupal',
+						'database' => 'iot0704',
 						'username' => 'root',
 						'password' => 'admin',
 						'host' => 'localhost'
@@ -167,7 +167,7 @@ class DB {
 				} else if ($this->config->server === 'staging') {
 					$this->credentials['d7'] = [
 						// drupal database on test2
-						'database' => 'ioti_drupal',
+						'database' => 'iot0704',
 						'username' => 'test2_tele_com',
 						'password' => 'OhLoogai1Jook5mai7oc',
 						'host' => 'mysql'

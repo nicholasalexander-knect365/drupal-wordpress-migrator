@@ -95,6 +95,21 @@ class Taxonomy {
 		return (integer) $term_id;
 	}
 
+	public function remapIOTTaxonomyName($taxonomy) {
+		$remap = new RemapTaxonomy($this->db, $this->options);
+
+		switch ($this->options->project) {
+			case 'ioti':
+			case 'iotworldtoday':
+				$taxonomies = $remap->IOTIRemapNameCategory($taxonomy);
+				break;
+		}
+		if ($taxonomy['subject']) {
+			return $taxonomy['subject'];
+		}
+		return null;
+	}
+
 	protected function remapNameCategory($name) {
 
 		// if no taxonomy or not reconised, it may be a post_tag
@@ -271,8 +286,6 @@ class Taxonomy {
 	}
 
 	public function createTermRelationship($term_taxonomy_id, $postId) {
-
-
 
 		$wp_term_relationships = DB::wptable('term_relationships');
 		$term_order = 0;
@@ -479,6 +492,15 @@ class Taxonomy {
 		return $taxonomies;
 	}
 
+	public function getTaxonomyDrupal($tid) {
+		$sql = "SELECT name FROM taxonomy_term_data WHERE tid=$tid";
+		$record = $this->db->record($sql);
+		if ($record && $record->name) {
+			return $record->name;
+		} else {
+			return NULL;
+		}
+	}
 
 	// D7 only ... build the taxonomy term_data from drupal
 	private function getTermData($taxonomy) {

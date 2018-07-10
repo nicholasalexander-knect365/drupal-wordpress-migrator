@@ -177,9 +177,9 @@ if ($nodeCount > $maxChunk) {
 $d7_node->setNodeChunkSize($nodeCount);
 $chunks = floor($nodeCount / $chunk) + 1;
 
-if ($options->fields) {
-	$postmeta = new PostMeta($wp, DB::wptable('postmeta'));
-}
+//if ($options->fields) {
+$postmeta = new PostMeta($wp, DB::wptable('postmeta'));
+//}
 
 if ($verbose) {
 	print "\nConverting $nodeCount Drupal nodes\n";
@@ -235,7 +235,7 @@ for ($c = 0; $c < $chunks; $c++) {
 // debug('featuredInNodes');
 // debug($featuredInNodes);
 
-					if (count($featuredInNodes)) {
+					if (isset($featuredInNodes) && count($featuredInNodes)) {
 						foreach ($featuredInNodes as $featuredInNode) {
 							foreach($featuredInNode as $node_id) {
 								$featuredImages[$node_id] = $media_set;
@@ -291,6 +291,10 @@ for ($c = 0; $c < $chunks; $c++) {
 			} else {
 				// find the wpPostId for this node??
 				$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
+			}
+
+			if ($wpPostId) {
+				$postmeta->createUpdatePostMeta($wpPostId, 'ContentPillarUrl', $url);
 			}
 
 			$imgfiledata = '';
@@ -386,6 +390,20 @@ for ($c = 0; $c < $chunks; $c++) {
 								if ($data[1]->field_penton_media_credit_value) {
 									$image->credit = $data[1]->field_penton_media_credit_value;
 								}
+							} else if ($data[0] === 'field_penton_primary_category') {
+
+								if ($data[1]->field_penton_primary_category_tid) {
+									$pc_tid = $data[1]->field_penton_primary_category_tid;
+
+									// how to work out the primary category on tid?
+									$catName = $d7_taxonomy->getTaxonomyDrupal($pc_tid);
+									//$remapTaxonomy = new RemapTaxonomy($wp_taxonomy, $options);
+									$wpCatName = $wp_taxonomy->remapIOTTaxonomyName($catName);
+
+									if (strlen($wpCatName)) {
+										$postmeta->createGetPostMeta($wpPostId, 'primary_category', $wpCatName[0]);
+									}
+								}
 							} else if ($data[0] === 'field_penton_media_caption') {
 								if ($data[1]->field_penton_media_caption_value) {
 									$image->caption = $data[1]->field_penton_media_caption_value;
@@ -419,7 +437,6 @@ for ($c = 0; $c < $chunks; $c++) {
 							} else if ($data[0] === 'field_penton_native_advertising') {
 
 								$sponsored = (integer) $data[1]->field_penton_native_advertising_value;
-debug($sponsored);
 								if ($sponsored) {
 									$tx = new Taxonomy($wp, $options);
 									$term_id = $tx->getSetTerm('Sponsored', 'sponsored', 'Attributes');
