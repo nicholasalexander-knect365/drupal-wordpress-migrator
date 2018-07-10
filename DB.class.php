@@ -167,7 +167,7 @@ class DB {
 				} else if ($this->config->server === 'staging') {
 					$this->credentials['d7'] = [
 						// drupal database on test2
-						'database' => 'iot_drupal',
+						'database' => 'ioti_drupal',
 						'username' => 'test2_tele_com',
 						'password' => 'OhLoogai1Jook5mai7oc',
 						'host' => 'mysql'
@@ -187,6 +187,13 @@ class DB {
 						'username' => 'root',
 						'password' => 'root',
 						'host' => 'localhost'
+					];
+				} else if ($this->config->server === 'live') {
+					$this->creditials[d7] = [
+						'database' => '',
+						'username' => '',
+						'password' => '',
+						'host'	   => 'mysql'
 					];
 				} else {
 					throw new Exception('Unknown server configuration');
