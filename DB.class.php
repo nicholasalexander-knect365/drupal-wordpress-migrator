@@ -188,6 +188,13 @@ class DB {
 						'password' => 'root',
 						'host' => 'localhost'
 					];
+				} else if ($this->config->server === 'live') {
+					$this->creditials[d7] = [
+						'database' => '',
+						'username' => '',
+						'password' => '',
+						'host'	   => 'mysql'
+					];
 				} else {
 					throw new Exception('Unknown server configuration');
 				}

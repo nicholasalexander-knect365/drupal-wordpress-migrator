@@ -17,6 +17,9 @@ class User {
 	private $config;
 	private $drupal_uid_key = ''; //'drupal_uid';
 
+	private $start;
+	private $limit;
+
 	public function __construct($wp, $d7, $config) {
 		$this->db = $wp;
 		$this->d7 = $d7;
@@ -29,6 +32,15 @@ class User {
 		$this->capabilities[3] = 'a:1:{s:11:"contributor";b:1}';
 		$this->capabilities[4] = 'a:1:{s:10:"subscriber";b:1;}';
 		$this->drupal_uid_key = 'drupal_' .$config->siteId . '_uid';
+
+		$this->limit = 0;
+		$this->start = 0;
+	}
+
+	public function countDUsers() {
+		$sql = "SELECT COUNT(*) as c FROM dusers";
+		$record = $this->db->record($sql);
+		return $record->c;
 	}
 
 	public function getDrupalUsers() {
@@ -43,10 +55,20 @@ class User {
 		}
 	}
 
-	public function getTempDrupalUsers() {
-		$sql = "SELECT uid, name, mail, signature, timezone, language, created, role from dusers";
+	public function getTempDrupalUsers($chunk = 0) {
+
+		if ($chunk) {
+			$start = $this->start;
+			$limit = $chunk;
+			$sql = "SELECT uid, name, mail, signature, timezone, language, created, role from dusers LIMIT $start, $limit";
+			$this->start = $this->start + $this->limit;
+		} else {
+			$sql = "SELECT uid, name, mail, signature, timezone, language, created, role from dusers";
+		}
 		$this->drupalUsers = $this->db->records($sql);
+
 		return count((array)$this->drupalUsers);
+
 	}
 
 	public function countDrupalUsers() {
@@ -682,6 +704,7 @@ class User {
 
 	// TODO: something did not work here on IOTI - 
 	public function createWordpressUsers($blog_id) {
+
 		foreach ($this->drupalUsers as $drupal_user) {
 
 			if ($drupal_user->uid > 0) {
