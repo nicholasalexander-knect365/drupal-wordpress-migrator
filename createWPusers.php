@@ -16,7 +16,7 @@ require "User.class.php";
 // common routines include script initialisation
 require "common.php";
 
-$chunk = 250;
+$chunk = 50;
 $gap = 3;
 $counter = 0;
 

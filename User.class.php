@@ -61,11 +61,12 @@ class User {
 			$start = $this->start;
 			$limit = $chunk;
 			$sql = "SELECT uid, name, mail, signature, timezone, language, created, role from dusers LIMIT $start, $limit";
-			$this->start = $this->start + $this->limit;
+			$this->start = $this->start + $limit;
 		} else {
 			$sql = "SELECT uid, name, mail, signature, timezone, language, created, role from dusers";
 		}
 		$this->drupalUsers = $this->db->records($sql);
+print "\n$sql";
 
 		return count((array)$this->drupalUsers);
 
