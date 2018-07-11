@@ -61,7 +61,7 @@ class User {
 			$start = $this->start;
 			$limit = $chunk;
 			$sql = "SELECT uid, name, mail, signature, timezone, language, created, role from dusers LIMIT $start, $limit";
-			$this->start = $this->start + $limit;
+			$this->start = $start + $limit;
 		} else {
 			$sql = "SELECT uid, name, mail, signature, timezone, language, created, role from dusers";
 		}

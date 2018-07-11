@@ -42,7 +42,9 @@ class DB {
 			default:
 				throw new Exception('Programming error: connection type (' . $type . ') has not been defined.');
 		}
-
+if ($credentials['database'] === '') {
+	return NULL;
+}
 		//debug($credentials);
 		$this->connection = new mysqli(
 			$credentials['host'],
@@ -189,7 +191,7 @@ class DB {
 						'host' => 'localhost'
 					];
 				} else if ($this->config->server === 'live') {
-					$this->creditials[d7] = [
+					$this->credentials['d7'] = [
 						'database' => '',
 						'username' => '',
 						'password' => '',
@@ -251,6 +253,8 @@ class DB {
 				print "\n: Multisite mode";
 			} else if ($this->config->server === 'vm2') {
 				print "\n: Alternative VM mode (i.e. Homestead)";
+			} else if ($this->config->server === 'live') {
+				print "\n LIVE";
 			} else {
 				throw new Exception('Not multisite, yet server=local not set.  Please check your configuration!');
 			}
