@@ -17,7 +17,7 @@ require "User.class.php";
 require "common.php";
 
 $chunk = 250;
-$gap = 3;
+$gap = 5;
 $counter = 0;
 
 $BT = "START TRANSACTION";
@@ -47,6 +47,7 @@ if ($options->users) {
 					print(" ... creating ".$usersCreated.' users in Wordpress ');
 					$users->createWordpressUsers($options->siteId);
 					print(" ... ZZzzz ... ");
+					sleep($gap);
 					$wp->query($CT);
 				} catch (Exception $e) {
 					throw new Exception("MYSQL ERROR: ".$e->getMessage());
