@@ -41,16 +41,6 @@ class Files {
 		$this->drupalPath = $path;
 	}
 
-// initially I was concerned that images are imported freshly each time, but once we have the image, no need to get it again
-// deprecate this 
-	public function dirEmpty($dir) {
-		return;
-		// if (!is_readable($dir)) {
-		// 	debug("\n\nWARNING: image store directory $dir does not exist or is not writable\n\n");
-		// }
-  // 		return (count(scandir($dir)) == 2);
-	}
-
 	public function setImageStore($path) {
 
 		$this->imageStore = $path;
@@ -110,7 +100,10 @@ class Files {
 					print "\nCopying image ".$path;
 				}
 				if (file_exists($path)) {
-debug("\ncopying " . $path . ' to '.  $this->imageStore . '/' . $file->filename);
+
+					if ($this->options->verbose) {
+						debug("\ncopying " . $path . ' to '.  $this->imageStore . '/' . $file->filename);
+					}
 					try {
 						copy($path, $this->imageStore . '/' . $file->filename);
 						if ($this->verbose) {
@@ -247,7 +240,6 @@ debug("\ncopying " . $path . ' to '.  $this->imageStore . '/' . $file->filename)
 		}
 		return $files;
 	}
-
 
 	// moveFiles is deprecated in favour of 
 	// composing wp-cli commands in importCmds.php
