@@ -10,14 +10,16 @@ class WP {
 	private $options;
 	private $cmds;
 	private $preventDuplicates;
+	private $dbconfig;
 
-	public function __construct($db, $options) {
+	public function __construct($db, $options, $dbconfig) {
 		$this->db = $db;
 		$this->wp = $options->wordpressPath;
 		$this->options = $options;
 		$this->cmds = [];
 		$this->preventDuplicates = [];
-		
+		$this->dbconfig = $dbconfig;
+
 		$cmdPath = 'importCmds.sh';
 		$this->cmdFile = fopen($cmdPath, 'w+');
 	}
@@ -29,31 +31,17 @@ class WP {
 	// passing in the file handle as sometimes it switched databases after doing drupal queries
 	public function getWordpressUserId($uid, $drupalUidKey) {
 
-		//$wpress = new DB('wp', $this->options);
-//dd($this->options);
-		if ($this->options->server === 'multisite') {
-			$handle = 'telecoms_local';
-		} else if ($this->options->server === 'staging') {
-			$handle = 'test2_telecoms_com';
-		} else if ($this->options->server === 'beta') {
-			$handle = 'test1_telecoms_com';
-		} else if ($this->options->server === 'local') {
-			$handle = 'ioti';
-		} else {
-			dd($this->options);
-		}
-//$handle = 'telecoms_local';
-
-		$drupal_uid = $drupalUidKey; //$this->drupal_uid_key;
+		$handle = $this->dbconfig['wp']['database'];
+		$drupal_uid = $drupalUidKey; 
 
 		$sql = "SELECT * FROM `$handle`.wp_usermeta WHERE meta_key='$drupal_uid' AND meta_value LIKE '$uid'";
 
-//debug($sql);
+debug($sql);
 
 		$record = $this->db->record($sql);
 		//$record = $wpress->record($sql);
 
-//debug($record);
+debug($record);
 
 		if ($record) {
 			return $record->user_id;

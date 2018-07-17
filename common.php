@@ -47,7 +47,6 @@ try {
 	die( 'DB connection error: ' . $e->getMessage());
 }
 
-
 // configure the wordpress environment
 $wp->configure($options);
 if ($d7) {

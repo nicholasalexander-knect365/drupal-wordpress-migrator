@@ -61,6 +61,10 @@ if ($credentials['database'] === '') {
 		return $this->connection;
 	}
 
+	public function wpDBConfig() {
+		return $this->credentials;
+	}
+
 	private function wpConfig() {
 
 		if ($this->config->server === 'local' && empty($this->config->wordpressPath)) {

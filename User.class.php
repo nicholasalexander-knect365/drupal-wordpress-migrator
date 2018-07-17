@@ -31,7 +31,9 @@ class User {
 		$this->capabilities[2] = 'a:1:{s:6:"author";b:1;}';
 		$this->capabilities[3] = 'a:1:{s:11:"contributor";b:1}';
 		$this->capabilities[4] = 'a:1:{s:10:"subscriber";b:1;}';
-		$this->drupal_uid_key = 'drupal_' .$config->siteId . '_uid';
+
+		$this->capabilities['subscriber'] = $this->capabilities[4];
+		$this->drupal_uid_key = sprintf('drupal_%d_uid', $config->siteId);;
 
 		$this->limit = 0;
 		$this->start = 0;
@@ -66,7 +68,8 @@ class User {
 			$sql = "SELECT uid, name, mail, signature, timezone, language, created, role from dusers";
 		}
 		$this->drupalUsers = $this->db->records($sql);
-print "\n$sql";
+
+//print "\n$sql";
 
 		return count((array)$this->drupalUsers);
 
@@ -383,11 +386,12 @@ print "\n$sql";
 
 	private function determineCapability($role, $uid) {
 
+		$mapDrupalCapabilities = FALSE;
 		$user_level = NULL;
 
 		// initial spec was to assign roles, this has since been changed for ioti 
 		// TODO: remove (unless they change their mind...)
-		if (FALSE && strlen($role)) {
+		if ($mapDrupalCapabilities && strlen($role)) {
 
 			switch (strtolower($role)) {
 
@@ -423,17 +427,17 @@ print "\n$sql";
 					break;
 			}
 		} else {
-			// admin user
-			if ((integer) $uid === 1) {
+			// // admin user
+			// if ((integer) $uid === 1) {
 
-				$capability = $this->capabilities[0];
-				$user_level = 10;
+			// 	$capability = $this->capabilities[0];
+			// 	$user_level = 10;
 
-			} else {
+			// } else {
 
 				$capability = $this->capabilities[4];
 				$user_level = 1;
-			}
+			// }
 		}
 
 		return [$capability, $user_level];
@@ -466,6 +470,8 @@ print "\n$sql";
 		//$role_id = $drupal_user->role_id;
 		list($capability, $user_level) = $this->determineCapability($role, $uid);
 
+
+		// TODO: check if drupal_user->uid should be checked here
 		if ($blog_id && $drupal_user->uid) {
 
 			// $capabilityKey = sprintf('wp_%d_capabilities', $blog_id);
@@ -485,50 +491,51 @@ print "\n$sql";
 				'wp_%d_capabilities'				=> $capability,
 				'wp_%d_user_level'					=> $user_level,
 				'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
-				'googleauthenticator_enabled' 		=> 'disabled',
-				'googleauthenticator_hidefromuser'	=> 'disabled',
-				'show_admin_bar_front'				=> true,
-				'use_ssl'							=> 0,
-				'admin_color'						=> 'fresh',
-				'comment_shortcuts'					=> false,
-				'syntax_highlighting'				=> true,
-				'rich_editing'						=> true,
-				'aim' 								=> '',
-				'yim' 								=> '', 
-				'jabber' 							=> '',
-				'locale'							=> '',
-				'dismissed_wp_pointers'				=> '',
-				'googleauthenticator_enabled'		=> false,
-				'googleauthenticator_hidefromuser'	=> false
+				// 'googleauthenticator_enabled' 		=> 'disabled',
+				// 'googleauthenticator_hidefromuser'	=> 'disabled',
+				'show_admin_bar_front'				=> true
+				// 'use_ssl'							=> 0,
+				// 'admin_color'						=> 'fresh',
+				// 'comment_shortcuts'					=> false,
+				// 'syntax_highlighting'				=> true,
+				// 'rich_editing'						=> true,
+				// 'aim' 								=> '',
+				// 'yim' 								=> '', 
+				// 'jabber' 							=> '',
+				// 'locale'							=> '',
+				// 'dismissed_wp_pointers'				=> '',
+				// 'googleauthenticator_enabled'		=> false,
+				// 'googleauthenticator_hidefromuser'	=> false
 			];
 
-		} else {
-
-			$usermeta = [
-				'nickname' 							=> $wp_user->user_nicename,
-				'first_name' 						=> $first_name,
-				'last_name' 						=> $last_name,
-				'description' 						=> 'imported from drupal',
-				'wp_user_avatar' 					=> '',
-				'primary_blog' 						=> $blog_id,
-				'source_domain' 					=> $sourceDomain,
-				/* 'wp_role'							=> '', */
-				'wp_capabilities'					=> $capability,
-				'wp_user_level'						=> $user_level,
-				'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
-				'googleauthenticator_enabled' 		=> 'disabled',
-				'googleauthenticator_hidefromuser'	=> 'disabled',
-				'show_admin_bar_front'				=> true,
-				'use_ssl'							=> 0,
-				'admin_color'						=> 'fresh',
-				'comment_shortcuts'					=> false,
-				'syntax_highlighting'				=> true,
-				'rich_editing'						=> true,
-				'aim' 								=> '',
-				'yim' 								=> '', 
-				'jabber' 							=> ''
-			];
 		}
+		// else {
+
+		// 	$usermeta = [
+		// 		'nickname' 							=> $wp_user->user_nicename,
+		// 		'first_name' 						=> $first_name,
+		// 		'last_name' 						=> $last_name,
+		// 		'description' 						=> 'imported from drupal',
+		// 		'wp_user_avatar' 					=> '',
+		// 		'primary_blog' 						=> $blog_id,
+		// 		'source_domain' 					=> $sourceDomain,
+		// 		/* 'wp_role'							=> '', */
+		// 		'wp_capabilities'					=> $capability,
+		// 		'wp_user_level'						=> $user_level,
+		// 		'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
+		// 		'googleauthenticator_enabled' 		=> 'disabled',
+		// 		'googleauthenticator_hidefromuser'	=> 'disabled',
+		// 		'show_admin_bar_front'				=> true,
+		// 		'use_ssl'							=> 0,
+		// 		'admin_color'						=> 'fresh',
+		// 		'comment_shortcuts'					=> false,
+		// 		'syntax_highlighting'				=> true,
+		// 		'rich_editing'						=> true,
+		// 		'aim' 								=> '',
+		// 		'yim' 								=> '', 
+		// 		'jabber' 							=> ''
+		// 	];
+		// }
 		$this->updateUserMeta($usermeta, $user_id, $blog_id);
 	}
 

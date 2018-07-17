@@ -41,8 +41,9 @@ require "common.php";
 
 $users = new User($wp, $d7, $options);
 
+$wordpressDBConfig = $wp->wpDBConfig();
 // databases are now available as $wp and $d7
-$wordpress = new WP($wp, $options);
+$wordpress = new WP($wp, $options, $wordpressDBConfig);
 
 /* nodes */
 $d7_node = new Node($d7);
@@ -122,7 +123,6 @@ if ($options->initialise) {
 
 $wp_termmeta_term_id = $wp_taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
 
-
 $nodeSource = 'drupal';
 
 if (isset($wp_termmeta_term_id) && $wp_termmeta_term_id && (!$options->nodes && !$options->initialise)) {
@@ -177,9 +177,7 @@ if ($nodeCount > $maxChunk) {
 $d7_node->setNodeChunkSize($nodeCount);
 $chunks = floor($nodeCount / $chunk) + 1;
 
-//if ($options->fields) {
 $postmeta = new PostMeta($wp, DB::wptable('postmeta'));
-//}
 
 if ($verbose) {
 	print "\nConverting $nodeCount Drupal nodes\n";
@@ -419,7 +417,10 @@ for ($c = 0; $c < $chunks; $c++) {
 
 								// content_iller uses this:
 								$new_uid = $data[1]->field_penton_author_target_id;
+
+
 								$newUserId = $wordpress->getWordpressUserId($new_uid, $drupalUid);
+
 								if ($newUserId) {
 									$wp_post->updatePost($wpPostId, 'post_author', $newUserId);
 								} else {
