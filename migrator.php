@@ -454,17 +454,17 @@ for ($c = 0; $c < $chunks; $c++) {
 							}
 
 							// create a featured image
-							if (FALSE && isset($image->featured_image_id)) {
+							if (isset($image->featured_image_id)) {
 
 								$image_url = $d7_node->getNode($image->featured_image_id)->title;
-								// 
-								//$post->makeAttachment($wpPostId, $image_url);
-								//$postmeta->createFields($wpPostId, ['_thumbnail_id' => $mediaId]);
- 								//$fileSet = $files->getFiles($node->nid);
+
+								$mediaId = $wp_post->makeAttachment($wpPostId, $image_url);
+								$postmeta->createFields($wpPostId, ['_thumbnail_id' => $mediaId]);
+ 								$fileSet = $files->getFiles($node->nid);
 
 //debug($wpPostId);
 //debug($d7_node->getNode($image->featured_image_id));
-dd($imgfiledata);
+//dd($imgfiledata);
 								// the actual import of images is done with wp-cli - addUrlMediaLibary writes these commands
 								$wordpress->addMediaLibrary($wpPostId, $image_url, $options, true);
 

@@ -125,11 +125,16 @@ debug('DUP? '.  sprintf('%s%d', $url, $wpPostId) . '='. $this->preventDuplicates
 		}
 	}
 
-	public function addMediaLibrary($wpPostId, $file, $options, $featured = true, $source = '') {
+	public function addMediaLibrary($wpPostId, $filename, $options, $featured = true, $source = '') {
+
+		// filename is passed in as an object or a string
+		if (is_object($filename)) {
+			$filename = $filename->filename;
+		}
 
 		$wordpressPath = $options->wordpressPath;
 		$imageStore = $options->imageStore;
-		$url = $file->filename;
+		$url = $filename;
 
 		$this->addMedia($wpPostId, $url, $imageStore, $options, $featured, $source);
 	}
