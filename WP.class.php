@@ -114,7 +114,7 @@ class WP {
 				}
 				fputs($this->cmdFile, $cmd . "\n");
 			} else {
-debug('DUP? '.  sprintf('%s%d', $url, $wpPostId) . '='. $this->preventDuplicates[sprintf('%s%d', $url, $wpPostId)]);
+				debug('Duplicated? '.  sprintf('%s%d', $url, $wpPostId) . '='. $this->preventDuplicates[sprintf('%s%d', $url, $wpPostId)]);
 			}
 
 		} else {

@@ -16,8 +16,8 @@
 		} else if (isset($this->server) && $this->server === 'staging') {
 			$this->setDefaults();
 			$this->wordpressPath = '/srv/www/test2.telecoms.com';
-			$this->wordpressURL = 'http://iotworldtoday.com';
-			$this->drupalPath = 'images';
+			$this->wordpressURL = 'http://ioti/test2.telecoms.com';
+			$this->drupalPath = '/home/alexandern/ioti/files';
 			return;
 		} else if (isset($this->server) && $this->server === 'beta') {
 			$this->setDefaults();
