@@ -99,7 +99,13 @@ class Files {
 			case 'public' :
 
 				$uri = preg_replace('/public:\/\//', '', $file->uri);
-				$path = $this->drupalPath . '/sites/default/files/' . $uri;
+
+				if ($this->options->server === 'staging') {
+					$path = $this->drupalPath . '/images/' . $uri;
+				} else {
+					$path = $this->drupalPath . '/sites/default/files/' . $uri;
+				}
+
 				if ($this->verbose) {
 					print "\nCopying image ".$path;
 				}
