@@ -1,4 +1,4 @@
-<?php
++<?php
 /* 
 	Files module: reading and writing from the file sysstem
 
@@ -104,6 +104,7 @@ class Files {
 					print "\nCopying image ".$path;
 				}
 				if (file_exists($path)) {
+debug("\ncopying " . $path . ' to '.  $this->imageStore . '/' . $file->filename);
 					try {
 						copy($path, $this->imageStore . '/' . $file->filename);
 						if ($this->verbose) {

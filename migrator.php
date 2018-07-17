@@ -225,11 +225,12 @@ for ($c = 0; $c < $chunks; $c++) {
 			if ($options->nodes && $nodeSource === 'drupal') {
 
 				$d7_node->setNode($node);
+				$url = $d7_node->getNodeUrls($node);
 
 				// TODO: test if addMediaLibrary is working for media_entity posts
 				if ($node->type === 'media_entity') {
 					$media_set = $d7_fields->penton_media_images($node->nid);
-// $wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
+					$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
 // if(!$wpPostId) {
 // 	debug($wp_termmeta_term_id);
 // 	debug($node);
@@ -264,9 +265,6 @@ for ($c = 0; $c < $chunks; $c++) {
 // }
 				} else {
 
-					$url = $d7_node->getNodeUrls($node);
-// debug($node->nid);
-// debug($url);
 					if (isset($url) && strlen($url)) {
 						// create a postmeta for the $drupal URL
 						if (preg_match('/(.*)\/(.*)/', $url, $matches)) {
