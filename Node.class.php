@@ -129,12 +129,13 @@ class Node {
 	public function getNodeUrls($node) {
 		$nid = $node->nid;
 		$sql = "SELECT url_alias.alias FROM url_alias
-				INNER JOIN node ON url_alias.source=concat('node/',node.nid) AND node.type IN ('article','page') AND node.nid=$nid";
+				INNER JOIN node ON url_alias.source=concat('node/',node.nid) 
+				 AND node.type IN ('article','page') 
+				 AND node.nid=$nid";
 		$urls = $this->db->records($sql);
-
-		if (count($urls) > 1) {
+		if (isset($urls) && count($urls) > 1) {
 			throw new Exception('More than one node alias found... rethink this');
-		} else if (count($urls) === 1) {
+		} else if (isset($urls) && count($urls) === 1) {
 			$alias = $urls[0]->alias;
 		} else {
 			return NULL;

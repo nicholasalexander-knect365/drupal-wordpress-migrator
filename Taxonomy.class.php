@@ -104,8 +104,9 @@ class Taxonomy {
 				$taxonomies = $remap->IOTIRemapNameCategory($taxonomy);
 				break;
 		}
-		if ($taxonomy['subject']) {
-			return $taxonomy['subject'];
+
+		if (isset($taxonomies['subject'])) {
+			return $taxonomies['subject'];
 		}
 		return null;
 	}
@@ -262,7 +263,7 @@ class Taxonomy {
 		}
 	}
 
-	private function getTermFromSlug($slug) {
+	public function getTermFromSlug($slug) {
 
 		$wp_terms = DB::wptable('terms');
 
@@ -270,6 +271,18 @@ class Taxonomy {
 		$this->db->query($sql);
 		$term = $this->db->getRecord();
 		return $term;
+	}
+
+	public function getTermFromName($name) {
+		$wp_terms = DB::wptable('terms');
+
+		$sql = "SELECT term_id FROM $wp_terms WHERE name like '$name' LIMIT 1";
+		$this->db->query($sql);
+		$term = $this->db->getRecord();
+		if (isset($term) && $term->term_id) {
+			return $term->term_id;
+		}
+		return null;
 	}
 
 	private function makeTermMeta($term_id, $name, $description, $postId) {

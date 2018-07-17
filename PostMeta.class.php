@@ -92,9 +92,10 @@ class PostMeta extends DB {
 			return $record->meta_id;
 		}
 
-		$sql = "INSERT INTO $wp_postmeta (post_id, meta_key, meta_value) VALUES ($post_id, $key, $value)";
+		$sql = "INSERT INTO $wp_postmeta (post_id, meta_key, meta_value) VALUES ($post_id, '$key', '$value')";
 		$this->db->query($sql);
 		$id = $this->db->lastInsertId();
+
 		return $id;
 	}
 

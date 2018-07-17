@@ -222,11 +222,10 @@ for ($c = 0; $c < $chunks; $c++) {
 				continue;
 			}
 
+			$url = $d7_node->getNodeUrls($node);
 			if ($options->nodes && $nodeSource === 'drupal') {
 
 				$d7_node->setNode($node);
-				$url = $d7_node->getNodeUrls($node);
-
 				// TODO: test if addMediaLibrary is working for media_entity posts
 				if ($node->type === 'media_entity') {
 					$media_set = $d7_fields->penton_media_images($node->nid);
@@ -402,9 +401,11 @@ for ($c = 0; $c < $chunks; $c++) {
 									$catName = $d7_taxonomy->getTaxonomyDrupal($pc_tid);
 									//$remapTaxonomy = new RemapTaxonomy($wp_taxonomy, $options);
 									$wpCatName = $wp_taxonomy->remapIOTTaxonomyName($catName);
+									// find the category in terms
+									$wpCatId = $wp_taxonomy->getTermFromName($wpCatName);
 
 									if (strlen($wpCatName)) {
-										$postmeta->createGetPostMeta($wpPostId, 'primary_category', $wpCatName[0]);
+										$postmeta->createGetPostMeta($wpPostId, 'primary_category', $wpCatId);
 									}
 								}
 							} else if ($data[0] === 'field_penton_media_caption') {
