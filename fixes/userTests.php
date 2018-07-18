@@ -43,14 +43,23 @@ print "\nRecord counts : test3=".$record3->c;
 print "\n";
 
 $sql = "SELECT * FROM test2_telecoms_com.wp_users ORDER BY id DESC LIMIT 200";
-$result = $db2->query($sql);
-$records2 = $result->fetch_array();
+$result2 = $db2->query($sql);
 
+$record2s = [];
+while ($record2 = $result2->fetch_object()) {
+	$record2s[] = $record2;
+}
 
 $sql = "SELECT * FROM test3_telecoms_com.wp_users ORDER BY id DESC LIMIT 200";
-$result = $db3->query($sql);
-$records3 = $result->fetch_array();
+$result3 = $db3->query($sql);
 
-foreach($record2 as $rec) {
-	debug($rec);
+$record3s = [];
+while ($record3 = $result3->fetch_object()) {
+	$record3s[] = $record3;
+}
+
+foreach($records2s as $n => $rec) {
+	if ($record2s[$n]->user_nicename !== $record3s[$n]->user_nicename) {
+		debug($record2s[$n]);
+	}
 }
