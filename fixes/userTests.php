@@ -13,7 +13,7 @@ require "../Node.class.php";
 // common routines include script initialisation
 require "../common.php";
 
-$credentials = ['mysql', 'test2_tele_com', 'OhLoogai1Jook5mai7oc', 'test2_telecoms_com'];
+$credentials = ['host' => 'mysql', 'username' => 'test2_tele_com', 'password' => 'OhLoogai1Jook5mai7oc', 'database' =>'test2_telecoms_com'];
 
 $db2 = new mysqli(
 			$credentials['host'],
@@ -21,7 +21,7 @@ $db2 = new mysqli(
 			$credentials['password'],
 			$credentials['database']);
 
-$credentials = ['mysql', 'test3_tele_com', '6ORjLxbk9I8hs7tGwMFE', 'test3_telecoms_com'];
+$credentials = ['host' => 'mysql', 'username' => 'test3_tele_com', 'password' => '6ORjLxbk9I8hs7tGwMFE', 'database' => 'test3_telecoms_com'];
 $db3 = new mysqli(
 			$credentials['host'],
 			$credentials['username'],
