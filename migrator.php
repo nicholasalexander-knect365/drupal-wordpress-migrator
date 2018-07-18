@@ -43,6 +43,7 @@ $users = new User($wp, $d7, $options);
 
 $wordpressDBConfig = $wp->wpDBConfig();
 // databases are now available as $wp and $d7
+
 $wordpress = new WP($wp, $options, $wordpressDBConfig);
 
 /* nodes */
@@ -228,15 +229,7 @@ for ($c = 0; $c < $chunks; $c++) {
 				if ($node->type === 'media_entity') {
 					$media_set = $d7_fields->penton_media_images($node->nid);
 					$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
-// if(!$wpPostId) {
-// 	debug($wp_termmeta_term_id);
-// 	debug($node);
-// 	dd('check');
-// }
 					$featuredInNodes = $files->getMediaEntityParentNodeIds($node);
-
-// debug('featuredInNodes');
-// debug($featuredInNodes);
 
 					if (isset($featuredInNodes) && count($featuredInNodes)) {
 						foreach ($featuredInNodes as $featuredInNode) {
@@ -245,11 +238,6 @@ for ($c = 0; $c < $chunks; $c++) {
 							}
 						}
 					}
-
-// debug('media set');
-// debug($media_set);
-// debug('featuredImages');
-// debug ($featuredImages);
 
 // if (!empty($media_set)) {
 // 	$file_set = $files->getFiles($node->nid);
@@ -418,13 +406,12 @@ for ($c = 0; $c < $chunks; $c++) {
 								// content_iller uses this:
 								$new_uid = $data[1]->field_penton_author_target_id;
 
-
 								$newUserId = $wordpress->getWordpressUserId($new_uid, $drupalUid);
 
 								if ($newUserId) {
 									$wp_post->updatePost($wpPostId, 'post_author', $newUserId);
 								} else {
-									debug('no drupal_uid record for '.$new_uid);
+									debug('no drupal uid record for '.$new_uid);
 								}
 
 

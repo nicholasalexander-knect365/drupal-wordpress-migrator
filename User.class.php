@@ -57,6 +57,15 @@ class User {
 		}
 	}
 
+	public function getDrupalUser($uid) {
+		$sql = "SELECT * FROM dusers WHERE uid=$uid";
+		$record = $this->db->record($sql);
+		if (isset($record)) {
+			return $record;
+		}
+		return NULL;
+	}
+
 	public function getTempDrupalUsers($chunk = 0) {
 
 		if ($chunk) {
@@ -289,6 +298,16 @@ class User {
 		}
 	}
 
+	// return array of metadata for a user id
+	public function getUserMeta($id) {
+		$sql = "SELECT * FROM wp_usermeta WHERE user_id=$id";
+		$records = $this->db->records($sql);
+		if (isset($records) && count($records)) {
+			return $records;
+		} 
+		return NULL;
+	}
+
 	private function userHasBlogCapabilities($blog_id) {
 
 		// checks to see if a user exists in any other capacity than this blog
@@ -481,11 +500,12 @@ class User {
 				'nickname' 							=> $wp_user->user_nicename,
 				'first_name' 						=> $first_name,
 				'last_name' 						=> $last_name,
-				'description' 						=> $first_name . ' ' . $last_name,
+				'description' 						=> '',
 				'primary_blog' 						=> $blog_id,
 				'source_domain' 					=> $sourceDomain,
 				'changed_password'					=> true,
 				'drupal_migration'					=> date('Y-m-d H:i:s'),
+				'drupal_%d_uid'						=> $uid,
 				'wp_%d_user_avatar' 				=> '',
 				/* 'wp_%d_role'						=> '', */
 				'wp_%d_capabilities'				=> $capability,
@@ -509,33 +529,34 @@ class User {
 			];
 
 		}
-		// else {
+		else {
 
-		// 	$usermeta = [
-		// 		'nickname' 							=> $wp_user->user_nicename,
-		// 		'first_name' 						=> $first_name,
-		// 		'last_name' 						=> $last_name,
-		// 		'description' 						=> 'imported from drupal',
-		// 		'wp_user_avatar' 					=> '',
-		// 		'primary_blog' 						=> $blog_id,
-		// 		'source_domain' 					=> $sourceDomain,
-		// 		/* 'wp_role'							=> '', */
-		// 		'wp_capabilities'					=> $capability,
-		// 		'wp_user_level'						=> $user_level,
-		// 		'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
-		// 		'googleauthenticator_enabled' 		=> 'disabled',
-		// 		'googleauthenticator_hidefromuser'	=> 'disabled',
-		// 		'show_admin_bar_front'				=> true,
-		// 		'use_ssl'							=> 0,
-		// 		'admin_color'						=> 'fresh',
-		// 		'comment_shortcuts'					=> false,
-		// 		'syntax_highlighting'				=> true,
-		// 		'rich_editing'						=> true,
-		// 		'aim' 								=> '',
-		// 		'yim' 								=> '', 
-		// 		'jabber' 							=> ''
-		// 	];
-		// }
+			$usermeta = [
+				'nickname' 							=> $wp_user->user_nicename,
+				'first_name' 						=> $first_name,
+				'last_name' 						=> $last_name,
+				'description' 						=> 'imported from drupal',
+				'wp_user_avatar' 					=> '',
+				'primary_blog' 						=> $blog_id,
+				'source_domain' 					=> $sourceDomain,
+				/* 'wp_role'							=> '', */
+				'wp_capabilities'					=> $capability,
+				'wp_user_level'						=> $user_level,
+				'telecoms_author_meta'				=> 'a:2{s:5:"quote";s:0:"";s:8:"position":s:0:""}',
+				'drupal_migration'					=> date('Y-m-d H:i:s'),
+				// 'googleauthenticator_enabled' 		=> 'disabled',
+				// 'googleauthenticator_hidefromuser'	=> 'disabled',
+				// 'show_admin_bar_front'				=> true,
+				// 'use_ssl'							=> 0,
+				// 'admin_color'						=> 'fresh',
+				// 'comment_shortcuts'					=> false,
+				// 'syntax_highlighting'				=> true,
+				// 'rich_editing'						=> true,
+				// 'aim' 								=> '',
+				// 'yim' 								=> '', 
+				// 'jabber' 							=> ''
+			];
+		}
 		$this->updateUserMeta($usermeta, $user_id, $blog_id);
 	}
 
@@ -567,10 +588,10 @@ class User {
 	// 	$this->db->query($sql);
 	// }
 
-	private function insertOrUpdateUserMeta($user_id, $key, $value) {
+	public function insertOrUpdateUserMeta($user_id, $key, $value) {
 		// exists?
 		$sql = "SELECT umeta_id  FROM wp_usermeta WHERE meta_key = '$key' AND user_id = $user_id";
-//debug($sql);
+
 		$record = $this->db->record($sql);
 		if ($record && $record->umeta_id) {
 			$umeta_id = $record->umeta_id;
@@ -578,7 +599,7 @@ class User {
 		} else {
 			$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, '$key', $value)";
 		}
-//debug($sql);
+
 		try {
 			$this->db->query($sql);
 		} catch (Exception $e) {
@@ -631,11 +652,12 @@ class User {
 		if (count($names) > 1) {
 			$newname = strtolower($names[count($names)-1] . substr($names[0],0,1));
 		} else {
-			$newname = $email;
+			$newname = strtolower($email);
 		}
 
 		// apostropies in username?
 		$newname = preg_replace('/[\']/','',$newname);
+		$newname = preg_replace('/ /', '-', $newname);
 
 		return $newname;
 	}
@@ -654,7 +676,9 @@ class User {
 				$user_login = $user_email;
 			}
 
-			$user_display_name = $user_nicename = addslashes($drupalUser->name);
+			$user_display_name = addslashes($drupalUser->name);
+
+			$user_nicename = $user_login;
 			$user_nicename = substr($user_nicename, 0, 50);
 
 			// set password to a non-deterministic value (it has to be reset)
@@ -710,6 +734,34 @@ class User {
 		return null;
 	}
 
+	private function userNiceNameUsed($userNiceName, $user_id) {
+		
+		$sql = "SELECT * FROM wp_users WHERE ID=$user_id";
+		$myUser = $this->db->record($sql);
+
+		while(1) {
+			$sql = "SELECT * FROM wp_users WHERE user_nicename = '$userNiceName'";
+			$records = $this->db->records($sql);
+
+			if (!$records || count($records) === 0) {
+				return false;
+			} else if ((count($records) === 1) && ($records[0]->ID === $user_id)) {
+debug('one found');
+				return true;
+			} else {
+				$counter = 0;
+debug('more than one found');
+				foreach($records as $rec) {
+					$username = sprintf('%s-%d', $userName, ++$counter);
+					$updateId = $rec->ID;
+					$sql = "UPDATE wp_users SET user_nicename = '$username' WHERE ID=$updateId LIMIT 1";
+debug($sql);
+					$this->db->query($sql);
+				}
+			}
+		}
+	}
+
 	// TODO: something did not work here on IOTI - 
 	public function createWordpressUsers($blog_id) {
 
@@ -722,6 +774,25 @@ class User {
 				if (isset($user) && $user->ID) {
 
 					$user_id = $user->ID;
+					$user_login = $this->makeUserName($user->user_login, $user->user_email);
+//debug($user_login);
+					$user_nicename = preg_replace('/[^A-Za-z0-9-_]/', '-', $user_login);
+//debug($user_nicename);
+					// check user_login is unique
+					if ($this->userNiceNameUsed($user_nicename, $user_id)) {
+						debug('user name used result');
+						debug($user);
+						dd('stopped');
+					}
+
+					if ($user_login !== $user->user_login) {
+						$user->user_login = $user_login;
+						$user->user_nicename = substr($user_nicename, 0, 50);
+						$sql = "UPDATE wp_user SET user_login='$user_login', user_nicename='$user_nicename' 
+								WHERE ID = $user_id LIMIT 1";
+debug($sql);
+						$this->db->query($sql);
+					}
 
 				} else {
 

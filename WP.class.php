@@ -13,6 +13,7 @@ class WP {
 	private $dbconfig;
 
 	public function __construct($db, $options, $dbconfig) {
+
 		$this->db = $db;
 		$this->wp = $options->wordpressPath;
 		$this->options = $options;
@@ -36,17 +37,12 @@ class WP {
 
 		$sql = "SELECT * FROM `$handle`.wp_usermeta WHERE meta_key='$drupal_uid' AND meta_value LIKE '$uid'";
 
-debug($sql);
-
 		$record = $this->db->record($sql);
 		//$record = $wpress->record($sql);
 
-debug($record);
-
-		if ($record) {
+		if (isset($record) && $record->user_id) {
 			return $record->user_id;
 		} else {
-
 			return NULL;
 		}
 	}

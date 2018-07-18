@@ -27,11 +27,9 @@ try {
 	if ($options->get('help')) {
 		die("\nHELP Mode\n\n");
 	}
-
 } catch (Exception $e) {
-
 	debug("Option setting error\n" . $e->getMessage() . "\n\n");
-	die;
+	throw new Exception("ERROR: setting option");
 }
 
 /* connect databases */
@@ -59,8 +57,14 @@ $drupalUid = sprintf('drupal_%d_uid', $options->siteId);
 
 // HELPERS
 function dd($v) {
-	var_dump($v);
-	die;
+	try {
+		var_dump($v);
+		die;
+	} catch (Exception $e) {
+		debug($e->getMessage());
+		debug($v);
+		throw new Exception('die/dump failed');
+	}
 }
 
 function message($v) {

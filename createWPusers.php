@@ -26,7 +26,7 @@ $CT = "COMMIT";
 $users = new User($wp, $d7, $options);
 
 // databases are now available as $wp and $d7
-$wordpress = new WP($wp, $options);
+$wordpress = new WP($wp, $options, $wp);
 
 if ($chunk > 0) {
 	$dusers_size = $users->countDUsers();
@@ -46,8 +46,8 @@ if ($options->users) {
 					$usersCreated = $users->getTempDrupalUsers($chunk);
 					print(" ... creating ".$usersCreated.' users in Wordpress ');
 					$users->createWordpressUsers($options->siteId);
-					print(" ... ZZzzz ... ");
-					sleep($gap);
+					//print(" ... ZZzzz ... ");
+					//sleep($gap);
 					$wp->query($CT);
 				} catch (Exception $e) {
 					throw new Exception("MYSQL ERROR: ".$e->getMessage());

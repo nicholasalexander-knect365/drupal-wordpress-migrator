@@ -115,6 +115,7 @@ class Node {
 	}
 
 	public function getAllNodes() {
+
 		$sql = "SELECT n.nid, n.vid, n.type, n.language, n.title, n.uid, n.status, n.created, n.changed, n.comment, n.promote, n.sticky, n.tnid, n.translate, b.body_value as content
 				FROM node n
 				INNER JOIN node_type t ON n.type=t.type
