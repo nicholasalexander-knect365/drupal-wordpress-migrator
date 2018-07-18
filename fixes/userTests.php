@@ -30,14 +30,12 @@ $db3 = new mysqli(
 
 $sql = "SELECT COUNT(*) as c FROM test2_telecoms_com.wp_users";
 $result = $db2->query($sql);
-$record2 = $result->fetch_array();
-
+$record2 = $result->fetch_object();
 
 $sql = "SELECT COUNT(*) as c FROM test3_telecoms_com.wp_users";
 $result = $db3->query($sql);
-$record3 = $result->fetch_array();
+$record3 = $result->fetch_object();
 
 print "\nRecord counts : test2=".$record2->c;
-
 print "\nRecord counts : test3=".$record3->c;
 
