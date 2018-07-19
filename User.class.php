@@ -744,7 +744,6 @@ class User {
 			$records = $this->db->records($sql);
 
 			if (!$records || count($records) === 0) {
-debug('none found');
 				return false;
 			} else if ((count($records) === 1) && ($records[0]->ID === $user_id)) {
 debug('one found');
