@@ -69,15 +69,19 @@ foreach($record2s as $n => $rec) {
 
 // nicenames are unique?
 $records2 = [];
-foreach(['test2_telecoms_com', 'test3_telecoms_com'] as $server) {
-	$sql = "SELECT * FROM $server.wp_users a WHERE EXISTS (SELECT 1 FROM wp_users b WHERE b.user_nicename=a.user_nicename LIMIT 1,1);";
-	$result2 = $db2->query($sql);
-	while($record2 = $result2->fetch_object()) {
-		$records2[] = $record2;
-	}
-
-	print "\nNumber of matching nice_names on $server in wp_users ".count($records2);
+$records3 = [];
+$sql = "SELECT * FROM `test2_telecoms_com`.wp_users a WHERE EXISTS (SELECT 1 FROM `test2_telecoms_com`.wp_users b WHERE b.user_nicename=a.user_nicename LIMIT 1,1);";
+$result2 = $db2->query($sql);
+while($record2 = $result2->fetch_object()) {
+	$records2[] = $record2;
 }
-
+$sql = "SELECT * FROM `test3_telecoms_com`.wp_users a WHERE EXISTS (SELECT 1 FROM `test3_telecoms_com`.wp_users b WHERE b.user_nicename=a.user_nicename LIMIT 1,1);";
+$result3 = $db3->query($sql);
+while($record3 = $result3->fetch_object()) {
+	$records3[] = $record3;
+}
 print "\nMatching nice names: $matching of $limit";
+print "\nNumber of matching nice_names on test2 in wp_users ".count($records2);
+print "\nNumber of matching nice_names on test3 in wp_users ".count($records3);
+
 print "\nEnd of script";
