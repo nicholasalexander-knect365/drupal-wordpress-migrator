@@ -744,6 +744,7 @@ class User {
 			$records = $this->db->records($sql);
 
 			if (!$records || count($records) === 0) {
+debug('none found');
 				return false;
 			} else if ((count($records) === 1) && ($records[0]->ID === $user_id)) {
 debug('one found');
@@ -788,7 +789,7 @@ debug($sql);
 					if ($user_login !== $user->user_login) {
 						$user->user_login = $user_login;
 						$user->user_nicename = substr($user_nicename, 0, 50);
-						$sql = "UPDATE wp_user SET user_login='$user_login', user_nicename='$user_nicename' 
+						$sql = "UPDATE wp_users SET user_login='$user_login', user_nicename='$user_nicename' 
 								WHERE ID = $user_id LIMIT 1";
 debug($sql);
 						$this->db->query($sql);
