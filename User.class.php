@@ -745,9 +745,9 @@ class User {
 
 			if (!$records || count($records) === 0) {
 				return false;
-			} else if ((count($records) === 1) && ($records[0]->ID === $user_id)) {
-debug('one found');
-				return true;
+// 			} else if ((count($records) === 1) && ($records[0]->ID === $user_id)) {
+// debug('one found');
+// 				return true;
 			} else {
 				$counter = 0;
 debug('more than one found');
