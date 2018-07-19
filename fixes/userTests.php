@@ -12,7 +12,7 @@ require "../Node.class.php";
 
 // common routines include script initialisation
 require "../common.php";
-$limit = 2000;
+$limit = 12000;
 
 $credentials = ['host' => 'mysql', 'username' => 'test2_tele_com', 'password' => 'OhLoogai1Jook5mai7oc', 'database' =>'test2_telecoms_com'];
 
