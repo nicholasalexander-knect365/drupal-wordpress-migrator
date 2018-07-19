@@ -752,7 +752,7 @@ class User {
 				$counter = 0;
 debug('more than one found');
 				foreach($records as $rec) {
-					$username = sprintf('%s-%d', $userName, ++$counter);
+					$username = sprintf('%s-%d', $userNiceName, ++$counter);
 					$updateId = $rec->ID;
 					$sql = "UPDATE wp_users SET user_nicename = '$username' WHERE ID=$updateId LIMIT 1";
 debug($sql);
