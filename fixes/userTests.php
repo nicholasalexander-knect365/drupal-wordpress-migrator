@@ -69,7 +69,7 @@ foreach($record2s as $n => $rec) {
 
 // nicenames are unique?
 $records2 = [];
-$sql = "SELECT * FROM wp_users a WHERE EXISTS (SELECT 1 FROM wp_users b WHERE b.user_nicename=a.user_nicename LIMIT 1,1);"
+$sql = "SELECT * FROM wp_users a WHERE EXISTS (SELECT 1 FROM wp_users b WHERE b.user_nicename=a.user_nicename LIMIT 1,1);";
 $result2 = $db2->query($sql);
 while($record2 = $result2->fetch_object()) {
 	$records2[] = $record2;
