@@ -58,7 +58,7 @@ while ($record3 = $result3->fetch_object()) {
 	$record3s[] = $record3;
 }
 
-foreach($records2s as $n => $rec) {
+foreach($record2s as $n => $rec) {
 	if ($record2s[$n]->user_nicename !== $record3s[$n]->user_nicename) {
 		debug($record2s[$n]);
 	}
