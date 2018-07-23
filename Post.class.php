@@ -115,7 +115,6 @@ class Post extends DB {
 		$wp_posts = DB::wptable('posts');
 		$sql = "UPDATE $wp_posts SET $field = '$data' WHERE ID = $post_id";
 		$this->db->query($sql);
-//debug($sql);
 
 	}
 

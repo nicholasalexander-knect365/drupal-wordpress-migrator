@@ -1,6 +1,7 @@
 <?php
 /***
  * fixIotiUsers.php
+ *
  * one off script to run on UAT server to assign drupal users to wp_38_capabilities 
  * (they were assigned to wp_capabilites in wp_usermeta)
  */
@@ -35,8 +36,10 @@ $drupal_uid = 'drupal_38_uid';
 $added = 0;
 $exists = [];
 $morethanone = 0;
+$userDone = [];
 
 foreach($drupal_nodes as $node) {
+
 	$uid = (integer) $node->uid;
 	$nid = (integer) $node->nid;
 	$duser = $user->getDrupalUser($uid);
@@ -58,18 +61,27 @@ foreach($drupal_nodes as $node) {
 	$drupal_uid_exists = false;
 
 	if (strlen($email)) {
+
 		$wpuser = $user->getWordpressUserByEmail($email);
 
-		//check nicename 
-//debug($email);
+		$OLDuser = clone($wpuser);
+		$wpuser->display_name = $wpuser->user_nicename;
+		$wpuser->user_nicename = strtolower(preg_replace('/[^A-Za-z0-9-_]/', '-', $wpuser->user_login));
+
+		if (empty($userDone[$wpuser->ID])) {
+			$user->updateUser($wpuser, $OLDuser);
+			$userDone[$wpuser->ID] = 1;
+		}
+
+		//check meta
 		$wpusermeta = $user->getUserMeta($wpuser->ID);
 		foreach($wpusermeta as $usermeta) {
 			if ($usermeta->meta_key === $drupal_uid) {
-//debug($usermeta);
 				$drupal_uid_exists = $usermeta->umeta_id;
 				break;
 			}
 		}
+
 	} else {
 		debug('No email for user ');
 		debug($duser);
@@ -93,8 +105,4 @@ foreach($drupal_nodes as $node) {
 
 }
 
-$uexists = count($exists);
-if ($added !== $uexists) {
-	debug("Users added: " . $added . ' discrepancy with exists check ' . $uexists);
-}
-die("\n\nEnd of script $added authors added with drupal_38_uid record, articles with more than one author: $morethanone (first one added)\n\n");
+die("\n\nEnd of script\n\n");

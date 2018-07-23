@@ -221,6 +221,47 @@ class User {
 		}
 	}
 
+	public function updateUser($user, $oldUser) {
+
+		$user_id = (integer) $user->ID;
+		$keys = [];
+
+		foreach($user as $key => $value) {
+			if ($oldUser->$key !== $value) {
+				$keys[] = $key;
+			}
+		}
+
+		if ($user_id) {
+			$check = $this->getWordpressUserById($user_id);
+
+			if (count($keys) && isset($check->ID) && ((integer)$check->ID === (integer)$user_id)) {
+				$settings = [];
+
+				foreach($keys as $key) {
+					$value = $user->$key;
+					$settings[] = "$key='$value'";
+				}
+
+				if (count($settings)) {
+
+					$sql = "UPDATE wp_users SET ";
+					$sql .= implode(', ', $settings);
+					$sql .= " WHERE ID=$user_id LIMIT 1;";
+
+					// output sql to run on live server
+					debug($sql);
+
+					// or run the update
+					$this->db->query($sql);
+				}
+			}
+
+		} else {
+			throw new Exception("updateUser requires an existing user to update");
+		}
+	}
+
 	public function removeWordpressUser($id) {
 		try {
 			$sql = "DELETE FROM wp_users WHERE ID=$id LIMIT 1";
@@ -597,7 +638,7 @@ class User {
 			$umeta_id = $record->umeta_id;
 			$sql = "UPDATE wp_usermeta SET meta_value = '$value' WHERE umeta_id = $umeta_id";
 		} else {
-			$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, '$key', $value)";
+			$sql = "INSERT INTO wp_usermeta (user_id, meta_key, meta_value) VALUES ($user_id, '$key', '$value')";
 		}
 
 		try {
@@ -750,15 +791,29 @@ class User {
 // 				return true;
 			} else {
 				$counter = 0;
-debug('more than one found');
+//debug('more than one found');
 				foreach($records as $rec) {
 					$username = sprintf('%s-%d', $userNiceName, ++$counter);
 					$updateId = $rec->ID;
 					$sql = "UPDATE wp_users SET user_nicename = '$username' WHERE ID=$updateId LIMIT 1";
-debug($sql);
+//debug($sql);
 					$this->db->query($sql);
 				}
 			}
+		}
+	}
+
+	// after createWordpressUsers has run, we have some errors to fix:
+	// 1. user nicename is the display name
+	public function fixWordpressUsers($blog_id) {
+		$sql = "SELECT * FROM wp_usermeta WHERE meta_key like 'drupal_38_uid'";
+		$userMetaRecords = $this->db->records($sql);
+		foreach($userMetaRecords as $usermeta) {
+			$user_id = $usermeta->user_id;
+			$drupal_id = (integer)$usermeta->meta_value;
+			$sql = "SELECT * FROM wp_users WHERE ID = $user_id";
+			$record = $this->db->record($sql);
+
 		}
 	}
 
@@ -790,7 +845,7 @@ debug($sql);
 						$user->user_nicename = substr($user_nicename, 0, 50);
 						$sql = "UPDATE wp_users SET user_login='$user_login', user_nicename='$user_nicename' 
 								WHERE ID = $user_id LIMIT 1";
-debug($sql);
+//debug($sql);
 						$this->db->query($sql);
 					}
 
