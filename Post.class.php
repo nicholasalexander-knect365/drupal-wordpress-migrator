@@ -99,23 +99,39 @@ class Post extends DB {
 		return $record;
 	}
 
+
+	public function updatePost($post_id, $field, $data, $queryOnly=false) {
+
+		$wp_posts = DB::wptable('posts');
+		$sql = "SELECT * FROM $wp_posts WHERE ID=$post_id";
+
+		$post = $this->db->record($sql);
+
+		if (isset($post) && $post->ID) {
+
+			$data = strip_tags(addslashes(trim($data, "\r\n ")));
+			$sql = "UPDATE $wp_posts SET $field = '$data' WHERE ID = $post_id";
+			
+			if ($queryOnly) {
+				return $sql;
+			}
+			$this->db->query($sql);
+			return true;
+		} else {
+			throw new Exception("\n\nupdatePost can not find post with ID of $post_id in $wp_posts table!\n");
+		}
+	}
+
 	public function updatePostRecord($post, $field, $value) {
 
 		$wp_posts = DB::wptable('posts');
 		$postId = $post->ID;
 
 		if ($postId) {
-			$sql = "UPDATE $wp_posts SET $field=$value WHERE ID=$postId LIMIT 1";
-			$this->db->query($sql);
+			$this->updatePost($postId, $field, $value);
+		} else {
+			throw new Exception("\n\nERROR: updatePostRecord requires a valid $post object\n");
 		}
-	}
-
-	public function updatePost($post_id, $field, $data) {
-
-		$wp_posts = DB::wptable('posts');
-		$sql = "UPDATE $wp_posts SET $field = '$data' WHERE ID = $post_id";
-		$this->db->query($sql);
-
 	}
 
 	public function nodeToPost($nodeId) {

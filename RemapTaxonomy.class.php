@@ -44,17 +44,18 @@ class RemapTaxonomy extends Taxonomy {
 				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Cities'];
 				break;
 
-			case 'smart energy and utilties':
+			case 'smart energy and utilities':
 				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Energy'];
 				break;
 
 			case 'smart buildings':
 			case 'smart home':
-				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Homes/Buildings'];
+				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Homes / Buildings'];
 				break;
 
 			case 'automotive':
 			case 'transport and logistics':
+			case 'transportation and logistics':
 				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Transportation / Logistics'];
 				break;
 
@@ -72,9 +73,18 @@ class RemapTaxonomy extends Taxonomy {
 				$taxset = ['type' => 'Business Resources'];
 				break;
 
+			case 'webinar':
+				$taxset = ['type' => 'Business Resources', 'type' => 'Webcasts'];
+				break;
+
+			case 'whitepapers':
+			case 'whitepaper':
+				$taxset = ['type' => 'Business Resources', 'type' => 'White Papers'];
+
+
 			case 'video':
 			case 'audio':
-				$taxset = ['type' => 'Other Content', 'subtype' => 'Video / Podcasts'];
+				$taxset = ['type' => 'Other Content', 'type' => 'Video / Podcasts'];
 				break;
 
 			case 'iot resources':
@@ -83,9 +93,12 @@ class RemapTaxonomy extends Taxonomy {
 
 			case 'connect the world of things to live business':
 			case "exploring iot's cutting edge":
+			case 'exploring iots cutting edge':
+			case 'exploring iot\'s cutting edge':
 			case 'five2ndwindow':
 			case 'hannover messe 2016':
 			case 'ideasxchange':
+			case 'ideaxchange':
 			case 'manufacturing day':
 			case 'ovum viewpoints':
 				$taxset = ['programs' => $name];
