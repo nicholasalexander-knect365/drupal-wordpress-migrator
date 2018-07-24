@@ -141,7 +141,7 @@ class PostMeta extends DB {
 				$value = '-';
 			}
 
-			$sql = "SELECT meta_id FROM $wp_postmeta WHERE meta_key = '$key' AND post_id=$wpPostId";
+			$sql = "SELECT meta_id FROM $wp_postmeta WHERE meta_key = '$key' AND post_id=$wpPostId limit 1";
 			$record = $this->db->record($sql);
 
 			if ($record && $record->meta_id) {

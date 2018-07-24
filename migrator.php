@@ -147,7 +147,7 @@ if ($options->taxonomy) {
 
 	$vocabularies = $d7_taxonomy->getVocabulary();
 	$taxonomies = $d7_taxonomy->fullTaxonomyList();
-
+//dd($taxonomies);
 	$wp_taxonomy->createTerms($taxonomies);
 
 }
@@ -170,6 +170,8 @@ if ($options->fields) {
 		debug($fieldTables);
 	}
 }
+
+
 
 // how many nodes to process?  - override default status=published
 $nodeCount = $d7_node->nodeCount(NULL);
@@ -322,14 +324,16 @@ for ($c = 0; $c < $chunks; $c++) {
 
 			if ($options->taxonomy) {
 				$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
-
+//debug($taxonomies);
 				if ($taxonomies && count($taxonomies)) {
 					foreach ($taxonomies as $taxonomy) {
+//debug($taxonomy);
 						$wp_taxonomy->makeWPTermData($taxonomy, $wpPostId);
 						if ($verbose) {
 							print "\n" . $taxonomy->category . ' : ' . $taxonomy->name;
 						}
 					}
+
 
 					if (!$options->quiet && !$options->progress && ($verbose === true) ) {
 						print "\nImported " . count($taxonomies) . " taxonomies.\n";

@@ -95,6 +95,7 @@ class Taxonomy {
 	}
 
 	public function remapIOTTaxonomyName($taxonomy) {
+throw new Exception('remapIOTTaxonomyName deprecated?');
 		$remap = new RemapTaxonomy($this->db, $this->options);
 
 		switch ($this->options->project) {
@@ -241,12 +242,12 @@ class Taxonomy {
 		foreach ($taxonomies as $taxonomy) {
 
 			$name = $this->makeWPTermName($taxonomy->name);
-			
+//debug($name);
 			if (strlen($name)) {
 
 				$term_group = 0;
 				$taxonomies = $this->remapNameCategory($name);
-
+//debug($taxonomies);
 				foreach ($taxonomies as $taxname => $name) {
 
 					$slug = $this->slugify($name);
@@ -255,13 +256,17 @@ class Taxonomy {
 					$this->terms[$taxname][$slug] = $term_id;
 
 					$record = $this->getTaxonomyRecord($term_id, $taxname);
+//debug($record);
 					if ($record === NULL) {
 						$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$taxname', '$name', 0, 1)";
-					} else {
-						$term_taxonomy_id = $record->term_taxonomy_id;
-						$sql = "UPDATE $wp_term_taxonomy SET count = count+1 WHERE term_taxonomy_id = $term_taxonomy_id";
-					}
+					// DO NOT INCREMENT COUNTS FOR MULTIPLE INSTANCES - THESE ARE INSTANCES OF TAXONOMY not NODES!
+					// } else {
+					// 	$term_taxonomy_id = $record->term_taxonomy_id;
+					// 	$sql = "UPDATE $wp_term_taxonomy SET count = count+1 WHERE term_taxonomy_id = $term_taxonomy_id";
+					// }
+//debug($sql);
 					$this->db->query($sql);
+					}
 				}
 			} else {
 				debug($taxonomy);
@@ -328,7 +333,7 @@ class Taxonomy {
 	}
 
 	// NB: taxonomy is a DRUPAL record nid/tid/vid/name/description/type (category)
-	private function makeTermTaxonomy($taxonomy) {
+	private function makeTermTaxonomy($taxonomy, $postId) {
 
 		$wp_term_taxonomy = DB::wptable('term_taxonomy');
 		$wp_terms = DB::wptable('terms');
@@ -336,7 +341,7 @@ class Taxonomy {
 		$name = $this->makeWPTermName($taxonomy->name);
 
 		$taxonomies = $this->remapNameCategory($name);
-
+//debug($taxonomies);
 		foreach($taxonomies as $taxname => $name) {
 
 			$slug = $this->slugify($name);
@@ -346,9 +351,13 @@ class Taxonomy {
 			} else {
 				$description = $taxonomy->name;
 			}
-
+// debug("================================");
+// debug($this->terms[$taxname][$slug]);
+// debug([$taxname, $slug]);
+// debug("================================");
 			if (isset($this->terms[$taxname][$slug])) {
 				$term_id = (integer) $this->terms[$taxname][$slug];
+				//debug("$term_id term_id found for " . $this->terms[$taxname][$slug]);
 			} else {
 				if ($this->options->verbose) {
 					debug('makeTermTaxonomy term created with:');
@@ -356,12 +365,19 @@ class Taxonomy {
 				}
 				$term_id = $this->createTerm($name, $slug);
 			}
-		}
+			$format = $taxonomy->format;
+			$weight = $taxonomy->weight;
+			$parent = $taxonomy->hierarchy;
 
-		$format = $taxonomy->format;
-		$weight = $taxonomy->weight;
-		$parent = $taxonomy->hierarchy;
-		return $this->updateInsertTaxonomy($term_id, $taxname);
+			$term_taxonomy_id = $this->updateInsertTaxonomy($term_id, $taxname);
+			$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId);
+		}
+	}
+
+	// wordpress
+	public function makeWPTermData($taxonomy, $postId) {
+		$this->makeTermTaxonomy($taxonomy, $postId);
+		
 	}
 
 	public function updateInsertTaxonomy($term_id, $taxname, $parent = 0, $description = '') {
@@ -370,28 +386,25 @@ class Taxonomy {
 		//$wp_terms = DB::wptable('terms');
 
 		$record = $this->getTaxonomyRecord($term_id, $taxname);
+// debug([$term_id, $taxname]);
 
+// debug($record);
 		if ($record) {
 			$term_taxonomy_id = $record->term_taxonomy_id;
 			$sql = "UPDATE $wp_term_taxonomy 
 					SET count=count+1 
 					WHERE term_taxonomy_id=$term_taxonomy_id";
 			$this->db->query($sql);
+//debug($sql);
 			return $term_taxonomy_id;
 		} else {
 			$sql = "INSERT INTO $wp_term_taxonomy (term_id, taxonomy, description, parent, count) VALUES ($term_id, '$taxname', '$description', $parent, 1)";
 			$this->db->query($sql);
 			$term_taxonomy_id = $this->db->lastInsertId();
 		}
+//debug($sql);
 		return $term_taxonomy_id;
 	}
-
-	// wordpress
-	public function makeWPTermData($taxonomy, $postId) {
-		$term_taxonomy_id = $this->makeTermTaxonomy($taxonomy);
-		$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId);
-	}
-
 
 	// wordpress
 	public function getTags() {

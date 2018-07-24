@@ -92,7 +92,7 @@ class RemapTaxonomy extends Taxonomy {
 			case 'white paper':
 			case 'white papers':
 				$taxset = ['type' => 'Business Resources', 'type' => 'White Papers'];
-
+				break;
 
 			case 'video':
 			case 'audio':
