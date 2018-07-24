@@ -24,6 +24,8 @@ class Taxonomy {
 	public $terms = [];
 	public $options;
 
+	private $counter = 0;
+
 	public function __construct($db, $options) {
 		$this->db = $db;
 		$this->options = $options;
@@ -95,7 +97,7 @@ class Taxonomy {
 	}
 
 	public function remapIOTTaxonomyName($taxonomy) {
-throw new Exception('remapIOTTaxonomyName deprecated?');
+
 		$remap = new RemapTaxonomy($this->db, $this->options);
 
 		switch ($this->options->project) {
@@ -351,13 +353,12 @@ throw new Exception('remapIOTTaxonomyName deprecated?');
 			} else {
 				$description = $taxonomy->name;
 			}
-// debug("================================");
-// debug($this->terms[$taxname][$slug]);
-// debug([$taxname, $slug]);
-// debug("================================");
+if ($this->options->verbose) {
+	debug("================================");
+	debug([$taxname, $slug]);
+}
 			if (isset($this->terms[$taxname][$slug])) {
 				$term_id = (integer) $this->terms[$taxname][$slug];
-				//debug("$term_id term_id found for " . $this->terms[$taxname][$slug]);
 			} else {
 				if ($this->options->verbose) {
 					debug('makeTermTaxonomy term created with:');
@@ -370,6 +371,10 @@ throw new Exception('remapIOTTaxonomyName deprecated?');
 			$parent = $taxonomy->hierarchy;
 
 			$term_taxonomy_id = $this->updateInsertTaxonomy($term_id, $taxname);
+
+if ($this->options->verbose) {
+	debug($this->counter++  . ") $taxname term_id:$term_id for " . $slug . ' term_taxonomy_id:'. $term_taxonomy_id . ' postId:'.$postId);
+}
 			$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId);
 		}
 	}

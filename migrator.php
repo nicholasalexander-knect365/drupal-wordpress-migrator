@@ -172,7 +172,6 @@ if ($options->fields) {
 }
 
 
-
 // how many nodes to process?  - override default status=published
 $nodeCount = $d7_node->nodeCount(NULL);
 
@@ -286,6 +285,7 @@ for ($c = 0; $c < $chunks; $c++) {
 			} else {
 				// find the wpPostId for this node??
 				$wpPostId = $wp_termmeta->getTermMetaValue($wp_termmeta_term_id, $node->nid);
+//debug('READ postId: '.$wpPostId . ' for node:'.$node->nid);
 			}
 
 			if ($wpPostId) {

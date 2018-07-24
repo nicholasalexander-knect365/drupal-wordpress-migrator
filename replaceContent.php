@@ -27,7 +27,9 @@ require "Taxonomy.class.php";
 require "common.php";
 
 // databases are now available as $wp and $d7
-$wordpress = new WP($wp, $options);
+$wordpressDBConfig = $wp->wpDBConfig();
+// databases are now available as $wp and $d7
+$wordpress = new WP($wp, $options, $wordpressDBConfig);
 
 /* nodes */
 $d7_node = new Node($d7);
