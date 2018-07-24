@@ -85,6 +85,10 @@ class PostMeta extends DB {
 
 	public function createGetPostMeta($post_id, $key, $value) {
 
+		if (empty($post_id)) {
+			throw new Exception("ERROR: createGetPostMeta requires a post_id!");
+		}
+
 		$wp_postmeta = DB::wptable('postmeta');
 		$sql = "SELECT meta_id FROM $wp_postmeta WHERE post_id = $post_id AND meta_key = '$key'";
 		$record = $this->db->record($sql);
