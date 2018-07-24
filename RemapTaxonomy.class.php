@@ -73,11 +73,11 @@ class RemapTaxonomy extends Taxonomy {
 				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Retail'];
 				break;
 
-			case 'article':
-			case 'gallery':
-			case 'link':
-				$taxset = ['type' => 'Business Resources'];
-				break;
+			// case 'article':
+			// case 'gallery':
+			// case 'link':
+			// 	$taxset = ['type' => 'Business Resources'];
+			// 	break;
 
 			case 'iot resources':
 				$taxset = ['type' => 'Business Resources'];
