@@ -10,6 +10,7 @@ class RemapTaxonomy extends Taxonomy {
 		switch(trim(strtolower($name))) {
 			case 'news':
 			case 'news and analysis':
+			case 'news & analysis':
 				$taxset = ['type' => 'News'];
 				break;
 
@@ -37,6 +38,7 @@ class RemapTaxonomy extends Taxonomy {
 				break;
 
 			case 'industrial iot (iiot)':
+			case 'industrial IoT':
 				$taxset = ['type' => 'Vertical Industries', 'subject' => 'IIoT'];
 				break;
 
@@ -67,9 +69,13 @@ class RemapTaxonomy extends Taxonomy {
 				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Retail'];
 				break;
 
-			case 'article':
-			case 'gallery':
-			case 'link':
+			// case 'article':
+			// case 'gallery':
+			// case 'link':
+			// 	$taxset = ['type' => 'Business Resources'];
+			// 	break;
+
+			case 'iot resources':
 				$taxset = ['type' => 'Business Resources'];
 				break;
 
@@ -87,9 +93,7 @@ class RemapTaxonomy extends Taxonomy {
 				$taxset = ['type' => 'Other Content', 'type' => 'Video / Podcasts'];
 				break;
 
-			case 'iot resources':
-				$taxset = ['type' => 'Business Resources'];
-				break;
+
 
 			case 'connect the world of things to live business':
 			case "exploring iot's cutting edge":
