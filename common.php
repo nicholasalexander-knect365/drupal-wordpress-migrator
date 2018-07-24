@@ -10,7 +10,6 @@ $option = NULL;
 
 /* control options */
 try {
-
 	$options = new Options();
 	$options->setAll();
 

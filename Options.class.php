@@ -29,6 +29,7 @@ class Options {
 	public $clean;
 	public $clearImages;
 	public $resetUserPassword;
+	public $resetTerms;
 
 	public $sqlDebug;
 
@@ -45,6 +46,7 @@ class Options {
 		'acf' => 'fields',
 		'project' => 'project',
 		'initialise'=> 'initialise',
+		'resetTerms' => 'resetTerms',
 		'clean' 	=> 'clean'
 	];
 
@@ -59,6 +61,7 @@ class Options {
 		$this->initialise 	= false;
 		$this->server 		= 'local';
 		$this->resetUserPassword = false;
+		$this->resetTerms = false;
 
 		$this->nodes 		= false;
 		$this->taxonomy 	= false;
@@ -131,6 +134,7 @@ class Options {
 		$this->fields 		= true;
 		$this->initialise 	= true;
 		$this->clean 		= true;
+		$this->resetTerms 	= false;
 		$this->clearImages 	= false;
 		$this->sqlDebug 	= false;
 
@@ -151,7 +155,7 @@ class Options {
 
 			$shortOpts = 'dvqpfntuh';
 			$longOpts  = ['server:', 'project:', 'wordpressURL:', 'wordpressPath:', 'drupalPath:',
-			 			  'imageStore:', 'initialise', 'clean', 'clearImages', 'acf', 'sql', 'resetUserPassword', 'dusers'];
+			 			  'imageStore:', 'initialise', 'clean', 'clearImages', 'acf', 'sql', 'resetTerms', 'resetUserPassword', 'dusers'];
 			$options = getopt($shortOpts, $longOpts);
 
 			if (empty($options)) {
@@ -183,6 +187,7 @@ class Options {
 				print "\n  --initialise   ... clears ALL data";
 				print "\n  --clean        ... strips html content";
 				print "\n  --clearImages  ... clears default images directory";
+				print "\n  --resetTerms   ... resets terms taxonomy counts";
 				print "\n  --noFiles=[no files]\n";
 				print "\n  -q Quiet";
 				print "\n  -v Verbose";
@@ -196,7 +201,7 @@ class Options {
 				print "\n  -f Files (Images)";
 				print "\n  --acf ACF Fields";
 				print "\n";
-				print "\n  -d --server=local - sets wordpressPath=~/Dev/wordpress/tuauto --project='PROJECT' --drupalPath=~/Dev/drupal7/PROJECT/ +verbose +files +nodes -taxonomy +fields +users +initialise +clean";
+				print "\n  -d --server=local - sets wordpressPath=~/Dev/wordpress/tuauto --project='PROJECT' --drupalPath=~/Dev/drupal7/PROJECT/ +verbose +files +nodes -taxonomy +fields +users +initialise +clean -resetTerms";
 				print "\n --d --server=vm sets defaults +progress +quiet -verbose -help +files +nodes -users +taxonomy +fields +initialise -clean +clearImages -sqlDebug --wordpressPath=/var/www/public --wordpressURL=http://tuauto.telecoms.local --drupalPath=/vagrant/drupal7/PROJECT";
 				print "\n --d --server=staging - use explicit args";
 				print "\n";
@@ -290,6 +295,10 @@ class Options {
 
 						case 'clearImages':
 							$this->clearImages = true;
+							break;
+
+						case 'resetTerms':
+							$this->resetTerms = true;
 							break;
 
 						case 'sql':

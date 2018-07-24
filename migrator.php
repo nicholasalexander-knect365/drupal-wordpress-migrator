@@ -105,6 +105,11 @@ if ($options->files) {
 $wp_taxonomy = new Taxonomy($wp, $options);
 $d7_taxonomy = new Taxonomy($d7, $options);
 
+//$options->resetTerms = true;
+if (true && $options->resetTerms) {
+	$wp_taxonomy->resetTermCounts();
+}
+
 // If the wordpress instance of Taxonomy needs to get drupal data: 
 $wp_taxonomy->setDrupalDb($d7);
 

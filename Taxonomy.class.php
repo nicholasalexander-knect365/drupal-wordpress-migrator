@@ -35,7 +35,6 @@ class Taxonomy {
 		}
 	}
 
-
 	//TODO TECH-DEBT: terms are NOT unique by SLUG!!!!
 	// they must be unique by SLUG and TERM_TAXONOMY
 
@@ -218,6 +217,14 @@ class Taxonomy {
 				WHERE taxonomy='$taxonomy' AND term_id=$term_id";
 		$record = $this->db->record($sql);
 		return $record;
+	}
+
+	public function resetTermCounts() {
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
+		$sql = "UPDATE $wp_term_taxonomy SET count=0";
+		$this->db->query($sql);
+		//$rowAffected = $this->db->rowsAffected();
+		return true;
 	}
 
 	public function createTerms($taxonomies) {
