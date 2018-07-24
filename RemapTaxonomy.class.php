@@ -7,6 +7,10 @@ class RemapTaxonomy extends Taxonomy {
 	protected function IOTIRemapNameCategory($name) {
 		// TODO: this is not yet complete: some taxonomies activate a parent,
 		// i.e. subject taxonomies are all also type=technolgies or type=vertical industries
+		// if (substr($name,0,13) === 'Exploring IoT' && substr($name, 15,12) === 'Cutting Edge') {
+		// 	$name = 'exploring iots cutting edge';
+		// 	dd($name);
+		// }
 		switch(trim(strtolower($name))) {
 			case 'news':
 			case 'news and analysis':
@@ -69,11 +73,11 @@ class RemapTaxonomy extends Taxonomy {
 				$taxset = ['type' => 'Vertical Industries', 'subject' => 'Retail'];
 				break;
 
-			// case 'article':
-			// case 'gallery':
-			// case 'link':
-			// 	$taxset = ['type' => 'Business Resources'];
-			// 	break;
+			case 'article':
+			case 'gallery':
+			case 'link':
+				$taxset = ['type' => 'Business Resources'];
+				break;
 
 			case 'iot resources':
 				$taxset = ['type' => 'Business Resources'];
@@ -85,6 +89,8 @@ class RemapTaxonomy extends Taxonomy {
 
 			case 'whitepapers':
 			case 'whitepaper':
+			case 'white paper':
+			case 'white papers':
 				$taxset = ['type' => 'Business Resources', 'type' => 'White Papers'];
 
 
@@ -93,12 +99,10 @@ class RemapTaxonomy extends Taxonomy {
 				$taxset = ['type' => 'Other Content', 'type' => 'Video / Podcasts'];
 				break;
 
-
-
 			case 'connect the world of things to live business':
 			case "exploring iot's cutting edge":
+			case "exploring iot\'s cutting edge":
 			case 'exploring iots cutting edge':
-			case 'exploring iot\'s cutting edge':
 			case 'five2ndwindow':
 			case 'hannover messe 2016':
 			case 'ideasxchange':
@@ -109,6 +113,9 @@ class RemapTaxonomy extends Taxonomy {
 				break;
 
 			default:
+// if ($name !== 'Article') {
+// 	debug($name);
+// }
 				$taxset = ['post_tag' => $name];
 				break;
 		}
