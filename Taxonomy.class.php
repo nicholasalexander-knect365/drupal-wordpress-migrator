@@ -323,12 +323,17 @@ class Taxonomy {
 		$this->db->query($sql);
 	}
 
-	private function makeTermRelationship($taxonomy, $term_taxonomy_id, $postId) {
+	private function makeTermRelationship($taxonomy, $term_taxonomy_id, $postId, $clearOlds = false) {
 
 		$wp_term_relationships = DB::wptable('term_relationships');
 
 		$term_order = $taxonomy->weight;
 		// create a termRelation
+
+		if ($clearOlds) {
+			$sql = "DELETE FROM $wp_term_relationships WHERE term_taxonomy_id=$term_taxonomy_id";
+			$this->db->query($sql);
+		}
 		$sql = "INSERT INTO $wp_term_relationships (object_id, term_taxonomy_id, term_order)
 				VALUES ($postId, $term_taxonomy_id, $term_order)";
 		$this->db->query($sql);
@@ -375,7 +380,7 @@ if ($this->options->verbose) {
 if ($this->options->verbose) {
 	debug($this->counter++  . ") $taxname term_id:$term_id for " . $slug . ' term_taxonomy_id:'. $term_taxonomy_id . ' postId:'.$postId);
 }
-			$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId);
+			$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId, TRUE);
 		}
 	}
 
