@@ -331,7 +331,7 @@ class Taxonomy {
 		// create a termRelation
 
 		if ($clearOlds) {
-			$sql = "DELETE FROM $wp_term_relationships WHERE term_taxonomy_id=$term_taxonomy_id";
+			$sql = "DELETE FROM $wp_term_relationships WHERE term_taxonomy_id=$term_taxonomy_id AND object_id=$postId";
 			$this->db->query($sql);
 		}
 		$sql = "INSERT INTO $wp_term_relationships (object_id, term_taxonomy_id, term_order)
@@ -358,10 +358,11 @@ class Taxonomy {
 			} else {
 				$description = $taxonomy->name;
 			}
-if ($this->options->verbose) {
-	debug("================================");
-	debug([$taxname, $slug]);
-}
+
+			if ($this->options->verbose) {
+				debug([$taxname, $slug]);
+			}
+
 			if (isset($this->terms[$taxname][$slug])) {
 				$term_id = (integer) $this->terms[$taxname][$slug];
 			} else {
@@ -371,16 +372,19 @@ if ($this->options->verbose) {
 				}
 				$term_id = $this->createTerm($name, $slug);
 			}
+
 			$format = $taxonomy->format;
 			$weight = $taxonomy->weight;
 			$parent = $taxonomy->hierarchy;
 
 			$term_taxonomy_id = $this->updateInsertTaxonomy($term_id, $taxname);
 
-if ($this->options->verbose) {
-	debug($this->counter++  . ") $taxname term_id:$term_id for " . $slug . ' term_taxonomy_id:'. $term_taxonomy_id . ' postId:'.$postId);
-}
+			if ($this->options->verbose) {
+				debug($this->counter++  . ") $taxname term_id:$term_id for " . $slug . ' term_taxonomy_id:'. $term_taxonomy_id . ' postId:'.$postId);
+			}
+
 			$this->makeTermRelationship($taxonomy, $term_taxonomy_id, $postId, TRUE);
+
 		}
 	}
 
