@@ -104,25 +104,34 @@ while ($line = fgets($newposts)) {
 
 			if (isset($authorRecords) && count($authorRecords) > 0) {
 				$author_id = $authorRecords[0]->field_penton_author_target_id;
-				$sql = "UPDATE $wp_posts SET post_author=$author_id WHERE ID=$post_id";
-				$wp->query($sql);
+				// lookup the author
+				$sql = "SELECT user_id FROM wp_usermeta WHERE meta_key='drupal_38_uid' AND meta_value='$author_id' LIMIT 1";
+				$um = $wp->record($sql);
+				if ($um && $um->user_id) {
+					$authorId=$um->user_id;
+
+					$sql = "UPDATE $wp_posts SET post_author=$authorId WHERE ID=$post_id LIMIT 1";
+					$wp->query($sql);
+				}
 			}
 
-			// taxonomies
-			$node = $d7_node->getNode($nid);
-			$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
-//debug($taxonomies);
-			if ($taxonomies && count($taxonomies)) {
-				foreach ($taxonomies as $taxonomy) {
-//debug($taxonomy);
-					$wp_taxonomy->makeWPTermData($taxonomy, $post_id);
-					if ($verbose) {
-						print "\n" . $taxonomy->category . ' : ' . $taxonomy->name;
+			if (false) {
+				// taxonomies
+				$node = $d7_node->getNode($nid);
+				$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
+	//debug($taxonomies);
+				if ($taxonomies && count($taxonomies)) {
+					foreach ($taxonomies as $taxonomy) {
+	//debug($taxonomy);
+						$wp_taxonomy->makeWPTermData($taxonomy, $post_id);
+						if ($verbose) {
+							print "\n" . $taxonomy->category . ' : ' . $taxonomy->name;
+						}
 					}
-				}
 
-				if (!$options->quiet && !$options->progress && ($verbose === true) ) {
-					print "\nImported " . count($taxonomies) . " taxonomies.\n";
+					if (!$options->quiet && !$options->progress && ($verbose === true) ) {
+						print "\nImported " . count($taxonomies) . " taxonomies.\n";
+					}
 				}
 			}
 		} 
