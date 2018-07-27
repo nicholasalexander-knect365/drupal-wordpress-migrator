@@ -106,7 +106,6 @@ if ($credentials['database'] === '') {
 							$this->credentials['wp']['database'] = $matched[1];
 						}
 						if ($match[1] === 'USER') {
-
 							$this->credentials['wp']['username'] = $matched[1];
 						}
 						if ($match[1] === 'PASSWORD') {
@@ -320,8 +319,17 @@ if ($credentials['database'] === '') {
 
 	public function query($sql) {
 
+		$show = true;
+
 		$this->sql = $sql;
 		$rowCount = 0;
+		
+		// temporary flag on taxonomy updates and inserts to track the SQLj
+		// TODO: remove ?
+
+		if ($show && substr($sql, 0, 6) !== 'SELECT' && substr($sql, 0,.6) !== 'SHOW T') {
+			debug(static::strip($sql) .  ';');
+		}
 
 		if ($this->config->sqlDebug) {
 			debug("\n".$this->type . ': ' .static::strip($sql) . "\n");

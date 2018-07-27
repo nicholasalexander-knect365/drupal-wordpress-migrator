@@ -272,7 +272,11 @@ for ($c = 0; $c < $chunks; $c++) {
 						}
 
 						$wpPostId = $wp_post->makePost($post_name, $node, $options, $files, $options->imageStore, $users);
-
+// if ($nid === 3066) {
+// 	debug($node);
+// 	debug($post_name);
+// 	debug($options);
+// }
 						if ($wpPostId) {
 							$metaId = $wp_termmeta->createTermMeta($wp_termmeta_term_id, $node->nid, $wpPostId);
 						}

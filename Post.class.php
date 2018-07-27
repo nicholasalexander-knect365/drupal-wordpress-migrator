@@ -326,11 +326,13 @@ class Post extends DB {
 						break;
 
 					case 'title':
-						$values[$wpKey] = $value;
+
+						$values[$wpKey] = addslashes($value);
 						$values['post_name'] = substr(Taxonomy::slugify($values[$wpKey]), 0, 200);
 						if (strlen($values['post_name']) === 0) {
 							$values['post_name'] = $options->project . '-' . $running++;
 						}
+
 
 						break;
 
@@ -469,9 +471,12 @@ debug($values);
 
 				$sql = "INSERT into $wp_posts (" . implode(', ', array_keys($values)) . ") VALUES ('" . implode("', '", $values) ."')";
 		}
-		$this->db->query($sql); 
-		$post_id = $this->db->lastInsertId();
-//debug($sql);
+		try {
+			$this->db->query($sql); 
+			$post_id = $this->db->lastInsertId();
+		} catch (Exception $e) {
+			debug($sql);
+		}
 		return $post_id;
 
 		// TODO: deprecate this?

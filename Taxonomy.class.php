@@ -88,7 +88,6 @@ class Taxonomy {
 		} else {
 
 			$sql = "INSERT INTO $wp_terms (name, slug, term_group) VALUES ('$term_name', '$term_slug', 0)";
-
 			$this->db->query($sql);
 			$term_id = $this->db->lastInsertId();
 		}
@@ -348,7 +347,7 @@ class Taxonomy {
 		$name = $this->makeWPTermName($taxonomy->name);
 
 		$taxonomies = $this->remapNameCategory($name);
-//debug($taxonomies);
+
 		foreach($taxonomies as $taxname => $name) {
 
 			$slug = $this->slugify($name);
@@ -377,7 +376,7 @@ class Taxonomy {
 			$weight = $taxonomy->weight;
 			$parent = $taxonomy->hierarchy;
 
-			$term_taxonomy_id = $this->updateInsertTaxonomy($term_id, $taxname);
+			$term_taxonomy_id = $this->updateInsertTaxonomy($term_id, $taxname, $parent, $description);
 
 			if ($this->options->verbose) {
 				debug($this->counter++  . ") $taxname term_id:$term_id for " . $slug . ' term_taxonomy_id:'. $term_taxonomy_id . ' postId:'.$postId);
