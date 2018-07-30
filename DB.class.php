@@ -318,9 +318,9 @@ if ($credentials['database'] === '') {
 		return $this->connection;
 	}
 
-	public function showQuery($state = true) {
+	public function setShowQuery($state = true) {
 		if ($state) {
-			$this->showQuery = state;
+			$this->showQuery = $state;
 		}
 		return $this->showQuery;
 	}

@@ -20,7 +20,7 @@ require "common.php";
 $users = new User($wp, $d7, $options);
 
 $wordpressDBConfig = $wp->wpDBConfig();
-$wp->showQuery(true);
+$wp->setShowQuery(true);
 // databases are now available as $wp and $d7
 
 $wordpress = new WP($wp, $options, $wordpressDBConfig);
