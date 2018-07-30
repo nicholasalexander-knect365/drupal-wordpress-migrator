@@ -20,6 +20,7 @@ require "common.php";
 $users = new User($wp, $d7, $options);
 
 $wordpressDBConfig = $wp->wpDBConfig();
+$wp->showQuery(true);
 // databases are now available as $wp and $d7
 
 $wordpress = new WP($wp, $options, $wordpressDBConfig);
@@ -78,6 +79,10 @@ while ($line = fgets($newposts)) {
 			$wp->query($line);
 			$post_id = $wp->lastInsertId();
 
+			if (empty($post_id)) {
+				throw new Exception($line . ' inserted without returning a post_id?');
+			}
+
 			$nid = $d7nodes[0]->nid;
 			$sql = "INSERT INTO $wp_termmeta (term_id, meta_key, meta_value) VALUES ($wp_termmeta_term_id, $nid, $post_id)";
 			$wp->query($sql);
@@ -88,7 +93,7 @@ while ($line = fgets($newposts)) {
 					WHERE entity_id = $nid";
 			$records = $d7->records($sql);
 
-			if (isset($records) && count($records) >0 ) {
+			if (isset($records) && count($records) > 0) {
 				$excerpt = $records[0]->excerpt;
 				// update the post
 				$sql = "UPDATE $wp_posts SET post_excerpt='$excerpt' WHERE ID=$post_id";
@@ -98,6 +103,7 @@ while ($line = fgets($newposts)) {
 				debug('field_penton_content_summary_value did not find a single record!');
 				debug($records);
 			}
+
 			// externally defined author
 			$sql = "SELECT * FROM field_data_field_penton_author WHERE entity_id=$nid";
 			$authorRecords = $d7->records($sql);
@@ -115,14 +121,15 @@ while ($line = fgets($newposts)) {
 				}
 			}
 
-			if (false) {
+			if (true) {
+//debug('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>taxonomies<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
 				// taxonomies
 				$node = $d7_node->getNode($nid);
 				$taxonomies = $d7_taxonomy->nodeTaxonomies($node);
-	//debug($taxonomies);
+//debug($taxonomies);
 				if ($taxonomies && count($taxonomies)) {
 					foreach ($taxonomies as $taxonomy) {
-	//debug($taxonomy);
+//debug($taxonomy);
 						$wp_taxonomy->makeWPTermData($taxonomy, $post_id);
 						if ($verbose) {
 							print "\n" . $taxonomy->category . ' : ' . $taxonomy->name;

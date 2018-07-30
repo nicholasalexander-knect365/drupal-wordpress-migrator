@@ -19,6 +19,7 @@ class DB {
 	private $result;
 	private $rows;
 	private $sql;
+	private $showQuery = false;
 
 	public function __construct($type, $config) {
 		$this->type = $type;
@@ -163,7 +164,7 @@ if ($credentials['database'] === '') {
 				// DRUPAL DB CONFIG
 				if ($this->config->server === 'local' || $this->config->server === 'multisite') {
 					$this->credentials['d7'] = [
-						'database' => 'iot0704',
+						'database' => 'ioti_drupal',
 						'username' => 'root',
 						'password' => 'admin',
 						'host' => 'localhost'
@@ -317,18 +318,24 @@ if ($credentials['database'] === '') {
 		return $this->connection;
 	}
 
+	public function showQuery($state = true) {
+		if ($state) {
+			$this->showQuery = state;
+		}
+		return $this->showQuery;
+	}
+
 	public function query($sql) {
 
-		$show = true;
+		$show = $this->showQuery;
 
 		$this->sql = $sql;
 		$rowCount = 0;
-		
+
 		// temporary flag on taxonomy updates and inserts to track the SQLj
 		// TODO: remove ?
-
-		if ($show && substr($sql, 0, 6) !== 'SELECT' && substr($sql, 0,.6) !== 'SHOW T') {
-			debug(static::strip($sql) .  ';');
+		if ($show && substr($sql, 0, 6) !== 'SELECT' && (substr($sql, 0,.6) !== 'SHOW T') && (substr($sql, 0, 6) !== 'COMMIT') && (substr($sql, 0, 11) !== 'START TRANS') && (substr($sql, 0, 12) !== 'SHOW COLUMNS')) {
+			debug(static::strip($sql) . ';');
 		}
 
 		if ($this->config->sqlDebug) {

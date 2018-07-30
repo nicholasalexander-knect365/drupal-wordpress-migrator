@@ -212,9 +212,15 @@ class Post extends DB {
 		$wp_postmeta = DB::wptable('postmeta');
 
 		$guid = $this->options->get('wordpressPath') . '/' . $url;
-		$sql = "INSERT INTO $wp_posts (post_type, guid) VALUES ('attachment', $url)";
+
+		$post_date = date('Y-m-d H:i:s');
+		$post_date_gmt = $post_date;
+		$to_ping = '';
+
+		$sql = "INSERT INTO $wp_posts (post_title, post_content, post_excerpt, post_content_filtered, to_ping, pinged, post_date, post_date_gmt, post_modified, post_modified_gmt, post_type, guid) VALUES ('$url', 'no content', '', '', '$to_ping', '', '$post_date', '$post_date_gmt', '$post_date', '$post_date_gmt', 'attachment', '$url')";
 		$this->db->query($sql);
 		$post_id = $this->db->lastInsertId();
+
 		$sql = "INSERT INTO $wp_postmeta (post_id, meta_key, meta_value) VALUES ($wpPostId, '_thumbnail_id', $post_id)";
 		$this->db->query($sql);
 		return $this->db->lastInsertId();

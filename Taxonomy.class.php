@@ -72,7 +72,7 @@ class Taxonomy {
 					debug(DB::strip($sql));
 					debug($records);
 					throw new Exception("ERROR: Can not isolate a term for $term_slug with taxonomy $taxonomy");
-				} else if ($number_found === 1) {
+				} if ($number_found === 1) {
 					$term_id = (integer) $records[0]->term_id;
 				} else {
 					$sql = "INSERT INTO $wp_terms (name, slug, term_group) VALUES ('$term_name', '$term_slug', 0)";
@@ -81,7 +81,6 @@ class Taxonomy {
 				}
 
 			} else {
-
 				throw new Exception("\n\nERROR: can not getSet term $term_slug without a taxonomy as multiple instances of the term slug already exist");
 			}
 
@@ -229,6 +228,19 @@ class Taxonomy {
 		return true;
 	}
 
+	public function loadTerms($taxonomies) {
+		$wp_terms = DB::wptable('terms');
+		$wp_term_taxonomy = DB::wptable('term_taxonomy');
+		$sql = "SELECT * FROM $wp_terms";
+		$records = $this->db->records($sql);
+		$this->terms = [];
+		foreach($records as $n => $record) {
+			$taxname = $record->name;
+			$slug = $this->slugify($name);
+			$this->terms[$taxname][$slug] = $term_id;
+		}
+	}
+
 	public function createTerms($taxonomies) {
 
 		$wp_terms = DB::wptable('terms');
@@ -242,14 +254,14 @@ class Taxonomy {
 
 		foreach ($taxonomies as $taxonomy) {
 
-			$name = $this->makeWPTermName($taxonomy->name);
+			$taxonomy_name = $this->makeWPTermName($taxonomy->name);
 //debug($name);
-			if (strlen($name)) {
+			if (strlen($taxonomy_name)) {
 
 				$term_group = 0;
-				$taxonomies = $this->remapNameCategory($name);
-//debug($taxonomies);
-				foreach ($taxonomies as $taxname => $name) {
+				$taxonomySet = $this->remapNameCategory($taxonomy_name);
+
+				foreach ($taxonomySet as $taxname => $name) {
 
 					$slug = $this->slugify($name);
 					$term_id = $this->getSetTerm($name, $slug, $taxname);
@@ -280,10 +292,13 @@ class Taxonomy {
 
 		$wp_terms = DB::wptable('terms');
 
-		$sql = "SELECT term_id FROM $wp_terms WHERE slug = '$slug' LIMIT 1";
+		$sql = "SELECT * FROM $wp_terms WHERE slug = '$slug' LIMIT 1";
 		$this->db->query($sql);
 		$term = $this->db->getRecord();
-		return $term;
+		if ($term) {
+			return $term;
+		} 
+		return null;
 	}
 
 	public function getTermFromName($name) {
@@ -362,8 +377,8 @@ class Taxonomy {
 				debug([$taxname, $slug]);
 			}
 
-			if (isset($this->terms[$taxname][$slug])) {
-				$term_id = (integer) $this->terms[$taxname][$slug];
+			if ($term = $this->getTermFromSlug($slug)) {
+				$term_id = $term->term_id;
 			} else {
 				if ($this->options->verbose) {
 					debug('makeTermTaxonomy term created with:');
@@ -401,7 +416,7 @@ class Taxonomy {
 		$record = $this->getTaxonomyRecord($term_id, $taxname);
 // debug([$term_id, $taxname]);
 
-// debug($record);
+//debug($record);
 		if ($record) {
 			$term_taxonomy_id = $record->term_taxonomy_id;
 			$sql = "UPDATE $wp_term_taxonomy 

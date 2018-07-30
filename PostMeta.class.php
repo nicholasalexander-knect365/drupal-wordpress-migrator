@@ -112,7 +112,7 @@ class PostMeta extends DB {
 
 		if (isset($record) && $record->meta_id) {
 			$meta_id = $record->meta_id;
-			$sql = "UPDATE $wp_postmeta SET meta_value='$value' WHERE meta_id=$meta_id";
+			$sql = "UPDATE $wp_postmeta SET meta_value='$value' WHERE meta_id=$meta_id LIMIT 1";
 		} else {
 			$sql = "INSERT INTO $wp_postmeta (post_id, meta_key, meta_value) VALUES ($postId, '$key', '$value')";
 		}
