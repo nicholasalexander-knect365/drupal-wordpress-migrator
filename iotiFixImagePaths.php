@@ -52,6 +52,7 @@ $posts = $wp_post->getPosts();
 $count = 0;
 $tests = false;
 $debug = false;
+
 $matched = [];
 $wordpressDirectory = sprintf('blogs.dir/%d/files', (integer) $options->siteId);
 $addMedia = fopen('addMedia.sh', 'w');
@@ -77,6 +78,7 @@ foreach($posts as $post) {
 		if ( preg_match('/<img src="http:\/\/www.ioti.com/', $body) ) {
 			//dd($body);
 		}
+
 	} else {
 
 		// wget the image
@@ -166,29 +168,26 @@ foreach($posts as $post) {
 
 				fputs($addMedia, $cmd);
 
-				// create the media library entries
-			}
-		}
+				$newbody = preg_replace('/(<img.*?src=")(http:\/\/www.ioti.com\/)(.*?)"(.*?)>/',
+					'${1}http://www.iotworldtoday.com'.$imagePath.'"${4}>', $body);
 
-		//$newbody = preg_replace(['/(<img(.*?)src=")(http:\/\/www.ioti.com)(.*?)">/', '/(<img(.*?)src=")(http:\/\/iot-institute.com)(.*?)">/'],'${1}http://www.iotworldtoday.com${4}', $body);
-
-		$newbody = preg_replace(	'/(<img.*?src=")(http:\/\/www.ioti.com\/)(.*?)"(.*?)>/',
-									'${1}http://www.iotworldtoday.com'.$imagePath.'"${4}>', $body);
-
-		if ($debug) {
-			if ($body !== $newbody) {
-				$count++;
-				debug('====================================');
-				debug($body);
-				debug('------------------------------------');
-				debug($newbody);
-				debug('====================================');
+				if ($debug) {
+					if ($body !== $newbody) {
+						$count++;
+						debug('====================================');
+						debug($body);
+						debug('------------------------------------');
+						debug($newbody);
+						debug('====================================');
+					}
+				}
+				$body = $newbody;
 			}
 		}
 	}
 	// rewrite the post content
-	if (strlen($newbody) && $newbody !== 'no content') {
-		$wp_post->updatePost($post_id, 'body', $newbody);
+	if (strlen($body) && $body !== 'no content') {
+		$wp_post->updatePost($post_id, 'post_content', $body);
 	}
 }
 

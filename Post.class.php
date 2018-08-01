@@ -117,12 +117,12 @@ class Post extends DB {
 
 		if (isset($post) && $post->ID) {
 
-			$data = strip_tags(addslashes(trim($data, "\r\n ")));
 			$sql = "UPDATE $wp_posts SET $field = '$data' WHERE ID = $post_id LIMIT 1;";
-			
+
 			if ($queryOnly) {
 				return $sql;
 			}
+
 			$this->db->query($sql);
 			return true;
 		} else {
