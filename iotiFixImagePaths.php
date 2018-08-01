@@ -55,6 +55,7 @@ $debug = false;
 $matched = [];
 $wordpressDirectory = sprintf('blogs.dir/%d/files', (integer) $options->siteId);
 $addMedia = fopen('addMedia.sh', 'w');
+$imagePath = '';
 
 $BEGIN_TRANS = "START TRANSACTION";
 $COMMIT = "COMMIT";
@@ -186,7 +187,7 @@ foreach($posts as $post) {
 		}
 	}
 	// rewrite the post content
-	if (strlen($newbody)) {
+	if (strlen($newbody) && $newbody !== 'no content') {
 		$wp_post->updatePost($post_id, 'body', $newbody);
 	}
 }
