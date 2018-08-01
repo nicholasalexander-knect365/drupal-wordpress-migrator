@@ -91,7 +91,8 @@ while ($line = fgets($newposts)) {
 			$sql = "SELECT field_penton_content_summary_value AS excerpt 
 					FROM field_data_field_penton_content_summary 
 					WHERE entity_id = $nid";
-			$records = $d7->records($sql);
+			//$records = $d7->records($sql);
+			$records = $wp->records($sql);
 
 			if (isset($records) && count($records) > 0) {
 				$excerpt = $records[0]->excerpt;
@@ -106,7 +107,7 @@ while ($line = fgets($newposts)) {
 
 			// externally defined author
 			$sql = "SELECT * FROM field_data_field_penton_author WHERE entity_id=$nid";
-			$authorRecords = $d7->records($sql);
+			$authorRecords = $wp->records($sql);
 
 			if (isset($authorRecords) && count($authorRecords) > 0) {
 				$author_id = $authorRecords[0]->field_penton_author_target_id;

@@ -63,7 +63,7 @@ class Fields {
 // 		return $records;
 // 	}
 
-	public function penton_media_images($media_node_id) {
+	public function penton_media_image($media_node_id) {
 
 		$sql = "SELECT i.entity_id as nid, 
 				i.revision_id as vid, 
@@ -84,7 +84,7 @@ class Fields {
 //debug(DB::strip($sql));
 		$records = $this->db->records($sql);
 //debug($records);
-		return $records;
+		return $records[0];
 	}
 
 	// appears not used?

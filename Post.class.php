@@ -99,6 +99,14 @@ class Post extends DB {
 		return $record;
 	}
 
+	// TODO: add chunking if needed
+	public function getPosts() {
+		$wp_posts = DB::wptable('posts');
+		$sql = "SELECT * FROM $wp_posts";
+		$records = $this->db->records($sql);
+		return $records;
+	}
+
 
 	public function updatePost($post_id, $field, $data, $queryOnly=false) {
 

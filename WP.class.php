@@ -70,7 +70,7 @@ class WP {
 		}
 	}
 
-	private function addMedia($wpPostId, $url, $imageStore, $options, $featured, $source) {
+	private function addMedia($wpPostId, $url, $imageStore, $options, $featured, $source, $title, $alt, $caption) {
 
 		if (!$wpPostId) {
 			throw new Exception('No wpPostId in call to addMedia');
@@ -89,7 +89,7 @@ class WP {
 				$this->preventDuplicates[sprintf('%s%d', $url, $wpPostId)] = 1;
 
 				if ($wpPostId) {
-					$cmd = "wp media import '$imageStore/$url' --post_id=$wpPostId --url='$wpUrl' --title=\"$name\"";
+					$cmd = "wp media import '$imageStore/$url' --post_id=$wpPostId --url='$wpUrl' --title=\"$title\" --alt=\"$alt\" --caption=\"$caption\"";
 					if ($featured) {
 						$cmd .= ' --featured_image';
 					}
@@ -109,18 +109,32 @@ class WP {
 		}
 	}
 
-	public function addMediaLibrary($wpPostId, $filename, $options, $featured = true, $source = '') {
+	public function addMediaLibrary($wpPostId, $filename, $options, $featured = true, $mediaSettings, $source = '') {
 
 		// filename is passed in as an object or a string
 		if (is_object($filename)) {
 			$filename = $filename->filename;
 		}
 
+		$title = ""; $alt = ""; $caption = ""; $credit = ""; 
+
+		if (!empty($mediaSettings)) {
+			$alt = $mediaSettings->alt;
+			$caption = $mediaSettings->caption;
+			$credit = $mediaSettings->credit;
+
+			if ($mediaSettings->title) {
+				$title = $mediaSettings->title;
+			} else {
+				$title = $alt;
+			}
+		}
+
 		$wordpressPath = $options->wordpressPath;
 		$imageStore = $options->imageStore;
 		$url = $filename;
 
-		$this->addMedia($wpPostId, $url, $imageStore, $options, $featured, $source);
+		$this->addMedia($wpPostId, $url, $imageStore, $options, $featured, $source, $title, $alt, $caption);
 	}
 
 }
