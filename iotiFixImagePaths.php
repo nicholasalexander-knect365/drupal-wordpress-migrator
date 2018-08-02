@@ -214,7 +214,7 @@ function configuration($options) {
 			break;
 		case 'live': 
 			$options->wppath = '/srv/www/telecoms.com';
-			$options->wpurl = 'https://www.iotworldtoday.com';
+			$options->wpurl = 'http://beta.iotworldtoday.com';
 			break;
 		default: 
 			die('Set a server option with --server=multisite/staging/live');

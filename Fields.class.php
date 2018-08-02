@@ -63,6 +63,36 @@ class Fields {
 // 		return $records;
 // 	}
 
+
+	// contentPillar/IOTI uses penton_link_media_feat_img
+	public function penton_media_feat_img($nid) {
+		$sql = "SELECT fm.*
+				FROM field_data_field_penton_link_media_feat_img fi
+				INNER JOIN file_managed fm ON fi.field_penton_link_media_feat_img_target_id=fm.fid
+				WHERE fi.entity_id=$nid";
+		$records = $this->db->records($sql);
+//debug(DB::strip($sql));
+		return $records;
+	}
+
+	// contentPillar/IOTI media_settings
+	public function penton_media_settings($fid) {
+		$sql  = "SELECT mi.entity_id as nid,
+						mi.field_penton_media_image_alt as alt, 
+						mi.field_penton_media_image_title as title,
+						c.field_penton_media_caption_value as caption, 
+						cr.field_penton_media_credit_value as credit
+				FROM field_data_field_penton_media_image mi
+				LEFT JOIN field_data_field_penton_media_caption c ON c.entity_id = mi.field_penton_media_image_fid
+				LEFT JOIN field_data_field_penton_media_credit cr ON cr.entity_id = mi.field_penton_media_image_fid
+				LEFT JOIN field_data_field_penton_media_type t ON t.entity_id = mi.field_penton_media_image_fid
+				where mi.field_penton_media_image_fid=$fid";
+//debug(DB::strip($sql));
+		$records = $this->db->record($sql);
+		return $records;
+	}
+
+	// this is not correct for IOTI: field_penton_media_image_fid relates to the file_manageed
 	public function penton_media_image($media_node_id) {
 
 		$sql = "SELECT i.entity_id as nid, 
@@ -81,9 +111,10 @@ class Fields {
 				LEFT JOIN field_data_field_penton_media_credit cr ON cr.entity_id = i.entity_id
 				LEFT JOIN field_data_field_penton_media_type t ON t.entity_id = i.entity_id
 				WHERE i.entity_id = $media_node_id";
-//debug(DB::strip($sql));
+
+debug(DB::strip($sql));
 		$records = $this->db->records($sql);
-//debug($records);
+debug($records);
 		return $records[0];
 	}
 
