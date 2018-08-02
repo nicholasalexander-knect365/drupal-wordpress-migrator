@@ -136,7 +136,6 @@ foreach($posts as $post) {
 					$blogsdirPath = $options->wppath . '/blogs.dir/files/2018/08/';
 					$imagePath = '/files/2018/08/' . $url;
 					$blogsdir =  getcwd() . '/imageset';
-//debug($ext_url);
 
 					$ch = curl_init(); 
 					curl_setopt($ch, CURLOPT_URL, $ext_url); 
