@@ -145,7 +145,7 @@ foreach($posts as $post) {
 					curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
 
 					$filecontent = curl_exec($ch);
-					$fd = fopen( $blogsdir . '/' . basename($url), 'w+');
+					$fd = fopen( $blogsdir . '/' . basename($url), 'w');
 
 					if ($fd) {
 						fputs($fd, $filecontent);
@@ -164,7 +164,7 @@ foreach($posts as $post) {
 				$wppath = $options->wppath;
 				$wpurl = $options->wpurl;
 
-				$cmd = "wp media import '$blogsdir/$url' --post_id=$post_id --path=$wppath --url=$wpurl --title=\"$url\"";
+				$cmd = "\nwp media import '$blogsdir/$url' --post_id=$post_id --path=$wppath --url=$wpurl --title=\"$url\"";
 
 				fputs($addMedia, $cmd);
 
