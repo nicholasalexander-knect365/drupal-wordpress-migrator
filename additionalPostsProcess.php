@@ -163,7 +163,7 @@ while ($line = fgets($newposts)) {
 			}
 
 			$wordpress->addMediaLibrary($wpPostId, $filename, $options, $featured = true, $media_settings, $source = '');
-dd($wpPostId);
+
 			// primary category
 			$sql = "SELECT field_penton_primary_category_tid AS tid FROM field_data_field_penton_primary_category WHERE entity_id=$nid";
 			$record = $d7->record($sql);
@@ -177,7 +177,7 @@ dd($wpPostId);
 				$wpCatName = $wp_taxonomy->remapIOTTaxonomyName($catName);
 				// find the category in terms
 				$wpCatId = $wp_taxonomy->getTermFromName($wpCatName);
-//debug([$pc_tid, $wpCatId, $wpCatName, $catName, $term]);
+debug([$pc_tid, $wpCatId, $wpCatName, $catName, $term]);
 				if (strlen($wpCatName)) {
 					$postmeta->createGetPostMeta($wpPostId, 'primary_category', $wpCatId);
 				}
