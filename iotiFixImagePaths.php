@@ -135,16 +135,20 @@ foreach($posts as $post) {
 					// real location where image should end up running wp media import
 					$blogsdirPath = $options->wppath . '/blogs.dir/files/2018/08/';
 					$imagePath = '/files/2018/08/' . $url;
-					$blogsdir = 'imageset';
+					$blogsdir =  getcwd() . '/imageset';
 //debug($ext_url);
 
 					$ch = curl_init(); 
-					curl_setopt($ch, CURLOPT_URL, $url); 
+					curl_setopt($ch, CURLOPT_URL, $ext_url); 
 					curl_setopt($ch, CURLOPT_HEADER, false); 
-					curl_setopt($ch, CURLOPT_NOBODY, TRUE); // remove body 
+					curl_setopt($ch, CURLOPT_NOBODY, false); // remove body 
 					curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
+					try {
+						$filecontent = curl_exec($ch);
+					} catch(Exception $e) {
+						die($e->getMessage());
+					}
 
-					$filecontent = curl_exec($ch);
 					$fd = fopen( $blogsdir . '/' . basename($url), 'w');
 
 					if ($fd) {
