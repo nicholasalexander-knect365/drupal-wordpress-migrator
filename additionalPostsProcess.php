@@ -163,20 +163,21 @@ while ($line = fgets($newposts)) {
 			}
 
 			$wordpress->addMediaLibrary($wpPostId, $filename, $options, $featured = true, $media_settings, $source = '');
-
-
+dd($wpPostId);
 			// primary category
-			$sql = "SELECT field_penton_primary_category_tid AS tid WHERE entity_id=$nid";
-			$record = $d7->records($sql);
+			$sql = "SELECT field_penton_primary_category_tid AS tid FROM field_data_field_penton_primary_category WHERE entity_id=$nid";
+			$record = $d7->record($sql);
+//dd($record);
 			if (isset($record)) {
 				$pc_tid = $record->tid;
-				$term = $wp_taxonomy->getTermFromSlug('primary_category');
+				$term = $wp_taxonomy->getTermFromSlug('primary');
 				// how to work out the primary category on tid?
 				$catName = $d7_taxonomy->getTaxonomyDrupal($pc_tid);
 				//$remapTaxonomy = new RemapTaxonomy($wp_taxonomy, $options);
 				$wpCatName = $wp_taxonomy->remapIOTTaxonomyName($catName);
 				// find the category in terms
 				$wpCatId = $wp_taxonomy->getTermFromName($wpCatName);
+//debug([$pc_tid, $wpCatId, $wpCatName, $catName, $term]);
 				if (strlen($wpCatName)) {
 					$postmeta->createGetPostMeta($wpPostId, 'primary_category', $wpCatId);
 				}
@@ -184,7 +185,7 @@ while ($line = fgets($newposts)) {
 
 			// for gettting seo data
 			$alias = $d7_node->getNodeUrls($d7nodes[0]);
-			fputs($ioti_urls, 'ioti.com/' . $alias);
+			fputs($ioti_urls, 'ioti.com/' . $alias . "\n");
 			// add alias to postmeta: $wpPostId ContentPillarUrl $alias
 			if ($wpPostId) {
 				$postmeta->createUpdatePostMeta($wpPostId, 'ContentPillarUrl', $alias);
