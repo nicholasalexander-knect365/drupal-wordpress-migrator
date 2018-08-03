@@ -257,7 +257,7 @@ while ($line = fgets($newposts)) {
 // debug($d7_node->getNode($image->featured_image_id));
 // dd($image_url);
 
-						$wordpress->addMediaLibrary($wpPostId, $image_url, $options, $featured = true, $media_settings, $source = '');
+						$wordpress->addMediaLibrary($wpPostId, $image_url, $options, $featured = true, $media_set, $source = '');
 					}
 				}
 			}
