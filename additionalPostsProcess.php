@@ -181,7 +181,8 @@ while ($line = fgets($newposts)) {
 				$postmeta->createUpdatePostMeta($wpPostId, 'ContentPillarUrl', $alias);
 			}
 
-
+			$image = new stdClass();
+			$image->featured_image_id = null;
 			// field data
 			foreach($fieldTables as $fieldDataSource) {
 
@@ -196,8 +197,7 @@ while ($line = fgets($newposts)) {
 
 				if ($data) {
 
-					$image = new stdClass();
-					$image->featured_image_id = null;
+
 
 					// IOTI specific "article types" (they are all being imported as posts)
 					$article_types = ['Article', 'Gallery', 'Audio', 'Video', 'Webinar', 'Data Table', 'White Paper', 'Link'];
@@ -241,25 +241,17 @@ while ($line = fgets($newposts)) {
 					} else if ($data[0] === 'field_penton_link_media_feat_img') {
 						$image->featured_image_id = $data[1]->field_penton_link_media_feat_img_target_id;
 					}
-// debug($data);
-// debug($image);
-					if (isset($image->featured_image_id)) {
-
-						$image_url = $d7_node->getNode($image->featured_image_id)->title;
-						$media_set = $d7_fields->penton_media_image($node->nid);
-						$mediaId = $wp_post->makeAttachment($wpPostId, $image_url);
-						$postmeta->createFields($wpPostId, ['_thumbnail_id' => $mediaId]);
-						
-					//$fileSet = $files->getFiles($node->nid);
-
-//debug($image);
-// debug($image->featured_image_id);
-// debug($d7_node->getNode($image->featured_image_id));
-// dd($image_url);
-
-						$wordpress->addMediaLibrary($wpPostId, $image_url, $options, $featured = true, $media_set, $source = '');
-					}
 				}
+			}
+
+			if (isset($image->featured_image_id)) {
+
+				$image_url = $d7_node->getNode($image->featured_image_id)->title;
+				$media_set = $d7_fields->penton_media_image($node->nid);
+				$mediaId = $wp_post->makeAttachment($wpPostId, $image_url);
+				$postmeta->createFields($wpPostId, ['_thumbnail_id' => $mediaId]);
+				
+				$wordpress->addMediaLibrary($wpPostId, $image_url, $options, $featured = true, $media_set, $source = '');
 			}
 
 			// taxonomies

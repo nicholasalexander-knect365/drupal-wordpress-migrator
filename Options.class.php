@@ -71,7 +71,7 @@ class Options {
 		$this->dusers 		= false;
 
 		$this->wordpressPath = '';
-		$this->wordpressURL  = 'http://ioti.multisite.local';
+		$this->wordpressURL  = '';
 		$this->wordpressDomain = 'iotworldtoday.com';
 
 		$this->drupalPath 	= '../drupal7/ioti';
