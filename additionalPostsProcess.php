@@ -12,7 +12,7 @@ require "User.class.php";
 
 require "Node.class.php";
 require "Taxonomy.class.php";
-
+require "Files.class.php";
 require "Fields.class.php";
 require "FieldSet.class.php";
 require "Gather.class.php";
@@ -47,7 +47,7 @@ $wp_termmeta = new WPTermMeta($wp);
 $wp_termmeta_term_id = $wp_taxonomy->getSetTerm(DRUPAL_WP, DRUPAL_WP);
 $wp_posts = DB::wptable('posts');
 $wp_termmeta = DB::wptable('termmeta');
-
+$files = new Files($d7, $s3bucket, $options);
 
 function status($wp, $wp_posts, $wp_termmeta) {
 	$sql = "SELECT COUNT(*) as c FROM $wp_posts";
@@ -104,7 +104,8 @@ while ($line = fgets($newposts)) {
 			debug($d7nodes);
 
 		} else if (isset($d7nodes) && count($d7nodes) === 1) {
-			$nid = $d7nodes[0]->nid;
+			$node = $d7nodes[0];
+			$nid = $node->nid;
 
 			// insert the post
 			$wp->query($line);
@@ -153,17 +154,6 @@ while ($line = fgets($newposts)) {
 				}
 			}
 
-			// featured image
-			$postImages = $d7_fields->penton_media_feat_img($nid);
-
-			if (isset($postImages) && count($postImages)) {
-				$filename = $postImages[0]->filename;
-				$fid = $postImages[0]->fid; 
-				$media_settings = $d7_fields->penton_media_settings($fid);
-			}
-
-			$wordpress->addMediaLibrary($wpPostId, $filename, $options, $featured = true, $media_settings, $source = '');
-
 			// primary category
 			$sql = "SELECT field_penton_primary_category_tid AS tid FROM field_data_field_penton_primary_category WHERE entity_id=$nid";
 			$record = $d7->record($sql);
@@ -177,7 +167,7 @@ while ($line = fgets($newposts)) {
 				$wpCatName = $wp_taxonomy->remapIOTTaxonomyName($catName);
 				// find the category in terms
 				$wpCatId = $wp_taxonomy->getTermFromName($wpCatName);
-debug([$pc_tid, $wpCatId, $wpCatName, $catName, $term]);
+//debug([$pc_tid, $wpCatId, $wpCatName, $catName, $term]);
 				if (strlen($wpCatName)) {
 					$postmeta->createGetPostMeta($wpPostId, 'primary_category', $wpCatId);
 				}
@@ -203,7 +193,12 @@ debug([$pc_tid, $wpCatId, $wpCatName, $catName, $term]);
 
 				//Gather brings in the fields with softdata
 				$data = $gather->$func($nid);
+
 				if ($data) {
+
+					$image = new stdClass();
+					$image->featured_image_id = null;
+
 					// IOTI specific "article types" (they are all being imported as posts)
 					$article_types = ['Article', 'Gallery', 'Audio', 'Video', 'Webinar', 'Data Table', 'White Paper', 'Link'];
 					if ($data[0] === 'field_penton_article_type') {
@@ -222,9 +217,50 @@ debug([$pc_tid, $wpCatId, $wpCatName, $catName, $term]);
 							$tx->createTermRelationship($term_taxonomy_id, $wpPostId);
 						}
 					}
+				
+					if ($data[0] === 'field_penton_media_image') {
+						if ($fieldDataSource === 'penton_media_image') {
+							$image->fid = $data[1]->field_penton_media_image_fid;
+							$image->alt = $data[1]->field_penton_media_image_alt;
+							$image->title = $data[1]->field_penton_media_image_title;
+							$image->width = $data[1]->field_penton_media_image_width;
+							$image->height = $data[1]->field_penton_media_image_height;
+						}
+					} else if ($data[0] === 'field_penton_media_type') {
+						$image->type = $data[1]->field_penton_media_type_value;
+						$image->nid = $node->nid; //$data[1]->entity_id;
+					
+					} else if ($data[0] === 'field_penton_media_credit') {
+						if ($data[1]->field_penton_media_credit_value) {
+							$image->credit = $data[1]->field_penton_media_credit_value;
+						}
+					} else if ($data[0] === 'field_penton_media_caption') {
+						if ($data[1]->field_penton_media_caption_value) {
+							$image->caption = $data[1]->field_penton_media_caption_value;
+						}
+					} else if ($data[0] === 'field_penton_link_media_feat_img') {
+						$image->featured_image_id = $data[1]->field_penton_link_media_feat_img_target_id;
+					}
+// debug($data);
+// debug($image);
+					if (isset($image->featured_image_id)) {
+
+						$image_url = $d7_node->getNode($image->featured_image_id)->title;
+						$media_set = $d7_fields->penton_media_image($node->nid);
+						$mediaId = $wp_post->makeAttachment($wpPostId, $image_url);
+						$postmeta->createFields($wpPostId, ['_thumbnail_id' => $mediaId]);
+						
+					//$fileSet = $files->getFiles($node->nid);
+
+//debug($image);
+// debug($image->featured_image_id);
+// debug($d7_node->getNode($image->featured_image_id));
+// dd($image_url);
+
+						$wordpress->addMediaLibrary($wpPostId, $image_url, $options, $featured = true, $media_settings, $source = '');
+					}
 				}
 			}
-
 
 			// taxonomies
 			$node = $d7_node->getNode($nid);

@@ -443,7 +443,7 @@ if ($credentials['database'] === '') {
 	} 
 
 	public function records($sql) {
-
+		$this->sql = $sql;
 		$numRows = $this->query($sql);
 		if ($numRows) {
 			return $this->getRecords();
@@ -455,8 +455,12 @@ if ($credentials['database'] === '') {
 	public function getRecord() {
 
 		if ($this->result) {
-
-			$row = $this->result->fetch_object();
+//debug($this->sql);
+			try {
+				$row = $this->result->fetch_object();
+			} catch (Exception $e) {
+				throw new Exception($e->getMessage());
+			}
 			$this->result->close();
 			return $row;
 		} else {

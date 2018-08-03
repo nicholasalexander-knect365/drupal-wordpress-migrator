@@ -113,7 +113,7 @@ if (true && $options->resetTerms) {
 // If the wordpress instance of Taxonomy needs to get drupal data: 
 $wp_taxonomy->setDrupalDb($d7);
 
-/* content types ... */
+/* content types ... */$files = new Files($d7, $s3bucket, $options);
 $d7_fields = new Fields($d7);
 $fieldSet = new FieldSet($d7);
 
@@ -482,11 +482,14 @@ if (!count($file_set)) {
 
 								$mediaId = $wp_post->makeAttachment($wpPostId, $image_url);
 								$postmeta->createFields($wpPostId, ['_thumbnail_id' => $mediaId]);
- 								$fileSet = $files->getFiles($node->nid);
+ 								
+ 								// not now used
+ 								//$fileSet = $files->getFiles($node->nid);
 
-//debug($wpPostId);
-//debug($d7_node->getNode($image->featured_image_id));
-//dd($imgfiledata);
+// debug($image);
+// debug($image->featured_image_id);
+// debug($d7_node->getNode($image->featured_image_id));
+// dd($image_url);
 								// the actual import of images is done with wp-cli - addUrlMediaLibary writes these commands
 								$wordpress->addMediaLibrary($wpPostId, $image_url, $options, true, $media_set);
 
