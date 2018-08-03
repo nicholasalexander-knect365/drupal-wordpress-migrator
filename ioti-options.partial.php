@@ -57,7 +57,7 @@
 		} else if (isset($this->server) && $this->server === 'beta') {
 			$this->wordpressPath = '/srv/www/test1.telecoms.com';
 			if (empty($wordpressURL)) {
-				$this->wordpressURL = 'http://ioti.test1.telecoms.com';
+				$this->wordpressURL = 'http://beta.iotworldtoday.com';
 			}
 		} else if (isset($this->server) && $this->server === 'multisite') {
 			$this->wordpressPath = '/home/nicholas/Dev/wordpress/'.$this->server;

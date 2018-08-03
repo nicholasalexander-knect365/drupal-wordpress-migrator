@@ -86,7 +86,7 @@ while ($line = fgets($newposts)) {
 	preg_match("/INSERT (.*?) VALUES \('.+?', '(.*?),/", $line, $matched);
 
 // var_dump($line);
-var_dump($matched);
+//var_dump($matched);
 	//	print "\n" . $matched[2];
 	
 	$title = substr($matched[2], 0, strlen($matched[2])-1);
