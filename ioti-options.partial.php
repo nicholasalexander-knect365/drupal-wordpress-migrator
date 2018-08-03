@@ -52,7 +52,7 @@
 		} else if (isset($this->server) && $this->server === 'staging') {
 			$this->wordpressPath = '/srv/www/test2.telecoms.com';
 			if (empty($wordpressURL)) {
-				$this->wordpressURL = 'http://ioti.test2.telecoms.local';
+				$this->wordpressURL = 'http://ioti.test2.telecoms.com';
 			}
 		} else if (isset($this->server) && $this->server === 'beta') {
 			$this->wordpressPath = '/srv/www/test1.telecoms.com';
