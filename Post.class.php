@@ -114,6 +114,7 @@ class Post extends DB {
 		$sql = "SELECT * FROM $wp_posts WHERE ID=$post_id";
 
 		$post = $this->db->record($sql);
+		$data = addslashes($data);
 
 		if (isset($post) && $post->ID) {
 

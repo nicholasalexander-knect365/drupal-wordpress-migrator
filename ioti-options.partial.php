@@ -24,6 +24,7 @@
 			$this->wordpressPath = '/srv/www/test1.telecoms.com';
 			$this->wordpressURL = 'http://www.iotworldtoday.com';
 			$this->drupalPath = '/home/alexandern/ioti/files';
+			
 			return;
 
 		} else if (isset($this->server) && $this->server === 'local') {

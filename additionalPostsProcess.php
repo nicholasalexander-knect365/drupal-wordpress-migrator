@@ -81,17 +81,16 @@ $COMMIT = "COMMIT";
 $wp->query($BEGIN_TRANS);
 
 while ($line = fgets($newposts)) {
+
 	//print "\n".$line;
+if (!strlen($line)) {
+	debug('EMPTY: ' .$line);
+}
 	// copy up to the first escaped apos in title
-	preg_match("/INSERT (.*?) VALUES \('.+?', '(.*?),/", $line, $matched);
+	preg_match("/INSERT (.*?) VALUES \('.+?', '(.*?)',/", $line, $matched);
 
-// var_dump($line);
-//var_dump($matched);
-	//	print "\n" . $matched[2];
-	
 	$title = substr($matched[2], 0, strlen($matched[2])-1);
-	//debug('TITLE='.$title);
-
+	
 	// find the title in drupal
 	if (strlen($title) > 2) {
 
@@ -250,8 +249,15 @@ while ($line = fgets($newposts)) {
 				$media_set = $d7_fields->penton_media_image($node->nid);
 				$mediaId = $wp_post->makeAttachment($wpPostId, $image_url);
 				$postmeta->createFields($wpPostId, ['_thumbnail_id' => $mediaId]);
-				
-				$wordpress->addMediaLibrary($wpPostId, $image_url, $options, $featured = true, $media_set, $source = '');
+
+				if ($image_url) {
+					$wordpress->addMediaLibrary($wpPostId, $image_url, $options, $featured = true, $media_set, $source = '');
+				} else {
+					debug('WARNING: NO IMAGE FOR post '.$wpPostId. ' image_url' .$image_url);
+				}
+
+			} else {
+				debug('WARNING: No featured image found for post '.$wpPostId);
 			}
 
 			// taxonomies

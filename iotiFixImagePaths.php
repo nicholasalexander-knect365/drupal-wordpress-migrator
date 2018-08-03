@@ -49,7 +49,7 @@ $wp_termmeta = DB::wptable('termmeta');
 // dd($nodes);
 
 $posts = $wp_post->getPosts();
-$count = 0;
+$counter = 0;
 $tests = false;
 $debug = false;
 
@@ -68,18 +68,18 @@ foreach($posts as $post) {
 	$body = $post->post_content;
 	$post_id = $post->ID;
 
-	if ($tests) {
-		if ( preg_match_all('/<img src="(.*?)"/', $body, $matchSet) ) {
-			//dd($matchSet);
-			foreach($matchSet[1] as $matched) {
-				debug($matched . '  '.$post->post_title);
-			}
-		}
-		if ( preg_match('/<img src="http:\/\/www.ioti.com/', $body) ) {
-			//dd($body);
-		}
+	// if ($tests) {
+	// 	if ( preg_match_all('/<img src="(.*?)"/', $body, $matchSet) ) {
+	// 		//dd($matchSet);
+	// 		foreach($matchSet[1] as $matched) {
+	// 			debug($matched . '  '.$post->post_title);
+	// 		}
+	// 	}
+	// 	if ( preg_match('/<img src="http:\/\/www.ioti.com/', $body) ) {
+	// 		//dd($body);
+	// 	}
 
-	} else {
+	// } else {
 
 		// wget the image
 		$m2 = preg_match_all('/<img src\=\"(http\:\/\/iot\-institute.com\/)(.*?)"/', $body, $matched2);
@@ -131,10 +131,13 @@ foreach($posts as $post) {
 
 				try {
 					$url = basename($ext_url);
+					preg_match('/(\d{4})-(\d{2})/',$post->post_date, $dateparts);
+					$year = sprintf('%04d', $dateparts[1]);
+					$month = sprintf('%02d', $dateparts[2]);
 
 					// real location where image should end up running wp media import
-					$blogsdirPath = $options->wppath . '/blogs.dir/files/2018/08/';
-					$imagePath = '/files/2018/08/' . $url;
+					$blogsdirPath = $options->wppath . "/blogs.dir/files/$year/$month/";
+					$imagePath = "/files/$year/$month/" . $url;
 					$blogsdir =  getcwd() . '/imageset';
 
 					$ch = curl_init(); 
@@ -172,11 +175,12 @@ foreach($posts as $post) {
 				fputs($addMedia, $cmd);
 
 				$newbody = preg_replace('/(<img.*?src=")(http:\/\/www.ioti.com\/)(.*?)"(.*?)>/',
-					'${1}http://www.iotworldtoday.com'.$imagePath.'"${4}>', $body);
+					'${1}http://beta.iotworldtoday.com'.$imagePath.'"${4}>', $body);
+
 
 				if ($debug) {
 					if ($body !== $newbody) {
-						$count++;
+
 						debug('====================================');
 						debug($body);
 						debug('------------------------------------');
@@ -187,9 +191,10 @@ foreach($posts as $post) {
 				$body = $newbody;
 			}
 		}
-	}
+	//}
 	// rewrite the post content
 	if (strlen($body) && $body !== 'no content') {
+		$counter++;
 		$wp_post->updatePost($post_id, 'post_content', $body);
 	}
 }
@@ -198,7 +203,7 @@ $wp->query($COMMIT);
 
 fclose($addMedia);
 
-print "\n\nInstances: $count";
+print "\n\nInstances: $counter";
 
 
 function configuration($options) {
